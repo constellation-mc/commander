@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "commander",
+  "version": "${version}",
+  "name": "commander",
+  "description": "",
+  "authors": [
+    "melontini"
+  ],
+  "contact": {
+    "repo": "https://github.com/melontini/commander"
+  },
+  "license": "MIT",
+  "icon": "assets/commander/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "me.melontini.commander.client.CommanderClient"
+    ],
+    "main": [
+      "me.melontini.commander.Commander"
+    ]
+  },
+  "mixins": [
+    "commander.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
