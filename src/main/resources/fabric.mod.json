@@ -14,9 +14,6 @@
   "icon": "assets/commander/icon.png",
   "environment": "*",
   "entrypoints": {
-    "client": [
-      "me.melontini.commander.client.CommanderClient"
-    ],
     "main": [
       "me.melontini.commander.Commander"
     ]
