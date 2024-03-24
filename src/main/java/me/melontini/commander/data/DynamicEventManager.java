@@ -24,6 +24,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Accessors(fluent = true)
 public class DynamicEventManager extends JsonDataLoader implements IdentifiableResourceReloadListener {
@@ -52,7 +53,7 @@ public class DynamicEventManager extends JsonDataLoader implements IdentifiableR
         })).values().stream().collect(Collectors.groupingBy(Subscription::type)).forEach((eventType, subscriptions) -> {
             var finalizer = eventType.context().get(EventType.FINALIZER);
             if (finalizer.isPresent()) {
-                this.customData.put(eventType, finalizer.get().apply(subscriptions));
+                this.customData.put(eventType, finalizer.get().apply(subscriptions.stream()));
                 return;
             }
             this.customData.put(eventType, subscriptions.stream().flatMap(s -> s.list().stream()).toList());
@@ -61,7 +62,7 @@ public class DynamicEventManager extends JsonDataLoader implements IdentifiableR
         Sets.difference(EventTypes.types(), customData.keySet()).forEach(type -> {
             var finalizer = type.context().get(EventType.FINALIZER);
             if (finalizer.isPresent()) {
-                this.customData.put(type, finalizer.get().apply(Collections.emptyList()));
+                this.customData.put(type, finalizer.get().apply(Stream.empty()));
                 return;
             }
             this.customData.put(type, Collections.emptyList());
