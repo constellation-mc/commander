@@ -12,7 +12,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 
 import static me.melontini.commander.Commander.id;
-import static me.melontini.commander.event.builtin.BuiltInEvents.runVoid;
+import static me.melontini.commander.util.EventExecutors.runVoid;
 
 @UtilityClass
 public class ServerTick {

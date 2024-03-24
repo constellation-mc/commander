@@ -17,8 +17,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 
 import static me.melontini.commander.Commander.id;
-import static me.melontini.commander.event.builtin.BuiltInEvents.runBoolean;
-import static me.melontini.commander.event.builtin.BuiltInEvents.runVoid;
+import static me.melontini.commander.util.EventExecutors.runBoolean;
+import static me.melontini.commander.util.EventExecutors.runVoid;
 import static net.minecraft.loot.context.LootContextParameters.*;
 
 @UtilityClass

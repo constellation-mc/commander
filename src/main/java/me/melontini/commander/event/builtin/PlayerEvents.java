@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.data.types.EventTypes;
 import me.melontini.commander.event.EventType;
+import me.melontini.commander.util.EventExecutors;
 import me.melontini.commander.util.MagicCodecs;
 import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.block.BlockState;
@@ -25,7 +26,6 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import static me.melontini.commander.Commander.id;
-import static me.melontini.commander.event.builtin.BuiltInEvents.*;
 import static net.minecraft.loot.context.LootContextParameters.*;
 
 @UtilityClass
@@ -50,7 +50,7 @@ public class PlayerEvents {
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> entityCallback(ATTACK_ENTITY, world, player, hand, entity));
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> entityCallback(USE_ENTITY, world, player, hand, entity));
 
-        UseItemCallback.EVENT.register((player, world, hand) -> new TypedActionResult<>(runActionResult(USE_ITEM, world, () -> {
+        UseItemCallback.EVENT.register((player, world, hand) -> new TypedActionResult<>(EventExecutors.runActionResult(USE_ITEM, world, () -> {
             LootContextParameterSet.Builder builder =  new LootContextParameterSet.Builder((ServerWorld) world)
                     .add(THIS_ENTITY, player)
                     .add(ORIGIN, player.getPos())
@@ -58,9 +58,9 @@ public class PlayerEvents {
             return new LootContext.Builder(builder.build(LootContextTypes.FISHING)).build(null);
         }), player.getStackInHand(hand)));
 
-        PlayerBlockBreakEvents.BEFORE.register((world, player, pos, state, blockEntity) -> runBoolean(BEFORE_BREAK, world, () -> breakContext(world, player, pos, state, blockEntity)));
-        PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> runVoid(AFTER_BREAK, world, () -> breakContext(world, player, pos, state, blockEntity)));
-        PlayerBlockBreakEvents.CANCELED.register((world, player, pos, state, blockEntity) -> runVoid(CANCELLED_BREAK, world, () -> breakContext(world, player, pos, state, blockEntity)));
+        PlayerBlockBreakEvents.BEFORE.register((world, player, pos, state, blockEntity) -> EventExecutors.runBoolean(BEFORE_BREAK, world, () -> breakContext(world, player, pos, state, blockEntity)));
+        PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> EventExecutors.runVoid(AFTER_BREAK, world, () -> breakContext(world, player, pos, state, blockEntity)));
+        PlayerBlockBreakEvents.CANCELED.register((world, player, pos, state, blockEntity) -> EventExecutors.runVoid(CANCELLED_BREAK, world, () -> breakContext(world, player, pos, state, blockEntity)));
     }
 
     private static LootContext breakContext(World world, PlayerEntity player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
@@ -73,7 +73,7 @@ public class PlayerEvents {
 
     private static ActionResult entityCallback(EventType type, World world, PlayerEntity player, Hand hand, Entity entity) {
         if (world.isClient()) return ActionResult.PASS;
-        return runActionResult(type, world, () -> {
+        return EventExecutors.runActionResult(type, world, () -> {
             ItemStack tool = player.getStackInHand(hand);
             DamageSource source = world.getDamageSources().generic();
 
@@ -87,7 +87,7 @@ public class PlayerEvents {
 
     private static ActionResult blockCallback(EventType type, World world, PlayerEntity player, ItemStack tool, Vec3d origin, BlockPos pos) {
         if (world.isClient()) return ActionResult.PASS;
-        return runActionResult(type, world, () -> {
+        return EventExecutors.runActionResult(type, world, () -> {
             BlockState state = world.getBlockState(pos);
             BlockEntity blockEntity = world.getBlockEntity(pos);
 
