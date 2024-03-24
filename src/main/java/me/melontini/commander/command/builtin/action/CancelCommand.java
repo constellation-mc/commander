@@ -1,8 +1,8 @@
 package me.melontini.commander.command.builtin.action;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +26,6 @@ public final class CancelCommand implements Command {
 
     @Override
     public boolean execute(EventContext context) {
-        var term = context.type().context().get(EventType.CANCEL_TERM);
-        if (term.isEmpty()) throw new IllegalStateException("Event does not support cancellation");
-
-        if (value == null) {
-            value = term.get().parse(JsonOps.INSTANCE, element).getOrThrow(false, string -> {
-                throw new JsonParseException(string);
-            });
-        }
-
         context.setReturnValue(value);
         return true;
     }
@@ -42,5 +33,17 @@ public final class CancelCommand implements Command {
     @Override
     public CommandType type() {
         return BuiltInCommands.CANCEL;
+    }
+
+    @Override
+    public DataResult<Void> validate(EventType type) {
+        if (type.context().get(EventType.CANCEL_TERM).isEmpty())
+            return DataResult.error(() -> "Event '%s' does not support cancellation");
+
+        var val = type.context().get(EventType.CANCEL_TERM).orElseThrow().parse(JsonOps.INSTANCE, element);
+        if (val.error().isPresent()) return val.map(object -> null);
+        this.value = val.result().orElseThrow();
+
+        return Command.super.validate(type);
     }
 }

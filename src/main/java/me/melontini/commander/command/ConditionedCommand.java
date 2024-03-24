@@ -3,6 +3,7 @@ package me.melontini.commander.command;
 import com.mojang.serialization.*;
 import me.melontini.commander.data.types.CommandTypes;
 import me.melontini.commander.event.EventContext;
+import me.melontini.commander.event.EventType;
 import me.melontini.commander.util.MagicCodecs;
 import net.minecraft.loot.condition.LootCondition;
 
@@ -37,5 +38,9 @@ public record ConditionedCommand(Optional<LootCondition> condition, Command othe
     public boolean execute(EventContext context) {
         if (!this.condition.map(condition1 -> condition1.test(context.lootContext())).orElse(true)) return false;
         return other().execute(context);
+    }
+
+    public DataResult<Void> validate(EventType type) {
+        return this.other().validate(type);
     }
 }

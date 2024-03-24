@@ -48,7 +48,13 @@ public record Subscription(EventType type, Object parameters, List<ConditionedCo
             }).map(o -> event.map(eventType -> {
                 T commands = input.get("commands");
                 if (commands != null)
-                    return LIST_CODEC.parse(ops, commands).map(list1 -> new Subscription(eventType, o.orElse(null), list1));
+                    return LIST_CODEC.parse(ops, commands).flatMap(list1 -> {
+                        for (ConditionedCommand conditionedCommand : list1) {
+                            var r = conditionedCommand.validate(eventType);
+                            if (r.error().isPresent()) return r.map(unused -> Collections.<ConditionedCommand>emptyList());
+                        }
+                        return DataResult.success(list1);
+                    }).map(list1 -> new Subscription(eventType, o.orElse(null), list1));
                 return DataResult.success(new Subscription(eventType, o.orElse(null), Collections.emptyList()));
             })).flatMap(Function.identity()).map(Function.identity()).flatMap(Function.identity()).map(Function.identity());
         }

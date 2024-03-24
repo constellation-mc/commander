@@ -42,7 +42,7 @@ public class DynamicEventManager extends JsonDataLoader implements IdentifiableR
     }
 
     public <T> T getData(EventType type, DataType<T> key) {
-        return key.cast(this.customData.get(type));
+        return (T) this.customData.get(type);
     }
 
     @Override
