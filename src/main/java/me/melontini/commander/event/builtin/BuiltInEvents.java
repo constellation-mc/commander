@@ -9,7 +9,8 @@ import static me.melontini.commander.Commander.id;
 @UtilityClass
 public class BuiltInEvents {
 
-    public static final EventType NULL = EventTypes.register(id("none"), EventType.builder().build());
+    public static final EventType NULL = EventTypes.register(id("none"), EventType.builder()
+            .<Void>finalizer(null, subscriptions -> null).build());
 
     public static void init() {
         ServerTick.init();
