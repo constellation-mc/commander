@@ -4,14 +4,16 @@ import com.mojang.serialization.Codec;
 import me.melontini.commander.data.Subscription;
 import me.melontini.commander.util.DataType;
 import me.melontini.dark_matter.api.base.util.Context;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public record EventType(Context context) {
 
     public static final Context.Key<Codec<?>> EXTENSION = Context.key("extension");
-    public static final Context.Key<Function<List<Subscription>, ?>> FINALIZER = Context.key("finalizer");
+    public static final Context.Key<Function<List<Map.Entry<Identifier, Subscription>>, ?>> FINALIZER = Context.key("finalizer");
     public static final Context.Key<Codec<?>> CANCEL_TERM = Context.key("cancel_term");
 
     @Override
@@ -31,7 +33,7 @@ public record EventType(Context context) {
             return this;
         }
 
-        public <C> Builder finalizer(DataType<C> type, Function<List<Subscription>, C> finalizer) {
+        public <C> Builder finalizer(DataType<C> type, Function<List<Map.Entry<Identifier, Subscription>>, C> finalizer) {
             builder.put(FINALIZER, finalizer);
             return this;
         }
