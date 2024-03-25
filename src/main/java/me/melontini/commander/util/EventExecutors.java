@@ -40,18 +40,22 @@ public class EventExecutors {
         return runBoolean(type, true, world, supplier);
     }
 
-    public static ActionResult runActionResult(EventType type, World world, Supplier<LootContext> supplier) {
-        if (world.isClient()) return ActionResult.PASS;
+    public static <T extends Enum<T>> T runEnum(EventType type, T def, World world, Supplier<LootContext> supplier) {
+        if (world.isClient()) return def;
 
         var subscribers = DynamicEventManager.getData(MakeSure.notNull(world.getServer()), type, DynamicEventManager.DEFAULT);
-        if (subscribers.isEmpty()) return ActionResult.PASS;
+        if (subscribers.isEmpty()) return def;
 
         var context = new EventContext(supplier.get(), type);
         for (ConditionedCommand subscriber : subscribers) {
             subscriber.execute(context);
-            ActionResult r = context.getReturnValue(null, null);
-            if (r != null && r != ActionResult.PASS) return r;
+            T r = context.getReturnValue(null, def);
+            if (r != def) return r;
         }
-        return ActionResult.PASS;
+        return def;
+    }
+
+    public static ActionResult runActionResult(EventType type, World world, Supplier<LootContext> supplier) {
+        return runEnum(type, ActionResult.PASS, world, supplier);
     }
 }
