@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "commander",
   "version": "${version}",
-  "name": "commander",
-  "description": "",
+  "name": "Commander",
+  "description": "A data pack event system",
   "authors": [
     "melontini"
   ],

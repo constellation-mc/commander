@@ -1,8 +1,8 @@
-## commander
+## Commander
 
 ### Quick Introduction
 
-**commander** introduces a new event system to the data pack format.
+**Commander** introduces a new event system to the data pack format.
 
 Each file placed in `commander/events` represents an event subscription. Commander mirrors some fabric events under the `commander` namespace. e.g. `server_tick/start`
 
