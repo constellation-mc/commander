@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 public record Subscription<E>(EventType type, E parameters, List<ConditionedCommand> list) {
 
     private static final Codec<List<ConditionedCommand>> LIST_CODEC = ExtraCodecs.list(ConditionedCommand.CODEC);
-    private static final Codec<Subscription<?>> BASE_CODEC = new MapCodec<Subscription<?>>() {
+    public static final MapCodec<Subscription<?>> BASE_CODEC = new MapCodec<>() {
         @Override
         public <T> RecordBuilder<T> encode(Subscription<?> input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
             var map = ops.mapBuilder();
@@ -52,7 +52,8 @@ public record Subscription<E>(EventType type, E parameters, List<ConditionedComm
                     return LIST_CODEC.parse(ops, commands).flatMap(list1 -> {
                         for (ConditionedCommand conditionedCommand : list1) {
                             var r = conditionedCommand.validate(eventType);
-                            if (r.error().isPresent()) return r.map(unused -> Collections.<ConditionedCommand>emptyList());
+                            if (r.error().isPresent())
+                                return r.map(unused -> Collections.<ConditionedCommand>emptyList());
                         }
                         return DataResult.success(list1);
                     }).map(list1 -> new Subscription<>(eventType, o.orElse(null), list1));
@@ -64,8 +65,8 @@ public record Subscription<E>(EventType type, E parameters, List<ConditionedComm
         public <T> Stream<T> keys(DynamicOps<T> ops) {
             return Stream.of("event", "parameters", "commands").map(ops::createString);
         }
-    }.codec();
+    };
 
-    public static final Codec<List<Subscription<?>>> CODEC = Codec.either(BASE_CODEC.listOf().fieldOf("events").codec(), BASE_CODEC)
+    public static final Codec<List<Subscription<?>>> CODEC = Codec.either(BASE_CODEC.codec().listOf().fieldOf("events").codec(), BASE_CODEC.codec())
             .xmap(e -> e.map(Function.identity(), Collections::singletonList), Either::left);
 }
