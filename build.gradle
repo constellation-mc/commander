@@ -4,7 +4,9 @@ plugins {
     id 'io.freefair.lombok' version '8.3'
 }
 
-version = project.mod_version
+def local = !System.getenv().containsKey("GITHUB_RUN_NUMBER");
+
+version = version = "${project.mod_version}-${local ? 'local' : "build.${System.getenv("GITHUB_RUN_NUMBER")}"}"
 group = project.maven_group
 
 base {
@@ -91,9 +93,13 @@ publishing {
 
     // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/constellation-mc/commander"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
 }
