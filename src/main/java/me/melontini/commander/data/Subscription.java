@@ -1,6 +1,5 @@
 package me.melontini.commander.data;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.*;
 import me.melontini.commander.command.ConditionedCommand;
 import me.melontini.commander.data.types.EventTypes;
@@ -17,7 +16,7 @@ import java.util.stream.Stream;
 public record Subscription(EventType type, Object parameters, List<ConditionedCommand> list) {
 
     private static final Codec<List<ConditionedCommand>> LIST_CODEC = ExtraCodecs.list(ConditionedCommand.CODEC);
-    private static final Codec<Subscription> BASE_CODEC = new MapCodec<Subscription>() {
+    public static final Codec<Subscription> CODEC = new MapCodec<Subscription>() {
         @Override
         public <T> RecordBuilder<T> encode(Subscription input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
             var map = ops.mapBuilder();
@@ -65,7 +64,4 @@ public record Subscription(EventType type, Object parameters, List<ConditionedCo
             return Stream.of("event", "parameters", "commands").map(ops::createString);
         }
     }.codec();
-
-    public static final Codec<List<Subscription>> CODEC = Codec.either(BASE_CODEC.listOf().fieldOf("events").codec(), BASE_CODEC)
-            .xmap(e -> e.map(Function.identity(), Collections::singletonList), Either::left);
 }

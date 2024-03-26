@@ -11,7 +11,6 @@ import me.melontini.commander.command.ConditionedCommand;
 import me.melontini.commander.data.types.EventTypes;
 import me.melontini.commander.event.EventType;
 import me.melontini.commander.util.DataType;
-import me.melontini.dark_matter.api.base.util.tuple.Tuple;
 import me.melontini.dark_matter.api.data.loading.ReloaderType;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resource.JsonDataLoader;
@@ -50,13 +49,13 @@ public class DynamicEventManager extends JsonDataLoader implements IdentifiableR
     protected void apply(Map<Identifier, JsonElement> parsed, ResourceManager manager, Profiler profiler) {
         Maps.transformValues(parsed, input -> Subscription.CODEC.parse(JsonOps.INSTANCE, input).getOrThrow(false, string -> {
             throw  new JsonParseException(string);
-        })).entrySet().stream().flatMap(e -> e.getValue().stream().map(s -> Tuple.of(e.getKey(), s))).collect(Collectors.groupingBy(e -> e.right().type())).forEach((eventType, subscriptions) -> {
+        })).entrySet().stream().collect(Collectors.groupingBy(e -> e.getValue().type())).forEach((eventType, subscriptions) -> {
             var finalizer = eventType.context().get(EventType.FINALIZER);
             if (finalizer.isPresent()) {
                 this.customData.put(eventType, finalizer.get().apply(subscriptions));
                 return;
             }
-            this.customData.put(eventType, subscriptions.stream().map(Tuple::right).flatMap(s -> s.list().stream()).toList());
+            this.customData.put(eventType, subscriptions.stream().map(Map.Entry::getValue).flatMap(s -> s.list().stream()).toList());
         });
 
         Sets.difference(EventTypes.types(), customData.keySet()).forEach(type -> {
