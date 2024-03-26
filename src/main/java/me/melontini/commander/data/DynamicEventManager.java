@@ -49,7 +49,7 @@ public class DynamicEventManager extends JsonDataLoader implements IdentifiableR
     protected void apply(Map<Identifier, JsonElement> parsed, ResourceManager manager, Profiler profiler) {
         Maps.transformValues(parsed, input -> Subscription.CODEC.parse(JsonOps.INSTANCE, input).getOrThrow(false, string -> {
             throw  new JsonParseException(string);
-        })).values().stream().collect(Collectors.groupingBy(Subscription::type)).forEach((eventType, subscriptions) -> {
+        })).values().stream().flatMap(ms -> ms.stream()).collect(Collectors.groupingBy(Subscription::type)).forEach((eventType, subscriptions) -> {
             var finalizer = eventType.context().get(EventType.FINALIZER);
             if (finalizer.isPresent()) {
                 this.customData.put(eventType, finalizer.get().apply(subscriptions));
