@@ -14,12 +14,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public record Subscription(EventType type, Object parameters, List<ConditionedCommand> list) {
+public record Subscription<E>(EventType type, E parameters, List<ConditionedCommand> list) {
 
     private static final Codec<List<ConditionedCommand>> LIST_CODEC = ExtraCodecs.list(ConditionedCommand.CODEC);
-    private static final Codec<Subscription> BASE_CODEC = new MapCodec<Subscription>() {
+    private static final Codec<Subscription<?>> BASE_CODEC = new MapCodec<Subscription<?>>() {
         @Override
-        public <T> RecordBuilder<T> encode(Subscription input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+        public <T> RecordBuilder<T> encode(Subscription<?> input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
             var map = ops.mapBuilder();
             var r = EventTypes.CODEC.encodeStart(ops, input.type());
             map.add("event", r);
@@ -32,7 +32,7 @@ public record Subscription(EventType type, Object parameters, List<ConditionedCo
         }
 
         @Override
-        public <T> DataResult<Subscription> decode(DynamicOps<T> ops, MapLike<T> input) {
+        public <T> DataResult<Subscription<?>> decode(DynamicOps<T> ops, MapLike<T> input) {
             T type = input.get("event");
             if (type == null) return DataResult.error(() -> "Missing 'event' field in %s".formatted(input));
             DataResult<EventType> event = EventTypes.CODEC.parse(ops, type);
@@ -55,9 +55,9 @@ public record Subscription(EventType type, Object parameters, List<ConditionedCo
                             if (r.error().isPresent()) return r.map(unused -> Collections.<ConditionedCommand>emptyList());
                         }
                         return DataResult.success(list1);
-                    }).map(list1 -> new Subscription(eventType, o.orElse(null), list1));
-                return DataResult.success(new Subscription(eventType, o.orElse(null), Collections.emptyList()));
-            })).flatMap(Function.identity()).map(Function.identity()).flatMap(Function.identity()).map(Function.identity());
+                    }).map(list1 -> new Subscription<>(eventType, o.orElse(null), list1));
+                return DataResult.success(new Subscription<>(eventType, o.orElse(null), Collections.emptyList()));
+            })).flatMap(Function.identity()).map(Function.identity()).flatMap(r -> r).map(Function.identity());
         }
 
         @Override
@@ -66,6 +66,6 @@ public record Subscription(EventType type, Object parameters, List<ConditionedCo
         }
     }.codec();
 
-    public static final Codec<List<Subscription>> CODEC = Codec.either(BASE_CODEC.listOf().fieldOf("events").codec(), BASE_CODEC)
+    public static final Codec<List<Subscription<?>>> CODEC = Codec.either(BASE_CODEC.listOf().fieldOf("events").codec(), BASE_CODEC)
             .xmap(e -> e.map(Function.identity(), Collections::singletonList), Either::left);
 }

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import me.melontini.commander.data.Subscription;
 import me.melontini.commander.util.DataType;
 import me.melontini.dark_matter.api.base.util.Context;
+import me.melontini.dark_matter.api.base.util.Utilities;
 
 import java.util.List;
 import java.util.function.Function;
@@ -11,7 +12,7 @@ import java.util.function.Function;
 public record EventType(Context context) {
 
     public static final Context.Key<Codec<?>> EXTENSION = Context.key("extension");
-    public static final Context.Key<Function<List<Subscription>, ?>> FINALIZER = Context.key("finalizer");
+    public static final Context.Key<Function<List<Subscription<?>>, ?>> FINALIZER = Context.key("finalizer");
     public static final Context.Key<Codec<?>> CANCEL_TERM = Context.key("cancel_term");
 
     @Override
@@ -26,13 +27,13 @@ public record EventType(Context context) {
     public static class Builder {
         private final Context.Builder builder = Context.builder();
 
-        public <T> Builder extension(Codec<T> extension) {
-            builder.put(EXTENSION, extension);
-            return this;
+        public <T, C> Builder extension(Codec<T> extension, Function<List<Subscription<T>>, C> finalizer) {
+            return extension(extension, finalizer, null);
         }
 
-        public <C> Builder finalizer(DataType<C> type, Function<List<Subscription>, C> finalizer) {
-            builder.put(FINALIZER, finalizer);
+        public <T, C> Builder extension(Codec<T> extension, Function<List<Subscription<T>>, C> finalizer, DataType<C> type) {
+            if (extension != null) builder.put(EXTENSION, extension);
+            builder.put(FINALIZER, Utilities.cast(finalizer));
             return this;
         }
 
