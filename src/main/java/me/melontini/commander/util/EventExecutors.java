@@ -31,7 +31,8 @@ public class EventExecutors {
         EventContext context = new EventContext(supplier.get(), type);
         for (ConditionedCommand subscriber : subscribers) {
             subscriber.execute(context);
-            if (context.getReturnValue(null, def) != def) return def;
+            boolean val = context.getReturnValue(null, def);
+            if (val != def) return val;
         }
         return def;
     }
