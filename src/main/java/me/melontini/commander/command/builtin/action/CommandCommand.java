@@ -8,6 +8,7 @@ import me.melontini.commander.command.CommandType;
 import me.melontini.commander.command.builtin.BuiltInCommands;
 import me.melontini.commander.command.selector.ConditionedSelector;
 import me.melontini.commander.event.EventContext;
+import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 
@@ -17,7 +18,7 @@ public record CommandCommand(ConditionedSelector selector, Either<List<String>, 
 
     public static final Codec<CommandCommand> CODEC = RecordCodecBuilder.create(data -> data.group(
             ConditionedSelector.CODEC.fieldOf("selector").forGetter(CommandCommand::selector),
-            Codec.either(Codec.STRING.listOf(), Identifier.CODEC).fieldOf("commands").forGetter(CommandCommand::commands)
+            ExtraCodecs.either(Codec.STRING.listOf(), Identifier.CODEC).fieldOf("commands").forGetter(CommandCommand::commands)
     ).apply(data, CommandCommand::new));
 
     @Override

@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 public record ConditionedSelector(Optional<LootCondition> condition, Selector other) {
 
-    public static final Codec<ConditionedSelector> CODEC =  Codec.either(RecordCodecBuilder.<ConditionedSelector>create(data -> data.group(
+    public static final Codec<ConditionedSelector> CODEC =  ExtraCodecs.either(RecordCodecBuilder.<ConditionedSelector>create(data -> data.group(
                 ExtraCodecs.optional("condition", MagicCodecs.LOOT_CONDITION).forGetter(ConditionedSelector::condition),
                 SelectorTypes.CODEC.fieldOf("value").forGetter(ConditionedSelector::other)
         ).apply(data, ConditionedSelector::new)), SelectorTypes.CODEC).xmap(e -> e.map(Function.identity(), selector -> new ConditionedSelector(Optional.empty(), selector)), Either::left);

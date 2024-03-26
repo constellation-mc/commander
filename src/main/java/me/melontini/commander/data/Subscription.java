@@ -67,6 +67,6 @@ public record Subscription<E>(EventType type, E parameters, List<ConditionedComm
         }
     };
 
-    public static final Codec<List<Subscription<?>>> CODEC = Codec.either(BASE_CODEC.codec().listOf().fieldOf("events").codec(), BASE_CODEC.codec())
+    public static final Codec<List<Subscription<?>>> CODEC = ExtraCodecs.either(ExtraCodecs.list(BASE_CODEC.codec()).fieldOf("events").codec(), BASE_CODEC.codec())
             .xmap(e -> e.map(Function.identity(), Collections::singletonList), Either::left);
 }
