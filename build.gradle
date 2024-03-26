@@ -11,12 +11,9 @@ base {
     archivesName = project.archives_base_name
 }
 
+apply from: "https://raw.githubusercontent.com/constellation-mc/artifacts/main/dark_matter.groovy"
+
 repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
     maven { url 'https://jitpack.io' }
 }
 
@@ -31,7 +28,7 @@ dependencies {
 
     def dmModules = ["base", "mixin", "minecraft", "data"]
     for (final def module in dmModules) {
-        modApi include("me.melontini.dark-matter:dark-matter-${module}:${project.dark_matter}")
+        modApi include("me.melontini:dark-matter-${module}:${project.dark_matter}")
     }
 }
 
