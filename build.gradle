@@ -13,7 +13,8 @@ base {
     archivesName = project.archives_base_name
 }
 
-apply from: "https://raw.githubusercontent.com/constellation-mc/artifacts/main/dark_matter.groovy"
+apply from: "https://raw.githubusercontent.com/constellation-mc/artifacts/main/artifacts.groovy"
+constellationRepo(project, "dark-matter")
 
 repositories {
     maven { url 'https://jitpack.io' }
