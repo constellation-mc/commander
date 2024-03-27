@@ -63,3 +63,6 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           modrinth-featured: true
           modrinth-unfeature-mode: subset
+          modrinth-dependencies: |
+            fabric-api(required)
+            dark-matter(embedded)
