@@ -6,7 +6,7 @@ plugins {
 
 def local = !System.getenv().containsKey("GITHUB_RUN_NUMBER");
 
-version = version = "${project.mod_version}-${local ? 'local' : "build.${System.getenv("GITHUB_RUN_NUMBER")}"}"
+version = "${project.mod_version}-${project.minecraft_version}-${local ? 'local' : "build.${System.getenv("GITHUB_RUN_NUMBER")}"}"
 group = project.maven_group
 
 base {
@@ -82,6 +82,18 @@ sourcesJar {
         sourceSets.main.allSource.contains it.file
     }
     from delombok
+}
+
+tasks.register('printVersionName') {
+    doLast {
+        println "${project.mod_version} (${project.minecraft_version})"
+    }
+}
+
+tasks.register('printVersion') {
+    doLast {
+        println version
+    }
 }
 
 // configure the maven publication
