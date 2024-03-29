@@ -1,9 +1,9 @@
 package me.melontini.commander;
 
-import me.melontini.commander.command.builtin.BuiltInCommands;
-import me.melontini.commander.command.selector.BuiltInSelectors;
+import me.melontini.commander.builtin.BuiltInCommands;
+import me.melontini.commander.builtin.BuiltInEvents;
+import me.melontini.commander.builtin.BuiltInSelectors;
 import me.melontini.commander.data.DynamicEventManager;
-import me.melontini.commander.event.builtin.BuiltInEvents;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;

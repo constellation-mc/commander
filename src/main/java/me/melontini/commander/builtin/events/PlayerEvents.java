@@ -1,8 +1,7 @@
-package me.melontini.commander.event.builtin;
+package me.melontini.commander.builtin.events;
 
 import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
-import me.melontini.commander.data.types.EventTypes;
 import me.melontini.commander.event.EventType;
 import me.melontini.commander.util.EventExecutors;
 import me.melontini.commander.util.MagicCodecs;
@@ -31,19 +30,19 @@ import static net.minecraft.loot.context.LootContextParameters.*;
 @UtilityClass
 public class PlayerEvents {
 
-    public static final EventType ATTACK_BLOCK = EventTypes.register(id("player_attack/block"), EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build());
-    public static final EventType USE_BLOCK = EventTypes.register(id("player_use/block"), EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build());
+    public static final EventType ATTACK_BLOCK = EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build(id("player_attack/block"));
+    public static final EventType USE_BLOCK = EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build(id("player_use/block"));
 
-    public static final EventType ATTACK_ENTITY = EventTypes.register(id("player_attack/entity"), EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build());
-    public static final EventType USE_ENTITY = EventTypes.register(id("player_use/entity"), EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build());
+    public static final EventType ATTACK_ENTITY = EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build(id("player_attack/entity"));
+    public static final EventType USE_ENTITY = EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build(id("player_use/entity"));
 
-    public static final EventType USE_ITEM = EventTypes.register(id("player_use/item"), EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build());
+    public static final EventType USE_ITEM = EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build(id("player_use/item"));
 
-    public static final EventType BEFORE_BREAK = EventTypes.register(id("player_break_block/before"), EventType.builder().cancelTerm(Codec.BOOL).build());
-    public static final EventType AFTER_BREAK = EventTypes.register(id("player_break_block/after"), EventType.builder().build());
-    public static final EventType CANCELLED_BREAK = EventTypes.register(id("player_break_block/cancelled"), EventType.builder().build());
+    public static final EventType BEFORE_BREAK = EventType.builder().cancelTerm(Codec.BOOL).build(id("player_break_block/before"));
+    public static final EventType AFTER_BREAK = EventType.builder().build(id("player_break_block/after"));
+    public static final EventType CANCELLED_BREAK = EventType.builder().build(id("player_break_block/cancelled"));
 
-    static void init() {
+    public static void init() {
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> blockCallback(ATTACK_BLOCK, world, player, player.getStackInHand(hand), Vec3d.ofCenter(pos), pos));
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> blockCallback(USE_BLOCK, world, player, player.getStackInHand(hand), hitResult.getPos(), hitResult.getBlockPos()));
 

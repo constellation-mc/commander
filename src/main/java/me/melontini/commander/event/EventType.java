@@ -2,9 +2,11 @@ package me.melontini.commander.event;
 
 import com.mojang.serialization.Codec;
 import me.melontini.commander.data.Subscription;
+import me.melontini.commander.data.types.EventTypes;
 import me.melontini.commander.util.DataType;
 import me.melontini.dark_matter.api.base.util.Context;
 import me.melontini.dark_matter.api.base.util.Utilities;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
 import java.util.function.Function;
@@ -42,8 +44,8 @@ public record EventType(Context context) {
             return this;
         }
 
-        public EventType build() {
-            return new EventType(this.builder.build());
+        public EventType build(Identifier identifier) {
+            return EventTypes.register(identifier, new EventType(this.builder.build()));
         }
     }
 }

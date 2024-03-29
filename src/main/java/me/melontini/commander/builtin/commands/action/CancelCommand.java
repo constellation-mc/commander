@@ -1,4 +1,4 @@
-package me.melontini.commander.command.builtin.action;
+package me.melontini.commander.builtin.commands.action;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
@@ -7,9 +7,9 @@ import com.mojang.serialization.JsonOps;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import me.melontini.commander.builtin.BuiltInCommands;
 import me.melontini.commander.command.Command;
 import me.melontini.commander.command.CommandType;
-import me.melontini.commander.command.builtin.BuiltInCommands;
 import me.melontini.commander.event.EventContext;
 import me.melontini.commander.event.EventType;
 import net.minecraft.util.dynamic.Codecs;

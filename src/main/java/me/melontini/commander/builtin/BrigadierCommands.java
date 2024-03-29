@@ -1,5 +1,6 @@
-package me.melontini.commander.command.brigadier;
+package me.melontini.commander.builtin;
 
+import me.melontini.commander.builtin.brigadier.ExplodeCommand;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 public class BrigadierCommands {

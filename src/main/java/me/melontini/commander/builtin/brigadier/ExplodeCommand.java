@@ -1,4 +1,4 @@
-package me.melontini.commander.command.brigadier;
+package me.melontini.commander.builtin.brigadier;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;

@@ -24,8 +24,7 @@ public final class CommandTypes {
         return COMMANDS.get(identifier);
     }
 
-    public static CommandType register(Identifier identifier, Codec<? extends Command> codec) {
-        CommandType type = new CommandType(codec);
+    public static CommandType register(Identifier identifier, CommandType type) {
         var old = COMMANDS.put(identifier, type);
         if (old != null) throw new IllegalStateException("Already registered command %s".formatted(identifier));
         return type;

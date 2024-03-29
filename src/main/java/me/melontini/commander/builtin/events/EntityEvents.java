@@ -1,8 +1,7 @@
-package me.melontini.commander.event.builtin;
+package me.melontini.commander.builtin.events;
 
 import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
-import me.melontini.commander.data.types.EventTypes;
 import me.melontini.commander.event.EventType;
 import me.melontini.commander.util.MagicCodecs;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
@@ -26,20 +25,20 @@ import static net.minecraft.loot.context.LootContextParameters.*;
 @UtilityClass
 public class EntityEvents {
 
-    public static final EventType ALLOW_DAMAGE = EventTypes.register(id("allow_damage"), EventType.builder().cancelTerm(Codec.BOOL).build());
-    public static final EventType ALLOW_DEATH = EventTypes.register(id("allow_death"), EventType.builder().cancelTerm(Codec.BOOL).build());
-    public static final EventType AFTER_DEATH = EventTypes.register(id("after_death"), EventType.builder().build());
+    public static final EventType ALLOW_DAMAGE = EventType.builder().cancelTerm(Codec.BOOL).build(id("allow_damage"));
+    public static final EventType ALLOW_DEATH = EventType.builder().cancelTerm(Codec.BOOL).build(id("allow_death"));
+    public static final EventType AFTER_DEATH = EventType.builder().build(id("after_death"));
 
-    public static final EventType START_SLEEPING = EventTypes.register(id("sleeping/start"), EventType.builder().build());
-    public static final EventType STOP_SLEEPING = EventTypes.register(id("sleeping/stop"), EventType.builder().build());
-    public static final EventType ALLOW_SLEEPING = EventTypes.register(id("sleeping/allow"), EventType.builder().cancelTerm(MagicCodecs.enumCodec(PlayerEntity.SleepFailureReason.class)).build());
-    public static final EventType ALLOW_SLEEP_TIME = EventTypes.register(id("sleeping/allow_time"), EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build());
-    public static final EventType ALLOW_NEARBY_MONSTERS = EventTypes.register(id("sleeping/allow_nearby_monsters"), EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build());
+    public static final EventType START_SLEEPING = EventType.builder().build(id("sleeping/start"));
+    public static final EventType STOP_SLEEPING = EventType.builder().build(id("sleeping/stop"));
+    public static final EventType ALLOW_SLEEPING = EventType.builder().cancelTerm(MagicCodecs.enumCodec(PlayerEntity.SleepFailureReason.class)).build(id("sleeping/allow"));
+    public static final EventType ALLOW_SLEEP_TIME = EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build(id("sleeping/allow_time"));
+    public static final EventType ALLOW_NEARBY_MONSTERS = EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build(id("sleeping/allow_nearby_monsters"));
 
-    public static final EventType ALLOW_ELYTRA = EventTypes.register(id("elytra_flight/allow"), EventType.builder().cancelTerm(Codec.BOOL).build());
-    //public static final EventType CUSTOM_ELYTRA = EventTypes.register(id("elytra_flight/custom"), EventType.builder().cancelTerm(Codec.BOOL).build());
+    public static final EventType ALLOW_ELYTRA = EventType.builder().cancelTerm(Codec.BOOL).build(id("elytra_flight/allow"));
+    //public static final EventType CUSTOM_ELYTRA = EventType.builder().cancelTerm(Codec.BOOL).build(id("elytra_flight/custom"));
 
-    public static final EventType AFTER_KILLED_BY_OTHER = EventTypes.register(id("after_killed_by_other"), EventType.builder().build());
+    public static final EventType AFTER_KILLED_BY_OTHER = EventType.builder().build(id("after_killed_by_other"));
 
     public static void init() {
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> runBoolean(ALLOW_DAMAGE, entity.getWorld(), () -> makeContext(entity, source.getPosition(), source)));

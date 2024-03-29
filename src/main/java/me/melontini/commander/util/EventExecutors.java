@@ -3,6 +3,7 @@ package me.melontini.commander.util;
 import me.melontini.commander.command.ConditionedCommand;
 import me.melontini.commander.data.DynamicEventManager;
 import me.melontini.commander.event.EventContext;
+import me.melontini.commander.event.EventKey;
 import me.melontini.commander.event.EventType;
 import me.melontini.dark_matter.api.base.util.MakeSure;
 import net.minecraft.loot.context.LootContext;
@@ -18,7 +19,9 @@ public class EventExecutors {
         var subscribers = DynamicEventManager.getData(MakeSure.notNull(world.getServer()), type, DynamicEventManager.DEFAULT);
         if (subscribers.isEmpty()) return;
 
-        EventContext context = new EventContext(supplier.get(), type);
+        EventContext context = EventContext.builder(type)
+                .addParameter(EventKey.LOOT_CONTEXT, supplier.get())
+                .build();
         for (ConditionedCommand subscriber : subscribers) subscriber.execute(context);
     }
 
@@ -28,7 +31,9 @@ public class EventExecutors {
         var subscribers = DynamicEventManager.getData(MakeSure.notNull(world.getServer()), type, DynamicEventManager.DEFAULT);
         if (subscribers.isEmpty()) return def;
 
-        EventContext context = new EventContext(supplier.get(), type);
+        EventContext context = EventContext.builder(type)
+                .addParameter(EventKey.LOOT_CONTEXT, supplier.get())
+                .build();
         for (ConditionedCommand subscriber : subscribers) {
             subscriber.execute(context);
             boolean val = context.getReturnValue(null, def);
@@ -47,7 +52,9 @@ public class EventExecutors {
         var subscribers = DynamicEventManager.getData(MakeSure.notNull(world.getServer()), type, DynamicEventManager.DEFAULT);
         if (subscribers.isEmpty()) return def;
 
-        var context = new EventContext(supplier.get(), type);
+        var context = EventContext.builder(type)
+                .addParameter(EventKey.LOOT_CONTEXT, supplier.get())
+                .build();
         for (ConditionedCommand subscriber : subscribers) {
             subscriber.execute(context);
             T r = context.getReturnValue(null, def);

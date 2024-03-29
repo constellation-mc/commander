@@ -1,11 +1,11 @@
-package me.melontini.commander.command.builtin.logic;
+package me.melontini.commander.builtin.commands.logic;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import me.melontini.commander.builtin.BuiltInCommands;
 import me.melontini.commander.command.Command;
 import me.melontini.commander.command.CommandType;
 import me.melontini.commander.command.ConditionedCommand;
-import me.melontini.commander.command.builtin.BuiltInCommands;
 import me.melontini.commander.event.EventContext;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 

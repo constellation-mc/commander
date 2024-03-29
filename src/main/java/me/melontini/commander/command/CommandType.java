@@ -1,11 +1,14 @@
 package me.melontini.commander.command;
 
 import com.mojang.serialization.Codec;
+import me.melontini.commander.data.types.CommandTypes;
+import net.minecraft.util.Identifier;
 
-public record CommandType(Codec<? extends Command> codec) {
+public interface CommandType {
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj == this;
+    static CommandType register(Identifier identifier, Codec<? extends Command> codec) {
+        return CommandTypes.register(identifier, () -> codec);
     }
+
+    Codec<? extends Command> codec();
 }

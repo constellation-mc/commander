@@ -1,7 +1,6 @@
-package me.melontini.commander.event.builtin;
+package me.melontini.commander.builtin.events;
 
 import lombok.experimental.UtilityClass;
-import me.melontini.commander.data.types.EventTypes;
 import me.melontini.commander.event.EventType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.loot.context.LootContext;
@@ -17,12 +16,12 @@ import static me.melontini.commander.util.EventExecutors.runVoid;
 @UtilityClass
 public class ServerTick {
 
-    public static final EventType START_TICK = EventTypes.register(id("server_tick/start"), EventType.builder().build());
-    public static final EventType END_TICK = EventTypes.register(id("server_tick/end"), EventType.builder().build());
-    public static final EventType START_WORLD_TICK = EventTypes.register(id("world_tick/start"), EventType.builder().build());
-    public static final EventType END_WORLD_TICK = EventTypes.register(id("world_tick/end"), EventType.builder().build());
+    public static final EventType START_TICK = EventType.builder().build(id("server_tick/start"));
+    public static final EventType END_TICK = EventType.builder().build(id("server_tick/end"));
+    public static final EventType START_WORLD_TICK = EventType.builder().build(id("world_tick/start"));
+    public static final EventType END_WORLD_TICK = EventType.builder().build(id("world_tick/end"));
 
-    static void init() {
+    public static void init() {
         ServerTickEvents.START_SERVER_TICK.register(server -> runVoid(START_TICK, server.getOverworld(), () -> forWorld(server.getOverworld())));
         ServerTickEvents.END_SERVER_TICK.register(server -> runVoid(END_TICK, server.getOverworld(), () -> forWorld(server.getOverworld())));
 

@@ -1,9 +1,9 @@
-package me.melontini.commander.command.builtin.action;
+package me.melontini.commander.builtin.commands.action;
 
 import com.mojang.serialization.Codec;
+import me.melontini.commander.builtin.BuiltInCommands;
 import me.melontini.commander.command.Command;
 import me.melontini.commander.command.CommandType;
-import me.melontini.commander.command.builtin.BuiltInCommands;
 import me.melontini.commander.event.EventContext;
 
 public record PrintCommand(String text) implements Command {
