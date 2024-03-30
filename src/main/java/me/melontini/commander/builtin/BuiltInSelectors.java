@@ -24,7 +24,7 @@ public final class BuiltInSelectors {
         var o = context.lootContext().requireParameter(LootContextParameters.ORIGIN);
 
         return new ServerCommandSource(world.getServer(), o, Vec2f.ZERO,
-                world, 4, "Origin", TextUtil.literal("Origin"),
+                world, 4, world.getRegistryKey().getValue().toString(), TextUtil.literal(world.getRegistryKey().getValue().toString()),
                 world.getServer(), null);
     });
     public static final Selector THIS_ENTITY = Selector.register(mc("this_entity"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.THIS_ENTITY)));
@@ -33,9 +33,9 @@ public final class BuiltInSelectors {
     public static final Selector LAST_DAMAGE_PLAYER = Selector.register(mc("last_damage_player"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.LAST_DAMAGE_PLAYER)));
     public static final Selector BLOCK_ENTITY = Selector.register(mc("block_entity"), context -> {
         var be = context.lootContext().requireParameter(LootContextParameters.BLOCK_ENTITY);
-        return new ServerCommandSource(be.getWorld().getServer(), Vec3d.ofCenter(be.getPos()), Vec2f.ZERO,
+        return new ServerCommandSource(context.lootContext().getWorld().getServer(), Vec3d.ofCenter(be.getPos()), Vec2f.ZERO,
                 (ServerWorld) be.getWorld(), 4, "BlockEntity", TextUtil.literal("BlockEntity"),
-                be.getWorld().getServer(), null);
+                context.lootContext().getWorld().getServer(), null);
     });
 
     public static final Selector DAMAGE_SOURCE_SOURCE = Selector.register(id("damage_source/source"), context -> {

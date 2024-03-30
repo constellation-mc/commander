@@ -11,11 +11,15 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.function.Function;
 
+import static me.melontini.commander.Commander.id;
+
 public record EventType(Context context) {
 
     public static final Context.Key<Codec<?>> EXTENSION = Context.key("extension");
     public static final Context.Key<Function<List<Subscription<?>>, ?>> FINALIZER = Context.key("finalizer");
     public static final Context.Key<Codec<?>> CANCEL_TERM = Context.key("cancel_term");
+
+    public static final EventType NULL = EventType.builder().extension(null, subscriptions -> null).build(id("none"));
 
     @Override
     public boolean equals(Object obj) {
