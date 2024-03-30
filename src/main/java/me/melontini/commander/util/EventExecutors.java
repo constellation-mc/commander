@@ -1,5 +1,6 @@
 package me.melontini.commander.util;
 
+import lombok.experimental.UtilityClass;
 import me.melontini.commander.command.ConditionedCommand;
 import me.melontini.commander.data.DynamicEventManager;
 import me.melontini.commander.event.EventContext;
@@ -12,6 +13,7 @@ import net.minecraft.world.World;
 
 import java.util.function.Supplier;
 
+@UtilityClass
 public class EventExecutors {
     public static void runVoid(EventType type, World world, Supplier<LootContext> supplier) {
         if (world.isClient()) return;
