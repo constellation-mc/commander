@@ -8,17 +8,18 @@ import me.melontini.commander.command.Command;
 import me.melontini.commander.command.CommandType;
 import me.melontini.commander.command.selector.ConditionedSelector;
 import me.melontini.commander.event.EventContext;
+import me.melontini.commander.util.macro.BrigadierMacro;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
 
-public record CommandCommand(ConditionedSelector selector, Either<List<String>, Identifier> commands) implements Command {
+public record CommandCommand(ConditionedSelector selector, Either<List<BrigadierMacro>, Identifier> commands) implements Command {
 
     public static final Codec<CommandCommand> CODEC = RecordCodecBuilder.create(data -> data.group(
             ConditionedSelector.CODEC.fieldOf("selector").forGetter(CommandCommand::selector),
-            ExtraCodecs.either(Codec.STRING.listOf(), Identifier.CODEC).fieldOf("commands").forGetter(CommandCommand::commands)
+            ExtraCodecs.either(BrigadierMacro.CODEC.listOf(), Identifier.CODEC).fieldOf("commands").forGetter(CommandCommand::commands)
     ).apply(data, CommandCommand::new));
 
     @Override
@@ -28,8 +29,8 @@ public record CommandCommand(ConditionedSelector selector, Either<List<String>, 
         var server = context.lootContext().getWorld().getServer();
 
         if (commands().left().isPresent()) {
-            for (String command : commands().left().get()) {
-                server.getCommandManager().executeWithPrefix(opt.get(), command);
+            for (BrigadierMacro command : commands().left().get()) {
+                server.getCommandManager().executeWithPrefix(opt.get(), command.build(context));
             }
         }
         if (commands().right().isPresent()) {

@@ -1,0 +1,14 @@
+package me.melontini.commander.util.macro;
+
+import me.melontini.commander.event.EventContext;
+
+import java.util.function.Function;
+
+public record DynamicMacro(String original, Function<EventContext, String> start) implements BrigadierMacro {
+
+    public String build(EventContext context) {
+        var s = start.apply(context);
+        System.out.println(s);
+        return s;
+    }
+}

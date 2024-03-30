@@ -1,6 +1,7 @@
 package me.melontini.commander.builtin;
 
 import lombok.experimental.UtilityClass;
+import me.melontini.commander.command.selector.Extractor;
 import me.melontini.commander.command.selector.Selector;
 import me.melontini.dark_matter.api.base.util.Utilities;
 import me.melontini.dark_matter.api.minecraft.util.TextUtil;
@@ -27,10 +28,10 @@ public final class BuiltInSelectors {
                 world, 4, world.getRegistryKey().getValue().toString(), TextUtil.literal(world.getRegistryKey().getValue().toString()),
                 world.getServer(), null);
     });
-    public static final Selector THIS_ENTITY = Selector.register(mc("this_entity"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.THIS_ENTITY)));
-    public static final Selector KILLER_ENTITY = Selector.register(mc("killer_entity"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.KILLER_ENTITY)));
-    public static final Selector DIRECT_KILLER_ENTITY = Selector.register(mc("direct_killer_entity"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.DIRECT_KILLER_ENTITY)));
-    public static final Selector LAST_DAMAGE_PLAYER = Selector.register(mc("last_damage_player"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.LAST_DAMAGE_PLAYER)));
+    public static final Selector THIS_ENTITY = Selector.register(mc("this_entity"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.THIS_ENTITY)), Extractor.forEntity());
+    public static final Selector KILLER_ENTITY = Selector.register(mc("killer_entity"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.KILLER_ENTITY)), Extractor.forEntity());
+    public static final Selector DIRECT_KILLER_ENTITY = Selector.register(mc("direct_killer_entity"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.DIRECT_KILLER_ENTITY)), Extractor.forEntity());
+    public static final Selector LAST_DAMAGE_PLAYER = Selector.register(mc("last_damage_player"), context -> forEntity(context.lootContext().requireParameter(LootContextParameters.LAST_DAMAGE_PLAYER)), Extractor.forEntity());
     public static final Selector BLOCK_ENTITY = Selector.register(mc("block_entity"), context -> {
         var be = context.lootContext().requireParameter(LootContextParameters.BLOCK_ENTITY);
         return new ServerCommandSource(context.lootContext().getWorld().getServer(), Vec3d.ofCenter(be.getPos()), Vec2f.ZERO,
@@ -51,7 +52,7 @@ public final class BuiltInSelectors {
         var l = context.lootContext().getWorld().getServer().getPlayerManager().getPlayerList();
         if (l == null || l.isEmpty()) return null;
         return forEntity(Utilities.pickAtRandom(l));
-    });
+    }, Extractor.forEntity());
 
     public static void init() {
     }
