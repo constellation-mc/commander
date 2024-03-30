@@ -12,6 +12,9 @@ public interface Extractor extends Function<ServerCommandSource, String> {
     static Consumer<Map<String, Extractor>> forEntity() {
         return map -> {
             map.put("uuid", source -> Objects.requireNonNull(source.getEntity()).getUuidAsString());
+            map.put("vel/x", source -> String.valueOf(Objects.requireNonNull(source.getEntity()).getVelocity().x));
+            map.put("vel/y", source -> String.valueOf(Objects.requireNonNull(source.getEntity()).getVelocity().y));
+            map.put("vel/z", source -> String.valueOf(Objects.requireNonNull(source.getEntity()).getVelocity().z));
         };
     }
 

@@ -33,7 +33,6 @@ public interface BrigadierMacro {
             Extractor extractor = SelectorTypes.getExtractor(identifier.result().orElseThrow(), field);
             if (extractor == null) return DataResult.error(() -> "Selector %s does not support extractor %s".formatted(identifier, field));
 
-
             var builder = new StringBuilder();
             matcher.appendReplacement(builder,"");
             String cmd = builder.toString();

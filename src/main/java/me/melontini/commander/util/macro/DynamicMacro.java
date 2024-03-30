@@ -7,8 +7,6 @@ import java.util.function.Function;
 public record DynamicMacro(String original, Function<EventContext, String> start) implements BrigadierMacro {
 
     public String build(EventContext context) {
-        var s = start.apply(context);
-        System.out.println(s);
-        return s;
+        return start.apply(context);
     }
 }

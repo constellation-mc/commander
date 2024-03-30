@@ -8,6 +8,7 @@ import me.melontini.commander.command.selector.Extractor;
 import me.melontini.commander.command.selector.Selector;
 import me.melontini.commander.util.MagicCodecs;
 import me.melontini.dark_matter.api.base.util.Utilities;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;
@@ -24,6 +25,10 @@ public final class SelectorTypes {
         map.put("x", source -> String.valueOf(source.getPosition().x));
         map.put("y", source -> String.valueOf(source.getPosition().y));
         map.put("z", source -> String.valueOf(source.getPosition().z));
+        map.put("rot/x", source -> String.valueOf(source.getRotation().x));
+        map.put("rot/y", source -> String.valueOf(source.getRotation().y));
+        map.put("name", ServerCommandSource::getName);
+        map.put("world/key", source -> source.getWorld().getRegistryKey().getValue().toString());
     }));
 
     public static final Codec<Selector> CODEC = MagicCodecs.mapLookup(SELECTORS);
