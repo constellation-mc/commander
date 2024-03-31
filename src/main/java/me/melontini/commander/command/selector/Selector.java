@@ -6,7 +6,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.function.Consumer;
 
 public interface Selector {
@@ -15,7 +14,7 @@ public interface Selector {
         return SelectorTypes.register(identifier, selector, null);
     }
 
-    static Selector register(Identifier identifier, Selector selector, Consumer<Map<String, Extractor>> extractors) {
+    static Selector register(Identifier identifier, Selector selector, Consumer<MacroBuilder> extractors) {
         return SelectorTypes.register(identifier, selector, extractors);
     }
 

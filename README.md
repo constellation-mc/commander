@@ -27,3 +27,7 @@ Each file placed in `commander/events` represents an event subscription. Command
 `parameters` is a block of addition subscription info. Can be omitted if the event does not expect any parameters.
 
 `commands` block defines actions the event will perform when invoked. Commands don't always interact with the game world, some commands are purely logical (`commander:random`), some are service commands (`commander:cancel`).
+
+***
+
+- [exp4j](https://www.objecthunter.net/exp4j/index.html) - math expressions eval. [Apache License 2.0](https://www.objecthunter.net/exp4j/license.html)

@@ -33,6 +33,8 @@ dependencies {
     for (final def module in dmModules) {
         modApi include("me.melontini:dark-matter-${module}:${project.dark_matter}")
     }
+
+    implementation include("net.objecthunter:exp4j:${project.exp4j_version}")
 }
 
 processResources {

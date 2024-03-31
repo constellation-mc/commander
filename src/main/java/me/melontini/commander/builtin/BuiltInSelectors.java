@@ -42,11 +42,11 @@ public final class BuiltInSelectors {
     public static final Selector DAMAGE_SOURCE_SOURCE = Selector.register(id("damage_source/source"), context -> {
         var s = context.lootContext().requireParameter(LootContextParameters.DAMAGE_SOURCE).getSource();
         return s != null ? forEntity(s) : null;
-    });
+    }, Extractor.forEntity());
     public static final Selector DAMAGE_SOURCE_ATTACKER = Selector.register(id("damage_source/attacker"), context -> {
         var s = context.lootContext().requireParameter(LootContextParameters.DAMAGE_SOURCE).getAttacker();
         return s != null ? forEntity(s) : null;
-    });
+    }, Extractor.forEntity());
 
     public static final Selector RANDOM_PLAYER = Selector.register(id("random_player"), context -> {
         var l = context.lootContext().getWorld().getServer().getPlayerManager().getPlayerList();

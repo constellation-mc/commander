@@ -4,32 +4,31 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
-import me.melontini.commander.command.selector.Extractor;
+import me.melontini.commander.command.selector.MacroBuilder;
 import me.melontini.commander.command.selector.Selector;
 import me.melontini.commander.util.MagicCodecs;
-import me.melontini.dark_matter.api.base.util.Utilities;
+import me.melontini.commander.util.macro.MacroContainer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @UtilityClass
 public final class SelectorTypes {
 
     private static final BiMap<Identifier, Selector> SELECTORS = HashBiMap.create();
-    private static final Map<Identifier, Map<String, Extractor>> EXTRACTORS = new HashMap<>();
-    private static final Map<String, Extractor> DEFAULT = Collections.unmodifiableMap(Utilities.supply(new HashMap<>(), map -> {
-        map.put("x", source -> String.valueOf(source.getPosition().x));
-        map.put("y", source -> String.valueOf(source.getPosition().y));
-        map.put("z", source -> String.valueOf(source.getPosition().z));
-        map.put("rot/x", source -> String.valueOf(source.getRotation().x));
-        map.put("rot/y", source -> String.valueOf(source.getRotation().y));
-        map.put("name", ServerCommandSource::getName);
-        map.put("world/key", source -> source.getWorld().getRegistryKey().getValue().toString());
-    }));
+    private static final Map<Identifier, MacroContainer> EXTRACTORS = new HashMap<>();
+    private static final Supplier<MacroBuilder> DEFAULT = () -> new MacroBuilder()
+            .arithmetic("x", source -> source.getPosition().x)
+            .arithmetic("y", source -> source.getPosition().y)
+            .arithmetic("z", source -> source.getPosition().z)
+            .arithmetic("rot/x", source -> source.getRotation().x)
+            .arithmetic("rot/y", source -> source.getRotation().y)
+            .string("name", ServerCommandSource::getName)
+            .string("world/key", source -> source.getWorld().getRegistryKey().getValue().toString());
 
     public static final Codec<Selector> CODEC = MagicCodecs.mapLookup(SELECTORS);
 
@@ -37,17 +36,17 @@ public final class SelectorTypes {
         return SELECTORS.get(identifier);
     }
 
-    public static Extractor getExtractor(Identifier identifier, String parameter) {
-        return EXTRACTORS.getOrDefault(identifier, DEFAULT).get(parameter);
+    public static MacroContainer getMacros(Identifier id) {
+        return EXTRACTORS.computeIfAbsent(id, id1 -> DEFAULT.get().build());
     }
 
-    public static Selector register(Identifier identifier, Selector selector, Consumer<Map<String, Extractor>> extractors) {
+    public static Selector register(Identifier identifier, Selector selector, Consumer<MacroBuilder> extractors) {
         var old = SELECTORS.put(identifier, selector);
         if (old != null) throw new IllegalStateException("Already registered selector %s".formatted(identifier));
         if (extractors != null) {
-            var map = new HashMap<>(DEFAULT);
-            extractors.accept(map);
-            EXTRACTORS.put(identifier, Collections.unmodifiableMap(map));
+            var builder = DEFAULT.get();
+            extractors.accept(builder);
+            EXTRACTORS.put(identifier, builder.build());
         }
         return selector;
     }
