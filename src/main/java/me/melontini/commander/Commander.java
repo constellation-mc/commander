@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 
 //TODO:
 // Better validation during `apply`
-// Wrap most common/server fabric events.
+// Macros with dynamic fields
 public class Commander implements ModInitializer {
 
     public static Identifier id(String path) {
