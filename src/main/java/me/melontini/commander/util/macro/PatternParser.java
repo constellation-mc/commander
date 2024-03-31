@@ -100,9 +100,9 @@ public class PatternParser {
     }
 
     private static String sanitize(String s) {
-        return s.replace(":", "_sc_")
-                .replace("(", "_rb_")
-                .replace(")", "_lb_")
+        return s.replace(":", "_cl_")
+                .replace("(", "_rp_")
+                .replace(")", "_lp_")
                 .replace("/", "_lsl_");
     }
 
