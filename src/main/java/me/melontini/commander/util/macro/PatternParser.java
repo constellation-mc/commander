@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class PatternParser {
 
     public static final Pattern PATTERN = Pattern.compile("\\$\\{\\{([^{}]*)\\}\\}");
-    public static final Pattern SELECTOR_PATTER = Pattern.compile("([a-z0-9_\\-/.:]*)\\(([a-z0-9_\\-/.]*)\\)");
+    public static final Pattern SELECTOR_PATTER = Pattern.compile("([a-z0-9_\\-/.:]+)\\[([a-z0-9_\\-/.]+)\\]");
 
     public static DataResult<BrigadierMacro> parse(String input) {
         Matcher matcher = PATTERN.matcher(input);
@@ -81,9 +81,9 @@ public class PatternParser {
             if (!container.isArithmetic(field)) return DataResult.error(() -> "String fields are not supported in arithmetic expressions: %s".formatted(field));
 
             var extractor = container.ofDouble(field);
-            var clear = sanitize(id + "(" + field + ")");
+            var clear = sanitize(id + "[" + field + "]");
             functions.put(clear, input -> extractor.apply(selector.select(input)));
-            reps.put(id + "(" + field + ")", clear);
+            reps.put(id + "[" + field + "]", clear);
         }
 
         for (Map.Entry<String, String> e : reps.entrySet()) {
@@ -101,8 +101,8 @@ public class PatternParser {
 
     private static String sanitize(String s) {
         return s.replace(":", "_cl_")
-                .replace("(", "_rp_")
-                .replace(")", "_lp_")
+                .replace("[", "_rb_")
+                .replace("]", "_lb_")
                 .replace("/", "_lsl_");
     }
 
