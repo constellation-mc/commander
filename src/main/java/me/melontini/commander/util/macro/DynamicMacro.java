@@ -4,9 +4,9 @@ import me.melontini.commander.event.EventContext;
 
 import java.util.function.Function;
 
-public record DynamicMacro(String original, Function<EventContext, String> start) implements BrigadierMacro {
+public record DynamicMacro(String original, Function<EventContext, StringBuilder> start) implements BrigadierMacro {
 
     public String build(EventContext context) {
-        return start.apply(context);
+        return start.apply(context).toString();
     }
 }

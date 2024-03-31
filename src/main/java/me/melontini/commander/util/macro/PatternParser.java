@@ -10,9 +10,11 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +28,7 @@ public class PatternParser {
         if (matcher.results().findAny().isEmpty()) return DataResult.success(new ConstantMacro(input));
         matcher.reset();
 
-        Function<EventContext, String> start = context -> "";
+        Function<EventContext, StringBuilder> start = context -> new StringBuilder();
         while (matcher.find()) {
             var result = parseExpression(matcher.group(1));
             if (result.error().isPresent()) return result.map(e -> null);
@@ -34,12 +36,12 @@ public class PatternParser {
             var func = result.result().orElseThrow();
             var cmd = sb(b -> matcher.appendReplacement(b, ""));
             var fin = start;
-            start = context -> fin.apply(context) + cmd + func.apply(context);
+            start = context -> fin.apply(context).append(cmd).append(func.apply(context));
         }
 
         var cmd = sb(matcher::appendTail);
         var fin = start;
-        start = context -> fin.apply(context) + cmd;
+        start = context -> fin.apply(context).append(cmd);
 
         return DataResult.success(new DynamicMacro(input, start));
     }
@@ -51,23 +53,19 @@ public class PatternParser {
     }
 
     public static DataResult<Function<EventContext, String>> parseExpression(String expression) {
-        Matcher matcher = SELECTOR_PATTER.matcher(expression);
-        if (matcher.results().findAny().isEmpty()) return DataResult.error(() -> "Invalid expression %s".formatted(expression));
-        matcher.reset();
+        List<MatchResult> matches = SELECTOR_PATTER.matcher(expression).results().toList();
+        if (matches.isEmpty()) return DataResult.error(() -> "Invalid expression %s".formatted(expression));
 
-        long matches = matcher.results().count();
-        matcher.reset();
-        if (matches == 1) return evalSingular(matcher);
-
-        return evalExpression(matcher, expression);
+        if (matches.size() == 1) return evalSingular(matches.get(0));
+        return evalExpression(matches, expression);
     }
 
-    public static DataResult<Function<EventContext, String>> evalExpression(Matcher matcher, String expression) {
+    public static DataResult<Function<EventContext, String>> evalExpression(List<MatchResult> matches, String expression) {
         Map<String, ToDoubleFunction<EventContext>> functions = new HashMap<>();
         Map<String, String> reps = new HashMap<>();
-        while (matcher.find()) {
-            String id = matcher.group(1);
-            String field = matcher.group(2);
+        for (MatchResult match : matches) {
+            String id = match.group(1);
+            String field = match.group(2);
 
             DataResult<Identifier> idResult = Identifier.validate(id);
             if (idResult.error().isPresent()) return idResult.map(r -> null);
@@ -106,10 +104,9 @@ public class PatternParser {
                 .replace("/", "_lsl_");
     }
 
-    public static DataResult<Function<EventContext, String>> evalSingular(Matcher matcher) {
-        if (!matcher.find()) return DataResult.error(() -> "Illegal eval state");
-        String id = matcher.group(1);
-        String field = matcher.group(2);
+    public static DataResult<Function<EventContext, String>> evalSingular(MatchResult match) {
+        String id = match.group(1);
+        String field = match.group(2);
 
         DataResult<Identifier> idResult = Identifier.validate(id);
         if (idResult.error().isPresent()) return idResult.map(r -> null);
