@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class PatternParser {
 
     public static final Pattern PATTERN = Pattern.compile("\\$\\{\\{([^{}]*)\\}\\}");
-    public static final Pattern SELECTOR_PATTER = Pattern.compile("([^ ()]*)\\(([^()]*)\\)");
+    public static final Pattern SELECTOR_PATTER = Pattern.compile("([a-z0-9_\\-/.:]*)\\(([a-z0-9_\\-/.]*)\\)");
 
     public static DataResult<BrigadierMacro> parse(String input) {
         Matcher matcher = PATTERN.matcher(input);
