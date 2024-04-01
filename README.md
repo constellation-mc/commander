@@ -1,5 +1,9 @@
 ## Commander
 
+Checkout the wiki to learn more! https://github.com/constellation-mc/commander/wiki
+
+If you have a suggestion or a feature request, be sure to share it here: https://github.com/constellation-mc/commander/discussions/categories/ideas
+
 ### Quick Introduction
 
 **Commander** introduces a new event system to the data pack format.
