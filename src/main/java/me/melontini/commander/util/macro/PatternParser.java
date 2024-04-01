@@ -56,7 +56,10 @@ public class PatternParser {
         List<MatchResult> matches = SELECTOR_PATTER.matcher(expression).results().toList();
         if (matches.isEmpty()) return DataResult.error(() -> "Invalid expression %s".formatted(expression));
 
-        if (matches.size() == 1) return evalSingular(matches.get(0));
+        if (matches.size() == 1) {
+            var r = evalSingular(matches.get(0));
+            if (r != null) return r;
+        }
         return evalExpression(matches, expression);
     }
 
@@ -125,24 +128,15 @@ public class PatternParser {
         if (idResult.error().isPresent()) return idResult.map(r -> null);
         Identifier identifier = idResult.result().orElseThrow();
 
-        Selector selector = SelectorTypes.getSelector(identifier);
-        if (selector == null) return DataResult.error(() -> "Unknown selector type %s!".formatted(id));
-
         MacroContainer container = SelectorTypes.getMacros(identifier);
+        if (container.isArithmetic(field)) return null;
         if (!container.contains(field)) return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
         boolean isDynamic = container.isDynamic(field);
         if (isDynamic && dynamic == null) throw new IllegalStateException("Missing required dynamic for field %s".formatted(field));
 
-        if (container.isArithmetic(field)) {
-            if (isDynamic) {
-                var entry = container.ofDynamicDouble(field);
-                Object value = entry.transformer().apply(dynamic);
-                return DataResult.success(context -> String.valueOf(entry.arithmetic().apply(value, selector.select(context))));
-            } else {
-                var extractor = container.ofDouble(field);
-                return DataResult.success(context -> String.valueOf(extractor.apply(selector.select(context))));
-            }
-        }
+        Selector selector = SelectorTypes.getSelector(identifier);
+        if (selector == null) return DataResult.error(() -> "Unknown selector type %s!".formatted(id));
+
         if (isDynamic) {
             var entry = container.ofDynamicString(field);
             Object value = entry.transformer().apply(dynamic);
