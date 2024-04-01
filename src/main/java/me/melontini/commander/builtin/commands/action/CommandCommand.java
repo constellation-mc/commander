@@ -3,14 +3,18 @@ package me.melontini.commander.builtin.commands.action;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import me.melontini.commander.Commander;
 import me.melontini.commander.builtin.BuiltInCommands;
 import me.melontini.commander.command.Command;
 import me.melontini.commander.command.CommandType;
 import me.melontini.commander.command.selector.ConditionedSelector;
 import me.melontini.commander.event.EventContext;
+import me.melontini.commander.util.ServerHelper;
 import me.melontini.commander.util.macro.BrigadierMacro;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
@@ -30,7 +34,13 @@ public record CommandCommand(ConditionedSelector selector, Either<List<Brigadier
 
         if (commands().left().isPresent()) {
             for (BrigadierMacro command : commands().left().get()) {
-                server.getCommandManager().executeWithPrefix(opt.get(), command.build(context));
+                try {
+                    server.getCommandManager().executeWithPrefix(opt.get(), command.build(context));
+                } catch (Throwable e) {
+                    ServerHelper.broadcastToOps(server, Text.literal(command.original()).append(Text.literal(" failed execution! Please check latest.log for more info!")).formatted(Formatting.RED));
+                    Commander.LOGGER.error(e);
+                    return false;
+                }
             }
         }
         if (commands().right().isPresent()) {

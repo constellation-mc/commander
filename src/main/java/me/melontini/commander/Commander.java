@@ -4,6 +4,7 @@ import me.melontini.commander.builtin.BuiltInCommands;
 import me.melontini.commander.builtin.BuiltInEvents;
 import me.melontini.commander.builtin.BuiltInSelectors;
 import me.melontini.commander.data.DynamicEventManager;
+import me.melontini.dark_matter.api.base.util.PrependingLogger;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
@@ -12,6 +13,8 @@ import net.minecraft.util.Identifier;
 // Better validation during `apply`
 // Macros with dynamic fields
 public class Commander implements ModInitializer {
+
+    public static final PrependingLogger LOGGER = PrependingLogger.get();
 
     public static Identifier id(String path) {
         return new Identifier("commander", path);
