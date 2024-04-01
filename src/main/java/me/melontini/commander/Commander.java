@@ -11,7 +11,6 @@ import net.minecraft.util.Identifier;
 
 //TODO:
 // Better validation during `apply`
-// Macros with dynamic fields
 public class Commander implements ModInitializer {
 
     public static final PrependingLogger LOGGER = PrependingLogger.get();

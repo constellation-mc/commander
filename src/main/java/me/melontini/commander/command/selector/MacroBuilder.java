@@ -1,22 +1,28 @@
 package me.melontini.commander.command.selector;
 
 import com.google.common.collect.ImmutableMap;
+import me.melontini.commander.util.functions.ToDoubleBiFunction;
 import me.melontini.commander.util.functions.ToDoubleFunction;
 import me.melontini.commander.util.macro.MacroContainer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class MacroBuilder {
     private final Map<String, ToDoubleFunction<ServerCommandSource>> arithmeticFunctions = new HashMap<>();
     private final Map<String, Function<ServerCommandSource, String>> stringFunctions = new HashMap<>();
+    private final Map<String, MacroContainer.ArithmeticEntry<?>> dynamicArithmeticFunctions = new HashMap<>();
+    private final Map<String, MacroContainer.StringEntry<?>> dynamicStringFunctions = new HashMap<>();
 
     public static Consumer<MacroBuilder> forEntity() {
         return builder -> builder
@@ -30,6 +36,7 @@ public class MacroBuilder {
                 .arithmetic("living/stuck_arrows", source -> living(source).getStuckArrowCount())
                 .arithmetic("living/stingers", source -> living(source).getStingerCount())
                 .arithmetic("living/armor", source -> living(source).getArmor())
+                .dynamicArithmetic("living/attribute", string -> Registries.ATTRIBUTE.get(Identifier.tryParse(string)), (attribute, source) -> living(source).getAttributeValue(attribute))
                 .arithmetic("player/xp/level", source -> player(source).experienceLevel)
                 .arithmetic("player/xp/total", source -> player(source).totalExperience);
     }
@@ -51,21 +58,40 @@ public class MacroBuilder {
     }
 
     public MacroBuilder arithmetic(String field, ToDoubleFunction<ServerCommandSource> function) {
-        var old = arithmeticFunctions.put(field, function);
-        if (old != null || stringFunctions.containsKey(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
+        if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
+        arithmeticFunctions.put(field, function);
         return this;
     }
 
     public MacroBuilder string(String field, Function<ServerCommandSource, String> function) {
-        var old = stringFunctions.put(field, function);
-        if (old != null || arithmeticFunctions.containsKey(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
+        if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
+        stringFunctions.put(field, function);
         return this;
+    }
+
+    public <T> MacroBuilder dynamicArithmetic(String field, Function<String, T> transformer, ToDoubleBiFunction<T, ServerCommandSource> arithmetic) {
+        if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
+        dynamicArithmeticFunctions.put(field, new MacroContainer.ArithmeticEntry<>(transformer, arithmetic));
+        return this;
+    }
+
+    public <T> MacroBuilder dynamicString(String field, Function<String, T> transformer, BiFunction<T, ServerCommandSource, String> arithmetic) {
+        if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
+        dynamicStringFunctions.put(field, new MacroContainer.StringEntry<>(transformer, arithmetic));
+        return this;
+    }
+
+    private boolean isDuplicate(String field) {
+        return arithmeticFunctions.containsKey(field) || stringFunctions.containsKey(field)
+                || dynamicArithmeticFunctions.containsKey(field) || dynamicStringFunctions.containsKey(field);
     }
 
     public MacroContainer build() {
         return new MacroContainer(
                 ImmutableMap.copyOf(arithmeticFunctions),
-                ImmutableMap.copyOf(stringFunctions)
+                ImmutableMap.copyOf(stringFunctions),
+                ImmutableMap.copyOf(dynamicArithmeticFunctions),
+                ImmutableMap.copyOf(dynamicStringFunctions)
         );
     }
 }

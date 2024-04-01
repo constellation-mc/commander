@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 public class PatternParser {
 
     public static final Pattern PATTERN = Pattern.compile("\\$\\{\\{([^{}]*)\\}\\}");
-    public static final Pattern SELECTOR_PATTER = Pattern.compile("([a-z0-9_\\-/.:]+)\\[([a-z0-9_\\-/.]+)\\]");
+    public static final Pattern SELECTOR_PATTER = Pattern.compile("([a-z0-9_\\-/.:]+)\\[([a-z0-9_\\-/.]+)(?:\\$([a-z0-9_\\-/.:]+))?\\]");
 
     public static DataResult<BrigadierMacro> parse(String input) {
         Matcher matcher = PATTERN.matcher(input);
@@ -66,6 +66,7 @@ public class PatternParser {
         for (MatchResult match : matches) {
             String id = match.group(1);
             String field = match.group(2);
+            String dynamic = match.group(3);
 
             DataResult<Identifier> idResult = Identifier.validate(id);
             if (idResult.error().isPresent()) return idResult.map(r -> null);
@@ -77,11 +78,21 @@ public class PatternParser {
             MacroContainer container = SelectorTypes.getMacros(identifier);
             if (!container.contains(field)) return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
             if (!container.isArithmetic(field)) return DataResult.error(() -> "String fields are not supported in arithmetic expressions: %s".formatted(field));
+            boolean isDynamic = container.isDynamic(field);
+            if (isDynamic && dynamic == null) throw new IllegalStateException("Missing required dynamic for field %s".formatted(field));
 
-            var extractor = container.ofDouble(field);
-            var clear = sanitize(id + "[" + field + "]");
-            functions.put(clear, input -> extractor.apply(selector.select(input)));
-            reps.put(id + "[" + field + "]", clear);
+            String part = expression.substring(match.start(), match.end());
+            var clear = sanitize(part);
+            reps.put(part, clear);
+
+            if (isDynamic) {
+                var entry = container.ofDynamicDouble(field);
+                Object value = entry.transformer().apply(dynamic);
+                functions.put(clear, context -> entry.arithmetic().apply(value, selector.select(context)));
+            } else {
+                var extractor = container.ofDouble(field);
+                functions.put(clear, context -> extractor.apply(selector.select(context)));
+            }
         }
 
         for (Map.Entry<String, String> e : reps.entrySet()) {
@@ -101,12 +112,14 @@ public class PatternParser {
         return s.replace(":", "_cl_")
                 .replace("[", "_rb_")
                 .replace("]", "_lb_")
-                .replace("/", "_lsl_");
+                .replace("/", "_lsl_")
+                .replace("$", "_dl_");
     }
 
     public static DataResult<Function<EventContext, String>> evalSingular(MatchResult match) {
         String id = match.group(1);
         String field = match.group(2);
+        String dynamic = match.group(3);
 
         DataResult<Identifier> idResult = Identifier.validate(id);
         if (idResult.error().isPresent()) return idResult.map(r -> null);
@@ -117,12 +130,26 @@ public class PatternParser {
 
         MacroContainer container = SelectorTypes.getMacros(identifier);
         if (!container.contains(field)) return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
+        boolean isDynamic = container.isDynamic(field);
+        if (isDynamic && dynamic == null) throw new IllegalStateException("Missing required dynamic for field %s".formatted(field));
 
         if (container.isArithmetic(field)) {
-            var extractor = container.ofDouble(field);
-            return DataResult.success(context -> String.valueOf(extractor.apply(selector.select(context))));
+            if (isDynamic) {
+                var entry = container.ofDynamicDouble(field);
+                Object value = entry.transformer().apply(dynamic);
+                return DataResult.success(context -> String.valueOf(entry.arithmetic().apply(value, selector.select(context))));
+            } else {
+                var extractor = container.ofDouble(field);
+                return DataResult.success(context -> String.valueOf(extractor.apply(selector.select(context))));
+            }
         }
-        var extractor = container.ofString(field);
-        return DataResult.success(context -> extractor.apply(selector.select(context)));
+        if (isDynamic) {
+            var entry = container.ofDynamicString(field);
+            Object value = entry.transformer().apply(dynamic);
+            return DataResult.success(context -> entry.string().apply(value, selector.select(context)));
+        } else {
+            var extractor = container.ofString(field);
+            return DataResult.success(context -> extractor.apply(selector.select(context)));
+        }
     }
 }
