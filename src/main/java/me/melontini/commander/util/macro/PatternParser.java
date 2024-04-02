@@ -1,10 +1,13 @@
 package me.melontini.commander.util.macro;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.command.selector.Selector;
 import me.melontini.commander.data.types.SelectorTypes;
-import me.melontini.commander.event.EventContext;
+import me.melontini.commander.util.StdFunctions;
 import me.melontini.commander.util.functions.ToDoubleFunction;
+import me.melontini.commander.util.math.Arithmetica;
+import net.minecraft.loot.context.LootContext;
 import net.minecraft.util.Identifier;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
@@ -28,7 +31,7 @@ public class PatternParser {
         if (matcher.results().findAny().isEmpty()) return DataResult.success(new ConstantMacro(input));
         matcher.reset();
 
-        Function<EventContext, StringBuilder> start = context -> new StringBuilder();
+        Function<LootContext, StringBuilder> start = context -> new StringBuilder();
         while (matcher.find()) {
             var result = parseExpression(matcher.group(1));
             if (result.error().isPresent()) return result.map(e -> null);
@@ -52,19 +55,23 @@ public class PatternParser {
         return b.toString();
     }
 
-    public static DataResult<Function<EventContext, String>> parseExpression(String expression) {
+    public static DataResult<Function<LootContext, String>> parseExpression(String expression) {
         List<MatchResult> matches = SELECTOR_PATTER.matcher(expression).results().toList();
-        if (matches.isEmpty()) return DataResult.error(() -> "Invalid expression %s".formatted(expression));
-
         if (matches.size() == 1) {
             var r = evalSingular(matches.get(0));
             if (r != null) return r;
         }
-        return evalExpression(matches, expression);
+        return evalExpression(matches, expression).map(function -> context -> String.valueOf(function.apply(context)));
     }
 
-    public static DataResult<Function<EventContext, String>> evalExpression(List<MatchResult> matches, String expression) {
-        Map<String, ToDoubleFunction<EventContext>> functions = new HashMap<>();
+    public static DataResult<Arithmetica> parseArithmetica(Either<Double, String> either) {
+        return either.map(d -> DataResult.success(Arithmetica.constant(d)), expression ->
+                evalExpression(SELECTOR_PATTER.matcher(expression).results().toList(), expression)
+                        .map(function -> Arithmetica.of(function, expression)));
+    }
+
+    public static DataResult<ToDoubleFunction<LootContext>> evalExpression(List<MatchResult> matches, String expression) {
+        Map<String, ToDoubleFunction<LootContext>> functions = new HashMap<>();
         Map<String, String> reps = new HashMap<>();
         for (MatchResult match : matches) {
             String id = match.group(1);
@@ -79,10 +86,13 @@ public class PatternParser {
             if (selector == null) return DataResult.error(() -> "Unknown selector type %s!".formatted(id));
 
             MacroContainer container = SelectorTypes.getMacros(identifier);
-            if (!container.contains(field)) return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
-            if (!container.isArithmetic(field)) return DataResult.error(() -> "String fields are not supported in arithmetic expressions: %s".formatted(field));
+            if (!container.contains(field))
+                return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
+            if (!container.isArithmetic(field))
+                return DataResult.error(() -> "String fields are not supported in arithmetic expressions: %s".formatted(field));
             boolean isDynamic = container.isDynamic(field);
-            if (isDynamic && dynamic == null) throw new IllegalStateException("Missing required dynamic for field %s".formatted(field));
+            if (isDynamic && dynamic == null)
+                throw new IllegalStateException("Missing required dynamic for field %s".formatted(field));
 
             String part = expression.substring(match.start(), match.end());
             var clear = sanitize(part);
@@ -98,17 +108,24 @@ public class PatternParser {
             }
         }
 
-        for (Map.Entry<String, String> e : reps.entrySet()) {
-            expression = expression.replace(e.getKey(), e.getValue());
-        }
-        ExpressionBuilder builder = new ExpressionBuilder(expression);
-        functions.keySet().forEach(builder::variable);
-        Expression built = builder.build();
+        try {
+            for (Map.Entry<String, String> e : reps.entrySet()) {
+                expression = expression.replace(e.getKey(), e.getValue());
+            }
+            ExpressionBuilder builder = new ExpressionBuilder(expression);
+            StdFunctions.FUNCTIONS.forEach(builder::function);
+            functions.keySet().forEach(builder::variable);
+            Expression built = builder.build();
 
-        return DataResult.success(context -> {
-            functions.forEach((string, function) -> built.setVariable(string, function.apply(context)));
-            return String.valueOf(built.evaluate());
-        });
+            return DataResult.success(context -> {
+                synchronized (built) {
+                    functions.forEach((string, function) -> built.setVariable(string, function.apply(context)));
+                    return built.evaluate();
+                }
+            });
+        } catch (Throwable throwable) {
+            return DataResult.error(throwable::getLocalizedMessage);
+        }
     }
 
     private static String sanitize(String s) {
@@ -119,7 +136,7 @@ public class PatternParser {
                 .replace("$", "_dl_");
     }
 
-    public static DataResult<Function<EventContext, String>> evalSingular(MatchResult match) {
+    public static DataResult<Function<LootContext, String>> evalSingular(MatchResult match) {
         String id = match.group(1);
         String field = match.group(2);
         String dynamic = match.group(3);
@@ -130,9 +147,11 @@ public class PatternParser {
 
         MacroContainer container = SelectorTypes.getMacros(identifier);
         if (container.isArithmetic(field)) return null;
-        if (!container.contains(field)) return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
+        if (!container.contains(field))
+            return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
         boolean isDynamic = container.isDynamic(field);
-        if (isDynamic && dynamic == null) throw new IllegalStateException("Missing required dynamic for field %s".formatted(field));
+        if (isDynamic && dynamic == null)
+            throw new IllegalStateException("Missing required dynamic for field %s".formatted(field));
 
         Selector selector = SelectorTypes.getSelector(identifier);
         if (selector == null) return DataResult.error(() -> "Unknown selector type %s!".formatted(id));

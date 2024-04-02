@@ -1,7 +1,7 @@
 package me.melontini.commander.command.selector;
 
 import me.melontini.commander.data.types.SelectorTypes;
-import me.melontini.commander.event.EventContext;
+import net.minecraft.loot.context.LootContext;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -18,5 +18,5 @@ public interface Selector {
         return SelectorTypes.register(identifier, selector, extractors);
     }
 
-    @Nullable ServerCommandSource select(EventContext context);
+    @Nullable ServerCommandSource select(LootContext context);
 }

@@ -3,6 +3,7 @@ package me.melontini.commander.builtin;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.builtin.commands.action.CancelCommand;
 import me.melontini.commander.builtin.commands.action.CommandCommand;
+import me.melontini.commander.builtin.commands.action.PrintArithmetica;
 import me.melontini.commander.builtin.commands.action.PrintCommand;
 import me.melontini.commander.builtin.commands.logic.AllOfCommand;
 import me.melontini.commander.builtin.commands.logic.AnyOfCommand;
@@ -24,6 +25,7 @@ public class BuiltInCommands {
     public static final CommandType CANCEL = CommandType.register(id("cancel"), CancelCommand.CODEC);
     public static final CommandType COMMANDS = CommandType.register(id("commands"), CommandCommand.CODEC);
     public static final CommandType PRINT = CommandType.register(id("print"), PrintCommand.CODEC);
+    public static final CommandType PRINT_ARITHMETICA = CommandType.register(id("print_arithmetica"), PrintArithmetica.CODEC);
 
     public static void init() {
         BrigadierCommands.init();

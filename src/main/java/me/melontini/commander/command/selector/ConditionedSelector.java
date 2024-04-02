@@ -25,7 +25,7 @@ public record ConditionedSelector(Optional<LootCondition> condition, Selector ot
         ).apply(data, ConditionedSelector::new)), SelectorTypes.CODEC).xmap(e -> e.map(Function.identity(), selector -> new ConditionedSelector(Optional.empty(), selector)), Either::left);
 
     public Optional<ServerCommandSource> select(EventContext context) {
-        var source = other.select(context);
+        var source = other.select(context.lootContext());
         if (source == null) return Optional.empty();
         if (condition.isEmpty()) return Optional.of(source);
 

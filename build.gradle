@@ -37,6 +37,10 @@ dependencies {
     implementation include("net.objecthunter:exp4j:${project.exp4j_version}")
 }
 
+loom {
+    accessWidenerPath = file("src/main/resources/commander.accesswidener")
+}
+
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
