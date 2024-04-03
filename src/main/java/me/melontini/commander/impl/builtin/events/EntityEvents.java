@@ -3,7 +3,7 @@ package me.melontini.commander.impl.builtin.events;
 import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
-import me.melontini.commander.impl.util.MagicCodecs;
+import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
@@ -31,9 +31,9 @@ public class EntityEvents {
 
     public static final EventType START_SLEEPING = EventType.builder().build(id("sleeping/start"));
     public static final EventType STOP_SLEEPING = EventType.builder().build(id("sleeping/stop"));
-    public static final EventType ALLOW_SLEEPING = EventType.builder().cancelTerm(MagicCodecs.enumCodec(PlayerEntity.SleepFailureReason.class)).build(id("sleeping/allow"));
-    public static final EventType ALLOW_SLEEP_TIME = EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build(id("sleeping/allow_time"));
-    public static final EventType ALLOW_NEARBY_MONSTERS = EventType.builder().cancelTerm(MagicCodecs.enumCodec(ActionResult.class)).build(id("sleeping/allow_nearby_monsters"));
+    public static final EventType ALLOW_SLEEPING = EventType.builder().cancelTerm(ExtraCodecs.enumCodec(PlayerEntity.SleepFailureReason.class)).build(id("sleeping/allow"));
+    public static final EventType ALLOW_SLEEP_TIME = EventType.builder().cancelTerm(ExtraCodecs.enumCodec(ActionResult.class)).build(id("sleeping/allow_time"));
+    public static final EventType ALLOW_NEARBY_MONSTERS = EventType.builder().cancelTerm(ExtraCodecs.enumCodec(ActionResult.class)).build(id("sleeping/allow_nearby_monsters"));
 
     public static final EventType ALLOW_ELYTRA = EventType.builder().cancelTerm(Codec.BOOL).build(id("elytra_flight/allow"));
     //public static final EventType CUSTOM_ELYTRA = EventType.builder().cancelTerm(Codec.BOOL).build(id("elytra_flight/custom"));

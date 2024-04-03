@@ -6,14 +6,14 @@ import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.command.Command;
 import me.melontini.commander.api.command.CommandType;
-import me.melontini.commander.impl.util.MagicCodecs;
+import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.util.Identifier;
 
 @UtilityClass
 public final class CommandTypes {
 
     private static final BiMap<Identifier, CommandType> COMMANDS = HashBiMap.create();
-    private static final Codec<CommandType> TYPE_CODEC = MagicCodecs.mapLookup(COMMANDS);
+    private static final Codec<CommandType> TYPE_CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, COMMANDS);
     public static final Codec<Command> CODEC = TYPE_CODEC.dispatch("type", Command::type, CommandType::codec);
 
     public static Identifier getId(CommandType type) {

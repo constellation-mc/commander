@@ -5,7 +5,7 @@ import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
-import me.melontini.commander.impl.util.MagicCodecs;
+import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;
@@ -15,7 +15,7 @@ import java.util.Set;
 public final class EventTypes {
 
     private static final BiMap<Identifier, EventType> EVENTS = HashBiMap.create();
-    public static final Codec<EventType> CODEC = MagicCodecs.mapLookup(EVENTS);
+    public static final Codec<EventType> CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, EVENTS);
 
     public static Identifier getId(EventType type) {
         return EVENTS.inverse().get(type);

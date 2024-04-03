@@ -6,8 +6,8 @@ import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.command.selector.MacroBuilder;
 import me.melontini.commander.api.command.selector.Selector;
-import me.melontini.commander.impl.util.MagicCodecs;
 import me.melontini.commander.impl.util.macro.MacroContainer;
+import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 
@@ -30,7 +30,7 @@ public final class SelectorTypes {
             .string("name", ServerCommandSource::getName)
             .string("world/key", source -> source.getWorld().getRegistryKey().getValue().toString());
 
-    public static final Codec<Selector> CODEC = MagicCodecs.mapLookup(SELECTORS);
+    public static final Codec<Selector> CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, SELECTORS);
 
     public static Selector getSelector(Identifier identifier) {
         return SELECTORS.get(identifier);
