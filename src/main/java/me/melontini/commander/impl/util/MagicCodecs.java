@@ -4,6 +4,8 @@ import com.google.common.collect.BiMap;
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import lombok.experimental.UtilityClass;
 import me.melontini.dark_matter.api.base.util.Utilities;
 import net.minecraft.loot.LootGsons;
@@ -11,6 +13,7 @@ import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.loot.condition.LootConditionType;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.JsonSerializer;
 import net.minecraft.util.dynamic.Codecs;
 
 import java.lang.reflect.Type;
@@ -36,6 +39,28 @@ public class MagicCodecs {
         condition.getType().getJsonSerializer().toJson(object, Utilities.cast(condition), lootContext);
         return DataResult.success(object);
     }));
+
+    public static <T> JsonSerializer<T> jsonSerializer(Codec<T> codec) {
+        var mcc = codec instanceof MapCodec.MapCodecCodec<T> glue ? glue.codec() : codec.fieldOf("value");
+        return new JsonSerializer<>() {
+            @Override
+            public void toJson(JsonObject json, T object, JsonSerializationContext context) {
+                var s = mcc.encode(object, JsonOps.INSTANCE, JsonOps.INSTANCE.mapBuilder());
+                s.build(json).getOrThrow(false, string -> {
+                    throw new JsonParseException(string);
+                });
+            }
+
+            @Override
+            public T fromJson(JsonObject json, JsonDeserializationContext context) {
+                return mcc.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.getMap(json).getOrThrow(false, string -> {
+                    throw new IllegalStateException(string);
+                })).getOrThrow(false, string -> {
+                    throw new JsonParseException(string);
+                });
+            }
+        };
+    }
 
     public static <T extends Enum<T>> Codec<T> enumCodec(Class<T> cls) {
         return Codec.STRING.comapFlatMap(string -> {
