@@ -1,10 +1,11 @@
 package me.melontini.commander.impl.util.macro;
 
 import com.mojang.serialization.DataResult;
-import me.melontini.commander.api.command.selector.Selector;
-import me.melontini.commander.impl.event.data.types.SelectorTypes;
+import me.melontini.commander.api.expression.BrigadierMacro;
+import me.melontini.commander.impl.event.data.types.MacroTypes;
 import me.melontini.commander.impl.util.ExpressionParser;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
@@ -65,7 +66,10 @@ public class PatternParser {
         if (idResult.error().isPresent()) return idResult.map(r -> null);
         Identifier identifier = idResult.result().orElseThrow();
 
-        MacroContainer container = SelectorTypes.getMacros(identifier);
+        LootContextParameter<?> parameter = MacroTypes.knowParameter(identifier);
+        if (parameter == null) return DataResult.error(() -> "Unknown loot context parameter %s".formatted(id));
+
+        MacroContainer container = MacroTypes.getMacros(parameter);
         if (container.isArithmetic(field)) return null;
         if (!container.contains(field))
             return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
@@ -73,16 +77,13 @@ public class PatternParser {
         if (isDynamic && dynamic == null)
             throw new IllegalStateException("Missing required dynamic for field %s".formatted(field));
 
-        Selector selector = SelectorTypes.getSelector(identifier);
-        if (selector == null) return DataResult.error(() -> "Unknown selector type %s!".formatted(id));
-
         if (isDynamic) {
             var entry = container.ofDynamicString(field);
             Object value = entry.transformer().apply(dynamic);
-            return DataResult.success(context -> entry.string().apply(value, selector.select(context)));
+            return DataResult.success(context -> entry.string().apply(value, context));
         } else {
             var extractor = container.ofString(field);
-            return DataResult.success(context -> extractor.apply(selector.select(context)));
+            return DataResult.success(extractor);
         }
     }
 }

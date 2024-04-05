@@ -3,7 +3,7 @@ package me.melontini.commander.impl.command;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import me.melontini.commander.api.command.selector.Selector;
+import me.melontini.commander.api.command.Selector;
 import me.melontini.commander.api.event.EventContext;
 import me.melontini.commander.impl.event.data.types.SelectorTypes;
 import me.melontini.commander.impl.util.MagicCodecs;

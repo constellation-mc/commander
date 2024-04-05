@@ -1,4 +1,4 @@
-package me.melontini.commander.api.util;
+package me.melontini.commander.api.expression;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;

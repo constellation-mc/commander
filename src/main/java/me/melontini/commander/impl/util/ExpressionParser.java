@@ -2,12 +2,12 @@ package me.melontini.commander.impl.util;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.DataResult;
-import me.melontini.commander.api.command.selector.Selector;
-import me.melontini.commander.api.util.Arithmetica;
+import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.api.util.functions.ToDoubleFunction;
-import me.melontini.commander.impl.event.data.types.SelectorTypes;
+import me.melontini.commander.impl.event.data.types.MacroTypes;
 import me.melontini.commander.impl.util.macro.MacroContainer;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.util.Identifier;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
@@ -39,10 +39,10 @@ public class ExpressionParser {
             if (idResult.error().isPresent()) return idResult.map(r -> null);
             Identifier identifier = idResult.result().orElseThrow();
 
-            Selector selector = SelectorTypes.getSelector(identifier);
-            if (selector == null) return DataResult.error(() -> "Unknown selector type %s!".formatted(id));
+            LootContextParameter<?> parameter = MacroTypes.knowParameter(identifier);
+            if (parameter == null) return DataResult.error(() -> "Unknown loot context parameter %s".formatted(id));
 
-            MacroContainer container = SelectorTypes.getMacros(identifier);
+            MacroContainer container = MacroTypes.getMacros(parameter);
             if (!container.contains(field))
                 return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
             if (!container.isArithmetic(field))
@@ -58,10 +58,10 @@ public class ExpressionParser {
             if (isDynamic) {
                 var entry = container.ofDynamicDouble(field);
                 Object value = entry.transformer().apply(dynamic);
-                functions.put(clear, context -> entry.arithmetic().apply(value, selector.select(context)));
+                functions.put(clear, context -> entry.arithmetic().apply(value, context));
             } else {
                 var extractor = container.ofDouble(field);
-                functions.put(clear, context -> extractor.apply(selector.select(context)));
+                functions.put(clear, extractor);
             }
         }
 

@@ -3,7 +3,7 @@ package me.melontini.commander.impl.util.macro;
 import lombok.RequiredArgsConstructor;
 import me.melontini.commander.api.util.functions.ToDoubleBiFunction;
 import me.melontini.commander.api.util.functions.ToDoubleFunction;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.loot.context.LootContext;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -12,8 +12,8 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class MacroContainer {
 
-    private final Map<String, ToDoubleFunction<ServerCommandSource>> arithmeticFunctions;
-    private final Map<String, Function<ServerCommandSource, String>> stringFunctions;
+    private final Map<String, ToDoubleFunction<LootContext>> arithmeticFunctions;
+    private final Map<String, Function<LootContext, String>> stringFunctions;
 
     private final Map<String, ArithmeticEntry<?>> dynamicArithmeticFunctions;
     private final Map<String, StringEntry<?>> dynamicStringFunctions;
@@ -31,11 +31,11 @@ public class MacroContainer {
                 || dynamicArithmeticFunctions.containsKey(field) || dynamicStringFunctions.containsKey(field);
     }
 
-    public Function<ServerCommandSource, String> ofString(String field) {
+    public Function<LootContext, String> ofString(String field) {
         return stringFunctions.get(field);
     }
 
-    public ToDoubleFunction<ServerCommandSource> ofDouble(String field) {
+    public ToDoubleFunction<LootContext> ofDouble(String field) {
         return arithmeticFunctions.get(field);
     }
 
@@ -47,6 +47,6 @@ public class MacroContainer {
         return (ArithmeticEntry<Object>) dynamicArithmeticFunctions.get(field);
     }
 
-    public record ArithmeticEntry<T>(Function<String, T> transformer, ToDoubleBiFunction<T, ServerCommandSource> arithmetic) { }
-    public record StringEntry<T>(Function<String, T> transformer, BiFunction<T, ServerCommandSource, String> string) { }
+    public record ArithmeticEntry<T>(Function<String, T> transformer, ToDoubleBiFunction<T, LootContext> arithmetic) { }
+    public record StringEntry<T>(Function<String, T> transformer, BiFunction<T, LootContext, String> string) { }
 }
