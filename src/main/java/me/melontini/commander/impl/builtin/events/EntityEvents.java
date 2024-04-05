@@ -18,6 +18,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.Objects;
+
 import static me.melontini.commander.api.util.EventExecutors.*;
 import static me.melontini.commander.impl.Commander.id;
 import static net.minecraft.loot.context.LootContextParameters.*;
@@ -41,10 +43,10 @@ public class EntityEvents {
     public static final EventType AFTER_KILLED_BY_OTHER = EventType.builder().build(id("after_killed_by_other"));
 
     public static void init() {
-        ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> runBoolean(ALLOW_DAMAGE, entity.getWorld(), () -> makeContext(entity, source.getPosition(), source)));
-        ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, damageAmount) -> runBoolean(ALLOW_DEATH, entity.getWorld(), () -> makeContext(entity, source.getPosition(), source)));
+        ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> runBoolean(ALLOW_DAMAGE, entity.getWorld(), () -> makeContext(entity, Objects.requireNonNullElse(source.getPosition(), entity.getPos()), source)));
+        ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, damageAmount) -> runBoolean(ALLOW_DEATH, entity.getWorld(), () -> makeContext(entity, Objects.requireNonNullElse(source.getPosition(), entity.getPos()), source)));
 
-        ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> runVoid(AFTER_DEATH, entity.getWorld(), () -> makeContext(entity, source.getPosition(), source)));
+        ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> runVoid(AFTER_DEATH, entity.getWorld(), () -> makeContext(entity, Objects.requireNonNullElse(source.getPosition(), entity.getPos()), source)));
 
         EntitySleepEvents.START_SLEEPING.register((entity, sleepingPos) -> runVoid(START_SLEEPING, entity.getWorld(), () -> makeContext(entity, Vec3d.ofCenter(sleepingPos), null)));
         EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> runVoid(STOP_SLEEPING, entity.getWorld(), () -> makeContext(entity, Vec3d.ofCenter(sleepingPos), null)));

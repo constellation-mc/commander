@@ -17,10 +17,10 @@ public class BuiltInMacros {
                 .arithmetic("world/day_time", context -> context.getWorld().getTimeOfDay())
                 .arithmetic("world/seed", context -> context.getWorld().getSeed()));
 
-        MacroRegistry.register(THIS_ENTITY, MacroBuilder.forEntity(context -> context.requireParameter(THIS_ENTITY)));
-        MacroRegistry.register(KILLER_ENTITY, MacroBuilder.forEntity(context -> context.requireParameter(KILLER_ENTITY)));
-        MacroRegistry.register(DIRECT_KILLER_ENTITY, MacroBuilder.forEntity(context -> context.requireParameter(DIRECT_KILLER_ENTITY)));
-        MacroRegistry.register(LAST_DAMAGE_PLAYER, MacroBuilder.forEntity(context -> context.requireParameter(LAST_DAMAGE_PLAYER)));
+        MacroRegistry.register(THIS_ENTITY, MacroBuilder.forEntity(context -> context.get(THIS_ENTITY)));
+        MacroRegistry.register(KILLER_ENTITY, MacroBuilder.forEntity(context -> context.get(KILLER_ENTITY)));
+        MacroRegistry.register(DIRECT_KILLER_ENTITY, MacroBuilder.forEntity(context -> context.get(DIRECT_KILLER_ENTITY)));
+        MacroRegistry.register(LAST_DAMAGE_PLAYER, MacroBuilder.forEntity(context -> context.get(LAST_DAMAGE_PLAYER)));
 
         MacroRegistry.register(DAMAGE_SOURCE, builder -> builder
                 .merge("source", MacroBuilder.forEntity(context -> context.requireParameter(DAMAGE_SOURCE).getSource()))

@@ -15,9 +15,14 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static me.melontini.commander.impl.util.ExpressionParser.*;
+
 public class PatternParser {
 
-    public static final Pattern PATTERN = Pattern.compile("\\$\\{\\{([^{}]*)\\}\\}");
+    public static final Pattern PATTERN = Pattern.compile("\\$(?:\\(([a-z]+)\\))?\\{\\{([^{}]*)\\}\\}");
+
+    public static final int CAST = 1;
+    public static final int EXPRESSION = 2;
 
     public static DataResult<BrigadierMacro> parse(String input) {
         Matcher matcher = PATTERN.matcher(input);
@@ -26,7 +31,7 @@ public class PatternParser {
 
         Function<LootContext, StringBuilder> start = context -> new StringBuilder();
         while (matcher.find()) {
-            var result = parseExpression(matcher.group(1));
+            var result = parseExpression(matcher.group(EXPRESSION), matcher.group(CAST));
             if (result.error().isPresent()) return result.map(e -> null);
 
             var func = result.result().orElseThrow();
@@ -48,19 +53,23 @@ public class PatternParser {
         return b.toString();
     }
 
-    public static DataResult<Function<LootContext, String>> parseExpression(String expression) {
+    public static DataResult<Function<LootContext, String>> parseExpression(String expression, String cast) {
         List<MatchResult> matches = ExpressionParser.SELECTOR_PATTER.matcher(expression).results().toList();
         if (matches.size() == 1) {
             var r = evalSingular(matches.get(0));
             if (r != null) return r;
         }
-        return ExpressionParser.evalExpression(matches, expression).map(function -> context -> String.valueOf(function.apply(context)));
+        if (cast != null && !cast.equals("long")) return DataResult.error(() -> "Unknown cast type %s".formatted(cast));
+
+        var result = ExpressionParser.evalExpression(matches, expression);
+        if (cast != null) return result.map(function -> context -> String.valueOf((long) function.apply(context)));
+        return result.map(function -> context -> String.valueOf(function.apply(context)));
     }
 
     public static DataResult<Function<LootContext, String>> evalSingular(MatchResult match) {
-        String id = match.group(1);
-        String field = match.group(2);
-        String dynamic = match.group(3);
+        String id = match.group(CONTEXT);
+        String field = match.group(FIELD);
+        String dynamic = match.group(DYNAMIC);
 
         DataResult<Identifier> idResult = Identifier.validate(id);
         if (idResult.error().isPresent()) return idResult.map(r -> null);

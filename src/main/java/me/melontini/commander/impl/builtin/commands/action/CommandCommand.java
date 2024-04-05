@@ -8,7 +8,6 @@ import me.melontini.commander.api.command.CommandType;
 import me.melontini.commander.api.command.Selector;
 import me.melontini.commander.api.event.EventContext;
 import me.melontini.commander.api.expression.BrigadierMacro;
-import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.builtin.BuiltInCommands;
 import me.melontini.commander.impl.util.ServerHelper;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
@@ -37,8 +36,8 @@ public record CommandCommand(Selector.Conditioned selector, Either<List<Brigadie
                 try {
                     server.getCommandManager().executeWithPrefix(opt.get(), command.build(context.lootContext()));
                 } catch (Throwable e) {
-                    ServerHelper.broadcastToOps(server, Text.literal(command.original()).append(Text.literal(" failed execution! Please check latest.log for more info!")).formatted(Formatting.RED));
-                    Commander.LOGGER.error(e);
+                    ServerHelper.broadcastToOps(server, Text.literal(command.original()).append(Text.literal(" failed execution! "))
+                            .append("%s: %s".formatted(e.getClass().getSimpleName(), e.getLocalizedMessage())).formatted(Formatting.RED));
                     return false;
                 }
             }

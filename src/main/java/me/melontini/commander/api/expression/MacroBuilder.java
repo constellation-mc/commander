@@ -57,15 +57,15 @@ public class MacroBuilder {
     }
 
     private static LivingEntity living(Function<LootContext, ? extends Entity> key, LootContext source) {
-        return ((LivingEntity) Objects.requireNonNull(key.apply(source)));
+        return (LivingEntity) entity(key, source);
     }
 
     private static ServerPlayerEntity player(Function<LootContext, ? extends Entity> key, LootContext source) {
-        return (ServerPlayerEntity) Objects.requireNonNull(key.apply(source));
+        return (ServerPlayerEntity) living(key, source);
     }
 
     private static Entity entity(Function<LootContext, ? extends Entity> key, LootContext source) {
-        return Objects.requireNonNull(key.apply(source));
+        return Objects.requireNonNull(key.apply(source), "missing required context!");
     }
 
     public MacroBuilder arithmetic(String field, ToDoubleFunction<LootContext> function) {

@@ -21,6 +21,10 @@ import java.util.regex.Pattern;
 public class ExpressionParser {
     public static final Pattern SELECTOR_PATTER = Pattern.compile("([a-z0-9_\\-/.:]+)\\[([a-z0-9_\\-/.]+)(?:\\$([a-z0-9_\\-/.:]+))?\\]");
 
+    public static final int CONTEXT = 1;
+    public static final int FIELD = 2;
+    public static final int DYNAMIC = 3;
+
     public static DataResult<Arithmetica> parseArithmetica(Either<Double, String> either) {
         return either.map(d -> DataResult.success(Arithmetica.constant(d)), expression ->
                 evalExpression(SELECTOR_PATTER.matcher(expression).results().toList(), expression)
@@ -31,9 +35,9 @@ public class ExpressionParser {
         Map<String, ToDoubleFunction<LootContext>> functions = new HashMap<>();
         Map<String, String> reps = new HashMap<>();
         for (MatchResult match : matches) {
-            String id = match.group(1);
-            String field = match.group(2);
-            String dynamic = match.group(3);
+            String id = match.group(CONTEXT);
+            String field = match.group(FIELD);
+            String dynamic = match.group(DYNAMIC);
 
             DataResult<Identifier> idResult = Identifier.validate(id);
             if (idResult.error().isPresent()) return idResult.map(r -> null);
