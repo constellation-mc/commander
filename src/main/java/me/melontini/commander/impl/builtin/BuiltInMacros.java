@@ -1,14 +1,14 @@
 package me.melontini.commander.impl.builtin;
 
-import me.melontini.commander.api.expression.MacroBuilder;
-import me.melontini.commander.api.expression.MacroRegistry;
+import me.melontini.commander.api.expression.ExtractionBuilder;
+import me.melontini.commander.api.expression.ExtractionRegistry;
 
 import static net.minecraft.loot.context.LootContextParameters.*;
 
 public class BuiltInMacros {
 
     public static void init() {
-        MacroRegistry.register(ORIGIN, builder -> builder
+        ExtractionRegistry.register(ORIGIN, builder -> builder
                 .arithmetic("x", context -> context.requireParameter(ORIGIN).x)
                 .arithmetic("y", context -> context.requireParameter(ORIGIN).y)
                 .arithmetic("z", context -> context.requireParameter(ORIGIN).z)
@@ -17,27 +17,27 @@ public class BuiltInMacros {
                 .arithmetic("world/day_time", context -> context.getWorld().getTimeOfDay())
                 .arithmetic("world/seed", context -> context.getWorld().getSeed()));
 
-        MacroRegistry.register(THIS_ENTITY, MacroBuilder.forEntity(context -> context.get(THIS_ENTITY)));
-        MacroRegistry.register(KILLER_ENTITY, MacroBuilder.forEntity(context -> context.get(KILLER_ENTITY)));
-        MacroRegistry.register(DIRECT_KILLER_ENTITY, MacroBuilder.forEntity(context -> context.get(DIRECT_KILLER_ENTITY)));
-        MacroRegistry.register(LAST_DAMAGE_PLAYER, MacroBuilder.forEntity(context -> context.get(LAST_DAMAGE_PLAYER)));
+        ExtractionRegistry.register(THIS_ENTITY, ExtractionBuilder.forEntity(context -> context.get(THIS_ENTITY)));
+        ExtractionRegistry.register(KILLER_ENTITY, ExtractionBuilder.forEntity(context -> context.get(KILLER_ENTITY)));
+        ExtractionRegistry.register(DIRECT_KILLER_ENTITY, ExtractionBuilder.forEntity(context -> context.get(DIRECT_KILLER_ENTITY)));
+        ExtractionRegistry.register(LAST_DAMAGE_PLAYER, ExtractionBuilder.forEntity(context -> context.get(LAST_DAMAGE_PLAYER)));
 
-        MacroRegistry.register(DAMAGE_SOURCE, builder -> builder
-                .merge("source", MacroBuilder.forEntity(context -> context.requireParameter(DAMAGE_SOURCE).getSource()))
-                .merge("attacker", MacroBuilder.forEntity(context -> context.requireParameter(DAMAGE_SOURCE).getAttacker())));
+        ExtractionRegistry.register(DAMAGE_SOURCE, builder -> builder
+                .merge("source", ExtractionBuilder.forEntity(context -> context.requireParameter(DAMAGE_SOURCE).getSource()))
+                .merge("attacker", ExtractionBuilder.forEntity(context -> context.requireParameter(DAMAGE_SOURCE).getAttacker())));
 
-        MacroRegistry.register(BLOCK_STATE, MacroBuilder.empty());
-        MacroRegistry.register(BLOCK_ENTITY, builder -> builder
+        ExtractionRegistry.register(BLOCK_STATE, ExtractionBuilder.empty());
+        ExtractionRegistry.register(BLOCK_ENTITY, builder -> builder
                 .arithmetic("x", context -> context.requireParameter(BLOCK_ENTITY).getPos().getX())
                 .arithmetic("y", context -> context.requireParameter(BLOCK_ENTITY).getPos().getY())
                 .arithmetic("z", context -> context.requireParameter(BLOCK_ENTITY).getPos().getZ()));
 
-        MacroRegistry.register(TOOL, builder -> builder
+        ExtractionRegistry.register(TOOL, builder -> builder
                 .arithmetic("count", context -> context.requireParameter(TOOL).getCount())
                 .arithmetic("max_count", context -> context.requireParameter(TOOL).getMaxCount())
                 .arithmetic("damage", context -> context.requireParameter(TOOL).getDamage())
                 .arithmetic("max_damage", context -> context.requireParameter(TOOL).getMaxDamage()));
 
-        MacroRegistry.register(EXPLOSION_RADIUS, builder -> builder.arithmetic("radius", context -> context.requireParameter(EXPLOSION_RADIUS)));
+        ExtractionRegistry.register(EXPLOSION_RADIUS, builder -> builder.arithmetic("radius", context -> context.requireParameter(EXPLOSION_RADIUS)));
     }
 }

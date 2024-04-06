@@ -5,9 +5,9 @@ import net.minecraft.loot.context.LootContextParameter;
 
 import java.util.function.Consumer;
 
-public class MacroRegistry {
+public class ExtractionRegistry {
 
-    public static void register(LootContextParameter<?> parameter, Consumer<MacroBuilder> builder) {
+    public static void register(LootContextParameter<?> parameter, Consumer<ExtractionBuilder> builder) {
         MacroTypes.register(parameter, builder);
     }
 }

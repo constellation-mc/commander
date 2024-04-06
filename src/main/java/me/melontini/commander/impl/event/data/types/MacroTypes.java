@@ -3,7 +3,7 @@ package me.melontini.commander.impl.event.data.types;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
-import me.melontini.commander.api.expression.MacroBuilder;
+import me.melontini.commander.api.expression.ExtractionBuilder;
 import me.melontini.commander.impl.util.macro.MacroContainer;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.loot.context.LootContextParameter;
@@ -20,7 +20,7 @@ public class MacroTypes {
     public static final Codec<LootContextParameter<?>> CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, KNOWN_PARAMETERS);
     private static final Map<LootContextParameter<?>, MacroContainer> EXTRACTORS = new IdentityHashMap<>();
 
-    private static final Supplier<MacroBuilder> DEFAULT = MacroBuilder::new;
+    private static final Supplier<ExtractionBuilder> DEFAULT = ExtractionBuilder::new;
 
     public static MacroContainer getMacros(LootContextParameter<?> id) {
         return EXTRACTORS.computeIfAbsent(id, id1 -> DEFAULT.get().build());
@@ -30,7 +30,7 @@ public class MacroTypes {
         return KNOWN_PARAMETERS.get(identifier);
     }
 
-    public static void register(LootContextParameter<?> parameter, Consumer<MacroBuilder> extractors) {
+    public static void register(LootContextParameter<?> parameter, Consumer<ExtractionBuilder> extractors) {
         var old = KNOWN_PARAMETERS.put(parameter.getId(), parameter);
         if (old != null) throw new IllegalStateException("Already registered selector %s".formatted(parameter.getId()));
         if (extractors != null) {

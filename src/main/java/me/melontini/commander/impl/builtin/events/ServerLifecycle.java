@@ -46,7 +46,7 @@ public class ServerLifecycle {
 
     private static LootContext forEntity(ServerWorld world, Entity entity) {
         LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder(world)
-                .add(LootContextParameters.ORIGIN, Vec3d.ZERO)
+                .add(LootContextParameters.ORIGIN, entity.getPos())
                 .add(LootContextParameters.THIS_ENTITY, entity);
         return new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(null);
     }

@@ -19,17 +19,17 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class MacroBuilder {
+public class ExtractionBuilder {
     private final Map<String, ToDoubleFunction<LootContext>> arithmeticFunctions = new HashMap<>();
     private final Map<String, Function<LootContext, String>> stringFunctions = new HashMap<>();
     private final Map<String, MacroContainer.ArithmeticEntry<?>> dynamicArithmeticFunctions = new HashMap<>();
     private final Map<String, MacroContainer.StringEntry<?>> dynamicStringFunctions = new HashMap<>();
 
-    public static Consumer<MacroBuilder> empty() {
+    public static Consumer<ExtractionBuilder> empty() {
         return builder -> {};
     }
 
-    public static Consumer<MacroBuilder> forEntity(Function<LootContext, ? extends Entity> key) {
+    public static Consumer<ExtractionBuilder> forEntity(Function<LootContext, ? extends Entity> key) {
         return builder -> builder
                 .string("uuid", context -> entity(key, context).getUuidAsString())
                 .string("key", context -> Registries.ENTITY_TYPE.getId(entity(key, context).getType()).toString())
@@ -52,7 +52,7 @@ public class MacroBuilder {
                 .arithmetic("player/xp/total", context -> player(key, context).totalExperience);
     }
 
-    public static Consumer<MacroBuilder> forEntity(Function<LootContext, ? extends Entity> key, Consumer<MacroBuilder> consumer) {
+    public static Consumer<ExtractionBuilder> forEntity(Function<LootContext, ? extends Entity> key, Consumer<ExtractionBuilder> consumer) {
         return forEntity(key).andThen(consumer);
     }
 
@@ -68,25 +68,25 @@ public class MacroBuilder {
         return Objects.requireNonNull(key.apply(source), "missing required context!");
     }
 
-    public MacroBuilder arithmetic(String field, ToDoubleFunction<LootContext> function) {
+    public ExtractionBuilder arithmetic(String field, ToDoubleFunction<LootContext> function) {
         if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
         arithmeticFunctions.put(field, function);
         return this;
     }
 
-    public MacroBuilder string(String field, Function<LootContext, String> function) {
+    public ExtractionBuilder string(String field, Function<LootContext, String> function) {
         if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
         stringFunctions.put(field, function);
         return this;
     }
 
-    public <T> MacroBuilder dynamicArithmetic(String field, Function<String, T> transformer, ToDoubleBiFunction<T, LootContext> arithmetic) {
+    public <T> ExtractionBuilder dynamicArithmetic(String field, Function<String, T> transformer, ToDoubleBiFunction<T, LootContext> arithmetic) {
         if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
         dynamicArithmeticFunctions.put(field, new MacroContainer.ArithmeticEntry<>(transformer, arithmetic));
         return this;
     }
 
-    public <T> MacroBuilder dynamicString(String field, Function<String, T> transformer, BiFunction<T, LootContext, String> arithmetic) {
+    public <T> ExtractionBuilder dynamicString(String field, Function<String, T> transformer, BiFunction<T, LootContext, String> arithmetic) {
         if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
         dynamicStringFunctions.put(field, new MacroContainer.StringEntry<>(transformer, arithmetic));
         return this;
@@ -97,8 +97,8 @@ public class MacroBuilder {
                 || dynamicArithmeticFunctions.containsKey(field) || dynamicStringFunctions.containsKey(field);
     }
 
-    public MacroBuilder merge(String prefix, Consumer<MacroBuilder> consumer) {
-        MacroBuilder other = new MacroBuilder();
+    public ExtractionBuilder merge(String prefix, Consumer<ExtractionBuilder> consumer) {
+        ExtractionBuilder other = new ExtractionBuilder();
         consumer.accept(other);
 
         other.arithmeticFunctions.forEach((s, f) -> this.arithmetic(prefix + "/" + s, f));
