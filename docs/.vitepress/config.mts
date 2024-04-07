@@ -6,6 +6,9 @@ export default defineConfig({
   title: "Commander",
   base: "/commander/",
 
+  cleanUrls: true,
+  lastUpdated: true,
+
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: '/commander/favicon.png' }],
     ['link', { rel: 'shortcut icon', type: 'image/png', href: '/commander/favicon.png' }]
