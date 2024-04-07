@@ -1,3 +1,5 @@
+# Commands
+
 Commands in Commander are the main actors in your subscription.
 
 In JSON, a command is an object. The required `type` field selects the command that will be executed when the event is invoked.

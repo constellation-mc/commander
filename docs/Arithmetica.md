@@ -1,3 +1,5 @@
+# Arithmetica
+
 Commander introduces support for evaluating math expressions with dynamic entity data.
 
 Arithmetica uses [exp4j](https://www.objecthunter.net/exp4j/index.html) for evaluation, while not required, it may be useful to familiarize yourself with it.

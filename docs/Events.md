@@ -1,3 +1,5 @@
+# Events
+
 Events in Commander are points during gameplay when your [commands](Commands) will be invoked.
 
 ## Introduction to subscriptions
