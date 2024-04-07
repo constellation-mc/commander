@@ -9,7 +9,7 @@ import net.minecraft.loot.context.LootContext;
 
 public interface Arithmetica extends ToDoubleFunction<LootContext> {
 
-    Codec<Arithmetica> CODEC = ExtraCodecs.either(Codec.DOUBLE, Codec.STRING).comapFlatMap(ExpressionParser::parseArithmetica, Arithmetica::toSource);
+    Codec<Arithmetica> CODEC = ExtraCodecs.either(Codec.DOUBLE, Codec.STRING).comapFlatMap(ExpressionParser::parseEither, Arithmetica::toSource);
 
     default long asLong(LootContext context) {
         return (long) this.apply(context);
@@ -30,10 +30,11 @@ public interface Arithmetica extends ToDoubleFunction<LootContext> {
     Either<Double, String> toSource();
 
     static Arithmetica constant(double d) {
+        Either<Double, String> either = Either.left(d);
         return new Arithmetica() {
             @Override
             public Either<Double, String> toSource() {
-                return Either.left(d);
+                return either;
             }
 
             @Override
@@ -44,10 +45,11 @@ public interface Arithmetica extends ToDoubleFunction<LootContext> {
     }
 
     static Arithmetica of(ToDoubleFunction<LootContext> function, String expression) {
+        Either<Double, String> either = Either.right(expression);
         return new Arithmetica() {
             @Override
             public Either<Double, String> toSource() {
-                return Either.right(expression);
+                return either;
             }
 
             @Override

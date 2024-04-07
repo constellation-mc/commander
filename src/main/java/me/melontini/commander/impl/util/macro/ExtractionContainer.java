@@ -10,7 +10,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
-public class MacroContainer {
+public class ExtractionContainer {
 
     private final Map<String, ToDoubleFunction<LootContext>> arithmeticFunctions;
     private final Map<String, Function<LootContext, String>> stringFunctions;

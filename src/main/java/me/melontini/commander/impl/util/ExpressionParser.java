@@ -4,8 +4,8 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.api.util.functions.ToDoubleFunction;
-import me.melontini.commander.impl.event.data.types.MacroTypes;
-import me.melontini.commander.impl.util.macro.MacroContainer;
+import me.melontini.commander.impl.event.data.types.ExtractionTypes;
+import me.melontini.commander.impl.util.macro.ExtractionContainer;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.util.Identifier;
@@ -25,13 +25,11 @@ public class ExpressionParser {
     public static final int FIELD = 2;
     public static final int DYNAMIC = 3;
 
-    public static DataResult<Arithmetica> parseArithmetica(Either<Double, String> either) {
-        return either.map(d -> DataResult.success(Arithmetica.constant(d)), expression ->
-                evalExpression(SELECTOR_PATTER.matcher(expression).results().toList(), expression)
-                        .map(function -> Arithmetica.of(function, expression)));
+    public static DataResult<Arithmetica> parseEither(Either<Double, String> either) {
+        return either.map(d -> DataResult.success(Arithmetica.constant(d)), expression -> parseExpression(SELECTOR_PATTER.matcher(expression).results().toList(), expression));
     }
 
-    public static DataResult<ToDoubleFunction<LootContext>> evalExpression(List<MatchResult> matches, String expression) {
+    public static DataResult<Arithmetica> parseExpression(List<MatchResult> matches, String expression) {
         Map<String, ToDoubleFunction<LootContext>> functions = new HashMap<>();
         Map<String, String> reps = new HashMap<>();
         for (MatchResult match : matches) {
@@ -43,10 +41,10 @@ public class ExpressionParser {
             if (idResult.error().isPresent()) return idResult.map(r -> null);
             Identifier identifier = idResult.result().orElseThrow();
 
-            LootContextParameter<?> parameter = MacroTypes.knowParameter(identifier);
+            LootContextParameter<?> parameter = ExtractionTypes.knownParameter(identifier);
             if (parameter == null) return DataResult.error(() -> "Unknown loot context parameter %s".formatted(id));
 
-            MacroContainer container = MacroTypes.getMacros(parameter);
+            ExtractionContainer container = ExtractionTypes.getMacros(parameter);
             if (!container.contains(field))
                 return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
             if (!container.isArithmetic(field))
@@ -78,12 +76,12 @@ public class ExpressionParser {
             functions.keySet().forEach(builder::variable);
             Expression built = builder.build();
 
-            return DataResult.success(context -> {
+            return DataResult.success(Arithmetica.of(context -> {
                 synchronized (built) {
                     functions.forEach((string, function) -> built.setVariable(string, function.apply(context)));
                     return built.evaluate();
                 }
-            });
+            }, expression));
         } catch (Throwable throwable) {
             return DataResult.error(throwable::getLocalizedMessage);
         }

@@ -3,7 +3,7 @@ package me.melontini.commander.api.expression;
 import com.google.common.collect.ImmutableMap;
 import me.melontini.commander.api.util.functions.ToDoubleBiFunction;
 import me.melontini.commander.api.util.functions.ToDoubleFunction;
-import me.melontini.commander.impl.util.macro.MacroContainer;
+import me.melontini.commander.impl.util.macro.ExtractionContainer;
 import me.melontini.dark_matter.api.base.util.Utilities;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -22,8 +22,8 @@ import java.util.function.Function;
 public class ExtractionBuilder {
     private final Map<String, ToDoubleFunction<LootContext>> arithmeticFunctions = new HashMap<>();
     private final Map<String, Function<LootContext, String>> stringFunctions = new HashMap<>();
-    private final Map<String, MacroContainer.ArithmeticEntry<?>> dynamicArithmeticFunctions = new HashMap<>();
-    private final Map<String, MacroContainer.StringEntry<?>> dynamicStringFunctions = new HashMap<>();
+    private final Map<String, ExtractionContainer.ArithmeticEntry<?>> dynamicArithmeticFunctions = new HashMap<>();
+    private final Map<String, ExtractionContainer.StringEntry<?>> dynamicStringFunctions = new HashMap<>();
 
     public static Consumer<ExtractionBuilder> empty() {
         return builder -> {};
@@ -82,13 +82,13 @@ public class ExtractionBuilder {
 
     public <T> ExtractionBuilder dynamicArithmetic(String field, Function<String, T> transformer, ToDoubleBiFunction<T, LootContext> arithmetic) {
         if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
-        dynamicArithmeticFunctions.put(field, new MacroContainer.ArithmeticEntry<>(transformer, arithmetic));
+        dynamicArithmeticFunctions.put(field, new ExtractionContainer.ArithmeticEntry<>(transformer, arithmetic));
         return this;
     }
 
     public <T> ExtractionBuilder dynamicString(String field, Function<String, T> transformer, BiFunction<T, LootContext, String> arithmetic) {
         if (isDuplicate(field)) throw new IllegalStateException("Tried to register field '%s' twice!".formatted(field));
-        dynamicStringFunctions.put(field, new MacroContainer.StringEntry<>(transformer, arithmetic));
+        dynamicStringFunctions.put(field, new ExtractionContainer.StringEntry<>(transformer, arithmetic));
         return this;
     }
 
@@ -110,8 +110,8 @@ public class ExtractionBuilder {
         return this;
     }
 
-    public MacroContainer build() {
-        return new MacroContainer(
+    public ExtractionContainer build() {
+        return new ExtractionContainer(
                 ImmutableMap.copyOf(arithmeticFunctions),
                 ImmutableMap.copyOf(stringFunctions),
                 ImmutableMap.copyOf(dynamicArithmeticFunctions),

@@ -3,7 +3,7 @@ package me.melontini.commander.impl;
 import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.impl.builtin.BuiltInCommands;
 import me.melontini.commander.impl.builtin.BuiltInEvents;
-import me.melontini.commander.impl.builtin.BuiltInMacros;
+import me.melontini.commander.impl.builtin.BuiltInExtractions;
 import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.util.ArithmeticaLootNumberProvider;
@@ -34,6 +34,6 @@ public class Commander implements ModInitializer {
         BuiltInEvents.init();
         BuiltInCommands.init();
         BuiltInSelectors.init();
-        BuiltInMacros.init();
+        BuiltInExtractions.init();
     }
 }

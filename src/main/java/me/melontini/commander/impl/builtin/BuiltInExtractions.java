@@ -5,7 +5,7 @@ import me.melontini.commander.api.expression.ExtractionRegistry;
 
 import static net.minecraft.loot.context.LootContextParameters.*;
 
-public class BuiltInMacros {
+public class BuiltInExtractions {
 
     public static void init() {
         ExtractionRegistry.register(ORIGIN, builder -> builder

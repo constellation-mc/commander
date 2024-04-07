@@ -13,7 +13,7 @@ public record PrintArithmeticaCommand(Arithmetica arithmetica) implements Comman
 
     @Override
     public boolean execute(EventContext context) {
-        System.out.println(arithmetica().apply(context.lootContext()));
+        System.out.println(arithmetica().asDouble(context.lootContext()));
         return true;
     }
 

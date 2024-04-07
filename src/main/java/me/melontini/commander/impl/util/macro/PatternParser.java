@@ -2,7 +2,7 @@ package me.melontini.commander.impl.util.macro;
 
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.api.expression.BrigadierMacro;
-import me.melontini.commander.impl.event.data.types.MacroTypes;
+import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.util.ExpressionParser;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameter;
@@ -61,9 +61,9 @@ public class PatternParser {
         }
         if (cast != null && !cast.equals("long")) return DataResult.error(() -> "Unknown cast type %s".formatted(cast));
 
-        var result = ExpressionParser.evalExpression(matches, expression);
-        if (cast != null) return result.map(function -> context -> String.valueOf((long) function.apply(context)));
-        return result.map(function -> context -> String.valueOf(function.apply(context)));
+        var result = ExpressionParser.parseExpression(matches, expression);
+        if (cast != null) return result.map(function -> context -> String.valueOf(function.asLong(context)));
+        return result.map(function -> context -> String.valueOf(function.asDouble(context)));
     }
 
     public static DataResult<Function<LootContext, String>> evalSingular(MatchResult match) {
@@ -75,10 +75,10 @@ public class PatternParser {
         if (idResult.error().isPresent()) return idResult.map(r -> null);
         Identifier identifier = idResult.result().orElseThrow();
 
-        LootContextParameter<?> parameter = MacroTypes.knowParameter(identifier);
+        LootContextParameter<?> parameter = ExtractionTypes.knownParameter(identifier);
         if (parameter == null) return DataResult.error(() -> "Unknown loot context parameter %s".formatted(id));
 
-        MacroContainer container = MacroTypes.getMacros(parameter);
+        ExtractionContainer container = ExtractionTypes.getMacros(parameter);
         if (container.isArithmetic(field)) return null;
         if (!container.contains(field))
             return DataResult.error(() -> "Unknown field type %s for selector %s".formatted(field, id));
