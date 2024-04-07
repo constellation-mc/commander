@@ -22,7 +22,7 @@ export default defineConfig({
     logo: { src: '/logo.png', width: 24, height: 24 },
 
     editLink: {
-      pattern: 'https://github.com/constellation-mc/commander-wiki/edit/main/docs/:path'
+      pattern: 'https://github.com/constellation-mc/commander/edit/documentation/docs/:path'
     },
 
     socialLinks: [
