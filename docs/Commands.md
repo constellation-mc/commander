@@ -112,7 +112,7 @@ Note: even if the condition is true early, the command will still execute all co
 :::
 
 ### `commander:random`
-This command type takes a weighted list of other commands and randomly executes some of them. By default, it rolls only once, but the number of rolls can be adjusted using the optional `rolls` field.
+This command type takes a weighted list of other commands and randomly executes some of them. By default, it rolls only once, but the number of rolls can be adjusted using the optional `rolls` field (Supports [Arithmetica](Arithmetica)).
 
 ::: details Example
 ```json
