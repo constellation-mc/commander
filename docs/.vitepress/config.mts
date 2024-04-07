@@ -4,6 +4,7 @@ import { en } from "./en"
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "Commander",
+  base: "/commander/",
 
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
