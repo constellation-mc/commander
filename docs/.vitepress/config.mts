@@ -7,8 +7,8 @@ export default defineConfig({
   base: "/commander/",
 
   head: [
-    ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
-    ['link', { rel: 'shortcut icon', type: 'image/png', href: '/favicon.png' }]
+    ['link', { rel: 'icon', type: 'image/png', href: '/commander/favicon.png' }],
+    ['link', { rel: 'shortcut icon', type: 'image/png', href: '/commander/favicon.png' }]
   ],
 
   markdown: {
