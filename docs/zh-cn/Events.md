@@ -47,6 +47,6 @@
 
 在 `commander` 命名空间下，本模组涵盖了绝大部分兼容的 fabric 事件。这里的返回指 [取消类命令](Commands#commandercancel)。
 
-当前可用的事件请见：[实体事件](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/EntityEvents.java)，[玩家事件](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/PlayerEvents.java)，[服务器生命周期]((https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/ServerLifecycle.java)，[服务器刻](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/ServerTick.java)。
+当前可用的事件请见：[实体事件](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/EntityEvents.java)，[玩家事件](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/PlayerEvents.java)，[服务器生命周期](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/ServerLifecycle.java)，[服务器刻](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/ServerTick.java)。
 
 前景：自动生成事件列表。
