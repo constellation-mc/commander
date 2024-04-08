@@ -11,6 +11,7 @@ import me.melontini.commander.api.expression.BrigadierMacro;
 import me.melontini.commander.impl.builtin.BuiltInCommands;
 import me.melontini.commander.impl.util.ServerHelper;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
+import net.minecraft.loot.context.LootContext;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -18,41 +19,76 @@ import net.minecraft.util.Identifier;
 
 import java.util.List;
 
-public record CommandCommand(Selector.Conditioned selector, Either<List<BrigadierMacro>, Identifier> commands) implements Command {
+public record CommandCommand(Selector.Conditioned selector, InterFunction commands) implements Command {
 
     public static final Codec<CommandCommand> CODEC = RecordCodecBuilder.create(data -> data.group(
             Selector.CODEC.fieldOf("selector").forGetter(CommandCommand::selector),
-            ExtraCodecs.either(BrigadierMacro.CODEC.listOf(), Identifier.CODEC).fieldOf("commands").forGetter(CommandCommand::commands)
+            ExtraCodecs.either(BrigadierMacro.CODEC.listOf(), Identifier.CODEC)
+                    .<InterFunction>xmap(e -> e.map(MacroedFunction::new, FunctionFunction::new), InterFunction::origin)
+                    .fieldOf("commands").forGetter(CommandCommand::commands)
     ).apply(data, CommandCommand::new));
 
     @Override
     public boolean execute(EventContext context) {
         var opt = selector().select(context).map(ServerCommandSource::withSilent);
         if (opt.isEmpty()) return false;
-        var server = context.lootContext().getWorld().getServer();
+        return commands().execute(context.lootContext(), opt.orElseThrow());
+    }
 
-        if (commands().left().isPresent()) {
-            for (BrigadierMacro command : commands().left().get()) {
+    @Override
+    public CommandType type() {
+        return BuiltInCommands.COMMANDS;
+    }
+
+    private interface InterFunction {
+        boolean execute(LootContext context, ServerCommandSource source);
+        Either<List<BrigadierMacro>, Identifier> origin();
+    }
+
+    private record MacroedFunction(List<BrigadierMacro> macros) implements InterFunction {
+
+        @Override
+        public boolean execute(LootContext context, ServerCommandSource source) {
+            var server = context.getWorld().getServer();
+
+            for (BrigadierMacro command : macros()) {
                 try {
-                    server.getCommandManager().executeWithPrefix(opt.get(), command.build(context.lootContext()));
+                    server.getCommandManager().executeWithPrefix(source, command.build(context));
                 } catch (Throwable e) {
                     ServerHelper.broadcastToOps(server, Text.literal(command.original()).append(Text.literal(" failed execution! "))
                             .append("%s: %s".formatted(e.getClass().getSimpleName(), e.getLocalizedMessage())).formatted(Formatting.RED));
                     return false;
                 }
             }
+            return true;
         }
-        if (commands().right().isPresent()) {
-            var func = server.getCommandFunctionManager().getFunction(commands().right().get());
-            func.ifPresentOrElse(commandFunction -> server.getCommandFunctionManager().execute(commandFunction, opt.get()), () -> {
-                throw new IllegalStateException("Unknown function %s!".formatted(commands().right().orElseThrow()));
-            });
+
+        @Override
+        public Either<List<BrigadierMacro>, Identifier> origin() {
+            return Either.left(macros());
         }
-        return true;
     }
 
-    @Override
-    public CommandType type() {
-        return BuiltInCommands.COMMANDS;
+    private record FunctionFunction(Identifier identifier) implements InterFunction {
+
+        @Override
+        public boolean execute(LootContext context, ServerCommandSource source) {
+            var server = context.getWorld().getServer();
+
+            var func = server.getCommandFunctionManager().getFunction(identifier());
+            if (func.isPresent()) {
+                server.getCommandFunctionManager().execute(func.orElseThrow(), source);
+                return true;
+            } else {
+                ServerHelper.broadcastToOps(server, Text.literal("Unknown function %s!".formatted(identifier()))
+                        .formatted(Formatting.RED));
+                return false;
+            }
+        }
+
+        @Override
+        public Either<List<BrigadierMacro>, Identifier> origin() {
+            return Either.right(identifier());
+        }
     }
 }

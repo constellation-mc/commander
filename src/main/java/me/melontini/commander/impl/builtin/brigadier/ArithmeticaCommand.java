@@ -27,17 +27,12 @@ public class ArithmeticaCommand {
                                     context.getSource().sendError(Text.literal(r.error().get().message()));
                                     return 0;
                                 }
-                                var eq = r.result().orElseThrow();
-                                if (eq.toSource().left().isPresent()) {
-                                    context.getSource().sendMessage(Text.literal(String.valueOf(eq.asDouble(null))));
-                                    return 1;
-                                }
                                 LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(context.getSource().getWorld())
                                         .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
                                         .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
                                         .build(LootContextTypes.COMMAND)).build(null);
 
-                                context.getSource().sendMessage(Text.literal(String.valueOf(eq.asDouble(context1))));
+                                context.getSource().sendMessage(Text.literal(String.valueOf(r.result().orElseThrow().asDouble(context1))));
                                 return 1;
                             } catch (Throwable t) {
                                 Commander.LOGGER.error(t);
