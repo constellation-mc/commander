@@ -27,7 +27,7 @@ export default {
       mapping: 'pathname',
       inputPosition: 'top',
       reactionsEnabled: '1',
-      loading: 'eager'
+      loading: 'lazy'
     }
 
     onMounted(() => {
