@@ -1,3 +1,7 @@
+---
+comment: false
+---
+
 # 命令官 <Badge type="warning" text="beta" />
 
 命令官模组是对原版数据包系统的补充。

@@ -1,3 +1,6 @@
+---
+comment: false
+---
 # Commander <Badge type="warning" text="beta" />
 
 Commander is an extension of the vanilla data pack system.

@@ -12,7 +12,11 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: '/commander/favicon.png' }],
-    ['link', { rel: 'shortcut icon', type: 'image/png', href: '/commander/favicon.png' }]
+    ['link', { rel: 'shortcut icon', type: 'image/png', href: '/commander/favicon.png' }],
+    ['meta', { name: "robots", content: "noai, noimageai" }],
+    ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
+    ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
+    ['link', { href: 'https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap', rel: 'stylesheet' }]
   ],
 
   markdown: {
@@ -68,7 +72,7 @@ export default defineConfig({
       ...en
     },
     "zh-cn": {
-      label: "群星模组",
+      label: "简体中文",
       link: "/zh-cn/",
       ...zh_cn
     }
