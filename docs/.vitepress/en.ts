@@ -12,7 +12,13 @@ export const en = defineConfig({
                     { text: 'Welcome!', link: '/' },
                     { text: 'Events', link: '/Events' },
                     { text: 'Commands', link: '/Commands' },
-                    { text: 'Arithmetica', link: '/Arithmetica' }
+                    { text: 'Arithmetica', link: '/Arithmetica' },
+                ]
+            },
+            {
+                text: 'Meta',
+                items: [
+                    { text: 'Badges', link: 'https://github.com/constellation-mc/commander/discussions/3' }
                 ]
             }
         ]
