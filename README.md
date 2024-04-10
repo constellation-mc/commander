@@ -1,36 +1,16 @@
 ## Commander
 
-Checkout the wiki to learn more! https://github.com/constellation-mc/commander/wiki
+Checkout the wiki to learn more! https://constellation-mc.github.io/commander/
 
 If you have a suggestion or a feature request, be sure to share it here: https://github.com/constellation-mc/commander/discussions/categories/ideas
 
 ### Quick Introduction
 
-**Commander** introduces a new event system to the data pack format.
+**Commander** is an extension of the vanilla data pack system.
 
-Each file placed in `commander/events` represents an event subscription. Commander mirrors some fabric events under the `commander` namespace. e.g. `server_tick/start`
+It adds a new event system, flexible json commands, new `/` commands, support for advanced mathematical expressions and more!
 
-```json
-{
-  "event": "namespace:event", //the event this file subscribes to.
-  "parameters": null, //optional parameters block
-  "commands": [
-    {
-      "type": "namespace:command", //command type
-      "condition": { //optional conditions block. Uses the vanilla predicates system
-        "condition": "minecraft:random_chance",
-        "chance": 0.5
-      },
-      "parameter": null, //misc command parameters
-      "parameter_2": 2
-    }
-  ]
-}
-```
-
-`parameters` is a block of addition subscription info. Can be omitted if the event does not expect any parameters.
-
-`commands` block defines actions the event will perform when invoked. Commands don't always interact with the game world, some commands are purely logical (`commander:random`), some are service commands (`commander:cancel`).
+There are no client-side features available, everything is done on the server.
 
 ***
 
