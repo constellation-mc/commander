@@ -12,6 +12,10 @@ Although Commander avoids using commands outside events, other projects might in
 
 [[toc]]
 
+## Selectors
+
+Some commands require you to specify a "selector". A selector is a simple identifier that allows you to select a position and (optionally) an entity that will be used to perform an action. Selectors, with some exceptions, mimic vanilla loot contexts, built-in selectors can be found here: [BuiltInSelectors](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/BuiltInSelectors.java)
+
 ## Built-in commands
 The mod comes with a minimal set of commands, this is by design, as game interactions should be handled by brigadier `/` commands, or functions.
 
