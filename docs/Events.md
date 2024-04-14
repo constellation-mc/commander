@@ -4,12 +4,27 @@ Events in Commander are points during gameplay when your [commands](Commands) wi
 
 ## Introduction to subscriptions
 
-An event declaration in your subscription file is an identifier of the event you want to subscribe to. An event can accept additional parameters in the `parameters` block, but built-in events do not require them (yet).
+An event declaration in your subscription file is an identifier of the event you want to subscribe to. An event can accept additional parameters in the `parameters` block, but built-in events do not require them (yet). Subscription files are read from `commander/events`.
+
+```
+|- recipes
+|- commander
+  |- events
+    |- test_event.json
+    |- folder
+      |- nested.json
+|- tags
+```
+
+A typical event declaration might look something like this:
 
 ::: details Example
 ```json
 {
-  "event": "commander:after_killed_by_other"
+  "event": "commander:after_killed_by_other",
+  "commands": [
+
+  ]
 }
 ```
 <br/>
@@ -18,7 +33,10 @@ An event declaration in your subscription file is an identifier of the event you
 {
   "event": "modid:custom_event",
   "parameters": {
-  }
+  },
+  "commands": [
+    
+  ]
 }
 ```
 :::
