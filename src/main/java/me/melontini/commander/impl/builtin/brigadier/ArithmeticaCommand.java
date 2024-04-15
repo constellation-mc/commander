@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.datafixers.util.Either;
 import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.util.ExpressionParser;
+import me.melontini.commander.impl.util.eval.CmdEvalException;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
@@ -34,6 +35,9 @@ public class ArithmeticaCommand {
 
                                 context.getSource().sendMessage(Text.literal(String.valueOf(r.result().orElseThrow().asDouble(context1))));
                                 return 1;
+                            } catch (CmdEvalException e) {
+                                context.getSource().sendError(Text.literal(e.getMessage()));
+                                return 0;
                             } catch (Throwable t) {
                                 Commander.LOGGER.error(t);
                                 throw t;

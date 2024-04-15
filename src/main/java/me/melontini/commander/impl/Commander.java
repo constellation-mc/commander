@@ -7,7 +7,7 @@ import me.melontini.commander.impl.builtin.BuiltInExtractions;
 import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.util.ArithmeticaLootNumberProvider;
-import me.melontini.commander.impl.util.EvalUtils;
+import me.melontini.commander.impl.util.eval.EvalUtils;
 import me.melontini.dark_matter.api.base.util.PrependingLogger;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;

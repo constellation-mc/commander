@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.util;
+package me.melontini.commander.impl.util.eval;
 
 import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.config.FunctionDictionaryIfc;
@@ -11,9 +11,12 @@ import com.ezylang.evalex.functions.string.*;
 import com.ezylang.evalex.functions.trigonometric.*;
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.util.functions.ClampFunction;
 import me.melontini.commander.impl.util.functions.LerpFunction;
 import me.melontini.commander.impl.util.functions.RangedRandomFunction;
+import net.minecraft.loot.context.LootContext;
+import net.minecraft.util.Identifier;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -22,6 +25,7 @@ public class EvalUtils {
 
     public static final ExpressionConfiguration CONFIGURATION = ExpressionConfiguration.builder()
             .dataAccessorSupplier(MapBasedDataAccessor::new)
+            .evaluationValueConverter(new ReflectiveValueConverter())
             .defaultConstants(ImmutableMap.of(
                     "true", EvaluationValue.booleanValue(true),
                     "false", EvaluationValue.booleanValue(false),
@@ -109,16 +113,18 @@ public class EvalUtils {
 
     public static class MapBasedDataAccessor implements DataAccessorIfc {
 
-        private final Map<String, EvaluationValue> variables = new Object2ObjectOpenHashMap<>();
+        public final ThreadLocal<LootContext> local = new ThreadLocal<>();
 
         @Override
         public EvaluationValue getData(String variable) {
-            return variables.get(variable);
+            var object = local.get().get(ExtractionTypes.knownParameter(new Identifier(variable)));
+            if (object == null) return null;
+            return EvaluationValue.structureValue(new ReflectiveMapStructure(object));
         }
 
         @Override
         public void setData(String variable, EvaluationValue value) {
-            variables.put(variable, value);
+            throw new IllegalStateException(variable);
         }
     }
 

@@ -9,6 +9,8 @@ import com.mojang.serialization.DataResult;
 import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.api.util.functions.ToDoubleFunction;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
+import me.melontini.commander.impl.util.eval.CmdEvalException;
+import me.melontini.commander.impl.util.eval.EvalUtils;
 import me.melontini.commander.impl.util.macro.ExtractionContainer;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameter;
@@ -79,10 +81,13 @@ public class ExpressionParser {
             return DataResult.success(Arithmetica.of(context -> {
                 synchronized (exp) {
                     try {
+                        ((EvalUtils.MapBasedDataAccessor)exp.getDataAccessor()).local.set(context);
                         return exp.withValues(Maps.transformValues(functions, input -> input.apply(context)))
                                 .evaluate().getNumberValue().doubleValue();
                     } catch (EvaluationException | ParseException e) {
-                        throw new RuntimeException(e.getLocalizedMessage(), e);
+                        throw new CmdEvalException(e.getMessage(), e);
+                    } finally {
+                        ((EvalUtils.MapBasedDataAccessor)exp.getDataAccessor()).local.remove();
                     }
                 }
             }, expression));
