@@ -52,6 +52,7 @@ public class PatternParser {
             return switch (cast) {
                 case "long" -> result.map(function -> context -> String.valueOf(function.apply(context).getNumberValue().longValue()));
                 case "int" -> result.map(function -> context -> String.valueOf(function.apply(context).getNumberValue().intValue()));
+                case "double" -> result.map(function -> context -> String.valueOf(function.apply(context).getNumberValue().doubleValue()));
                 case "bool" -> result.map(function -> context -> String.valueOf(function.apply(context).getBooleanValue()));
                 default -> DataResult.error(() -> "Unknown cast type %s".formatted(cast));
             };
