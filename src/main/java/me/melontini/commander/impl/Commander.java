@@ -1,9 +1,9 @@
 package me.melontini.commander.impl;
 
 import me.melontini.commander.api.expression.Arithmetica;
+import me.melontini.commander.api.expression.LootContextParameterRegistry;
 import me.melontini.commander.impl.builtin.BuiltInCommands;
 import me.melontini.commander.impl.builtin.BuiltInEvents;
-import me.melontini.commander.impl.builtin.BuiltInExtractions;
 import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.util.ArithmeticaLootNumberProvider;
@@ -16,9 +16,8 @@ import net.minecraft.loot.provider.number.LootNumberProviderType;
 import net.minecraft.loot.provider.number.LootNumberProviderTypes;
 import net.minecraft.util.Identifier;
 
-//TODO:
-// Better validation during `apply`
-// Scoreboard fields
+import static net.minecraft.loot.context.LootContextParameters.*;
+
 public class Commander implements ModInitializer {
 
     public static final PrependingLogger LOGGER = PrependingLogger.get();
@@ -36,6 +35,12 @@ public class Commander implements ModInitializer {
         BuiltInEvents.init();
         BuiltInCommands.init();
         BuiltInSelectors.init();
-        BuiltInExtractions.init();
+
+        LootContextParameterRegistry.register(
+                ORIGIN, TOOL,
+                THIS_ENTITY, LAST_DAMAGE_PLAYER,
+                KILLER_ENTITY, DIRECT_KILLER_ENTITY,
+                DAMAGE_SOURCE, EXPLOSION_RADIUS,
+                BLOCK_STATE, BLOCK_ENTITY);
     }
 }

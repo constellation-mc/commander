@@ -4,8 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.datafixers.util.Either;
 import me.melontini.commander.impl.Commander;
-import me.melontini.commander.impl.util.ExpressionParser;
 import me.melontini.commander.impl.util.eval.CmdEvalException;
+import me.melontini.commander.impl.util.eval.EvalUtils;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
@@ -23,7 +23,7 @@ public class ArithmeticaCommand {
                             try {
                                 String expression = StringArgumentType.getString(context, "expression");
 
-                                var r = ExpressionParser.parseEither(Either.right(expression));
+                                var r = EvalUtils.parseEither(Either.right(expression));
                                 if (r.error().isPresent()) {
                                     context.getSource().sendError(Text.literal(r.error().get().message()));
                                     return 0;

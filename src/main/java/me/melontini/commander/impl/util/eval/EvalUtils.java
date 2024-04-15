@@ -1,5 +1,7 @@
 package me.melontini.commander.impl.util.eval;
 
+import com.ezylang.evalex.EvaluationException;
+import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.config.FunctionDictionaryIfc;
 import com.ezylang.evalex.data.DataAccessorIfc;
@@ -9,8 +11,12 @@ import com.ezylang.evalex.functions.basic.*;
 import com.ezylang.evalex.functions.datetime.*;
 import com.ezylang.evalex.functions.string.*;
 import com.ezylang.evalex.functions.trigonometric.*;
+import com.ezylang.evalex.parser.ParseException;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.util.functions.ClampFunction;
 import me.melontini.commander.impl.util.functions.LerpFunction;
@@ -20,6 +26,7 @@ import net.minecraft.util.Identifier;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.function.Function;
 
 public class EvalUtils {
 
@@ -111,13 +118,38 @@ public class EvalUtils {
                             .build()))
             .build();
 
+    public static EvaluationValue evaluate(LootContext context, Expression exp) {
+        try {
+            ((EvalUtils.MapBasedDataAccessor)exp.getDataAccessor()).local.set(context);
+            return exp.copy().evaluate();
+        } catch (EvaluationException | ParseException e) {
+            throw new CmdEvalException(e.getMessage(), e);
+        } finally {
+            ((EvalUtils.MapBasedDataAccessor)exp.getDataAccessor()).local.remove();
+        }
+    }
+
+    public static DataResult<Arithmetica> parseEither(Either<Double, String> either) {
+        return either.map(d -> DataResult.success(Arithmetica.constant(d)), string -> parseExpression(string).map(func -> Arithmetica.of(context -> func.apply(context).getNumberValue().doubleValue(), string)));
+    }
+
+    public static DataResult<Function<LootContext, EvaluationValue>> parseExpression(String expression) {
+        try {
+            Expression exp = new Expression(expression.replace(":", "__idcl__"), CONFIGURATION);
+            exp.validate();
+            return DataResult.success(context -> evaluate(context, exp));
+        } catch (Throwable throwable) {
+            return DataResult.error(throwable::getLocalizedMessage);
+        }
+    }
+
     public static class MapBasedDataAccessor implements DataAccessorIfc {
 
         public final ThreadLocal<LootContext> local = new ThreadLocal<>();
 
         @Override
         public EvaluationValue getData(String variable) {
-            var object = local.get().get(ExtractionTypes.knownParameter(new Identifier(variable)));
+            var object = local.get().get(ExtractionTypes.getParameter(new Identifier(variable.replace("__idcl__", ":"))));
             if (object == null) return null;
             return EvaluationValue.structureValue(new ReflectiveMapStructure(object));
         }

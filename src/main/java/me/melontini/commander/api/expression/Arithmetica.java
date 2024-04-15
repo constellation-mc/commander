@@ -3,13 +3,13 @@ package me.melontini.commander.api.expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import me.melontini.commander.api.util.functions.ToDoubleFunction;
-import me.melontini.commander.impl.util.ExpressionParser;
+import me.melontini.commander.impl.util.eval.EvalUtils;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.loot.context.LootContext;
 
 public interface Arithmetica extends ToDoubleFunction<LootContext> {
 
-    Codec<Arithmetica> CODEC = ExtraCodecs.either(Codec.DOUBLE, Codec.STRING).comapFlatMap(ExpressionParser::parseEither, Arithmetica::toSource);
+    Codec<Arithmetica> CODEC = ExtraCodecs.either(Codec.DOUBLE, Codec.STRING).comapFlatMap(EvalUtils::parseEither, Arithmetica::toSource);
 
     default long asLong(LootContext context) {
         return (long) this.apply(context);
