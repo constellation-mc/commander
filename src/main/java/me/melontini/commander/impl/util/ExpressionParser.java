@@ -1,5 +1,9 @@
 package me.melontini.commander.impl.util;
 
+import com.ezylang.evalex.EvaluationException;
+import com.ezylang.evalex.Expression;
+import com.ezylang.evalex.parser.ParseException;
+import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.api.expression.Arithmetica;
@@ -9,8 +13,6 @@ import me.melontini.commander.impl.util.macro.ExtractionContainer;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.util.Identifier;
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -71,15 +73,17 @@ public class ExpressionParser {
             for (Map.Entry<String, String> e : reps.entrySet()) {
                 expression = expression.replace(e.getKey(), e.getValue());
             }
-            ExpressionBuilder builder = new ExpressionBuilder(expression);
-            StdFunctions.FUNCTIONS.forEach(builder::function);
-            functions.keySet().forEach(builder::variable);
-            Expression built = builder.build();
+            Expression exp = new Expression(expression, EvalUtils.CONFIGURATION);
+            exp.validate();
 
             return DataResult.success(Arithmetica.of(context -> {
-                synchronized (built) {
-                    functions.forEach((string, function) -> built.setVariable(string, function.apply(context)));
-                    return built.evaluate();
+                synchronized (exp) {
+                    try {
+                        return exp.withValues(Maps.transformValues(functions, input -> input.apply(context)))
+                                .evaluate().getNumberValue().doubleValue();
+                    } catch (EvaluationException | ParseException e) {
+                        throw new RuntimeException(e.getLocalizedMessage(), e);
+                    }
                 }
             }, expression));
         } catch (Throwable throwable) {

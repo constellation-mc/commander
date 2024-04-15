@@ -34,7 +34,8 @@ dependencies {
         modApi include("me.melontini:dark-matter-${module}:${project.dark_matter}")
     }
 
-    implementation include("net.objecthunter:exp4j:${project.exp4j_version}")
+    //implementation include("net.objecthunter:exp4j:${project.exp4j_version}")
+    implementation include("com.ezylang:EvalEx:${project.evalex_version}")
 }
 
 loom {
