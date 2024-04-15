@@ -1,5 +1,6 @@
 package me.melontini.commander.impl.util.eval;
 
+import me.melontini.commander.impl.util.mappings.MappingKeeper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,14 +24,14 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             map = new HashMap<>();
             for (Field field : object.getClass().getFields()) {
                 if (Modifier.isStatic(field.getModifiers())) continue;
-                map.put(field.getName(), field::get);
+                map.put(MappingKeeper.toNamed(field), field::get);
             }
             for (Method method : object.getClass().getMethods()) {
                 if (Modifier.isStatic(method.getModifiers())) continue;
                 if (method.getParameterCount() > 0) continue;
                 if (method.getReturnType() == void.class) continue;
 
-                String name = method.getName();
+                String name = MappingKeeper.toNamed(method);
 
                 map.put((name.startsWith("get") && name.length() > 3 && Character.isUpperCase(name.charAt(3))) ? name :  "m_" + name, method::invoke);
             }
@@ -111,5 +112,10 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     @Override
     public Set<Entry<String, Object>> entrySet() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(this.object);
     }
 }

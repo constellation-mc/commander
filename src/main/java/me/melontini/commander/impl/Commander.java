@@ -8,6 +8,8 @@ import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.util.ArithmeticaLootNumberProvider;
 import me.melontini.commander.impl.util.eval.EvalUtils;
+import me.melontini.commander.impl.util.mappings.MappingKeeper;
+import me.melontini.commander.impl.util.mappings.MinecraftDownloader;
 import me.melontini.dark_matter.api.base.util.PrependingLogger;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
@@ -31,6 +33,8 @@ public class Commander implements ModInitializer {
     public void onInitialize() {
         ServerReloadersEvent.EVENT.register(context -> context.register(new DynamicEventManager()));
         EvalUtils.init();
+        MinecraftDownloader.downloadMappings();
+        MappingKeeper.getMojmapTarget();
 
         BuiltInEvents.init();
         BuiltInCommands.init();

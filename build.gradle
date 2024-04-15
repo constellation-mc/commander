@@ -35,7 +35,9 @@ dependencies {
     }
 
     //implementation include("net.objecthunter:exp4j:${project.exp4j_version}")
+    //TODO: relocate
     implementation include("com.ezylang:EvalEx:${project.evalex_version}")
+    implementation include("net.fabricmc:mapping-io:${project.mappingio_version}")
 }
 
 loom {
