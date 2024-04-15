@@ -121,7 +121,7 @@ public class EvalUtils {
     public static EvaluationValue evaluate(LootContext context, Expression exp) {
         try {
             ((EvalUtils.MapBasedDataAccessor)exp.getDataAccessor()).local.set(context);
-            return exp.copy().evaluate();
+            return exp.evaluate();
         } catch (EvaluationException | ParseException e) {
             throw new CmdEvalException(e.getMessage(), e);
         } finally {
