@@ -1,8 +1,11 @@
 plugins {
     id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
     id 'io.freefair.lombok' version '8.3'
 }
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 def local = !System.getenv().containsKey("GITHUB_RUN_NUMBER");
 
@@ -20,6 +23,38 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
+configurations.register("shade") {
+    transitive = false
+}
+
+tasks.register('dependenciesJar', ShadowJar) {
+    configurations = [project.configurations.shade]
+    archiveClassifier = "dependencies"
+
+    exclude("META-INF/**")
+}
+
+tasks.register('fullDependenciesJar', ShadowJar) {
+    dependsOn(dependenciesJar)
+    mustRunAfter(jar)
+    archiveClassifier = "full-dependencies"
+
+    from(tasks.jar)
+    from(dependenciesJar)
+
+    var pck = "me.melontini.commander.impl.lib."
+
+    mergeServiceFiles()
+    relocate("net.fabricmc.mappingio", pck + "net.fabricmc.mappingio")
+    relocate("com.ezylang.evalex", pck + "com.ezylang.evalex")
+}
+
+remapJar {
+    dependsOn(fullDependenciesJar)
+    getInputFile().set(fullDependenciesJar.archiveFile.get())
+}
+tasks.jar.archiveClassifier = "slim"
+
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -34,10 +69,8 @@ dependencies {
         modApi include("me.melontini:dark-matter-${module}:${project.dark_matter}")
     }
 
-    //implementation include("net.objecthunter:exp4j:${project.exp4j_version}")
-    //TODO: relocate
-    implementation include("com.ezylang:EvalEx:${project.evalex_version}")
-    implementation include("net.fabricmc:mapping-io:${project.mappingio_version}")
+    implementation shade("com.ezylang:EvalEx:${project.evalex_version}")
+    implementation shade("net.fabricmc:mapping-io:${project.mappingio_version}")
 }
 
 loom {
