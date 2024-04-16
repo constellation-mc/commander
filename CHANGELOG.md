@@ -16,8 +16,6 @@ New:
 ```
 /say hi ${{this_entity.getX}}
 
-/say hi ${{this_entity.server.getModStatus.confidence}}
-
 /say hi ${{round(sqrt(abs(world.getSeed)), 0)}}
 ```
 

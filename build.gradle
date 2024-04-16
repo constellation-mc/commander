@@ -71,6 +71,7 @@ dependencies {
 
     implementation shade("com.ezylang:EvalEx:${project.evalex_version}")
     implementation shade("net.fabricmc:mapping-io:${project.mappingio_version}")
+    implementation shade("net.fabricmc:tiny-remapper:${tiny_remapper_version}")
 }
 
 loom {

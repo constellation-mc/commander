@@ -2,6 +2,7 @@ package me.melontini.commander.impl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.api.expression.LootContextParameterRegistry;
@@ -20,13 +21,14 @@ import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.tinyremapper.IMappingProvider;
+import net.fabricmc.tinyremapper.TinyRemapper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.provider.number.LootNumberProviderType;
 import net.minecraft.loot.provider.number.LootNumberProviderTypes;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -54,6 +56,9 @@ public class Commander implements ModInitializer {
     public static final Path COMMANDER_PATH = FabricLoader.getInstance().getGameDir().resolve(".commander");
     public static final String MINECRAFT_VERSION = getVersion();
 
+    @Getter
+    private static TinyRemapper remapper;
+
     public static Identifier id(String path) {
         return new Identifier("commander", path);
     }
@@ -73,7 +78,13 @@ public class Commander implements ModInitializer {
         ServerReloadersEvent.EVENT.register(context -> context.register(new DynamicEventManager()));
         EvalUtils.init();
         MinecraftDownloader.downloadMappings();
-        MappingKeeper.getMojmapTarget();
+
+        IMappingProvider provider = MappingKeeper.create(MappingKeeper.getMojmapTarget(), MappingKeeper.NAMESPACE, "mojang");
+        remapper = TinyRemapper.newRemapper()
+                .renameInvalidLocals(false)
+                .withMappings(provider)
+                .build();
+        remapper.readInputs(remapper.createInputTag(), FabricLoader.getInstance().getModContainer("minecraft").orElseThrow().getOrigin().getPaths().toArray(Path[]::new));
 
         log.info("Scanning common context classes!");
         Util.getMainWorkerExecutor().submit(() -> {
@@ -82,7 +93,7 @@ public class Commander implements ModInitializer {
                     Vec3d.class, BlockPos.class,
                     BlockState.class, BlockEntity.class,
                     ItemStack.class, DamageSource.class,
-                    ServerWorld.class, MinecraftServer.class
+                    ServerWorld.class
             ).forEach(aClass -> {
                 do {
                     ReflectiveMapStructure.getAccessors(aClass);

@@ -7,7 +7,10 @@ import me.melontini.commander.impl.Commander;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
+import net.fabricmc.mappingio.tree.MappingTree;
+import net.fabricmc.mappingio.tree.MappingTreeView;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
+import net.fabricmc.tinyremapper.IMappingProvider;
 import org.objectweb.asm.Type;
 
 import java.io.InputStreamReader;
@@ -19,7 +22,7 @@ import java.util.Objects;
 @Log4j2
 public final class MappingKeeper {
 
-    private static final String NAMESPACE = FabricLoader.getInstance().getMappingResolver().getCurrentRuntimeNamespace();
+    public static final String NAMESPACE = FabricLoader.getInstance().getMappingResolver().getCurrentRuntimeNamespace();
 
     @Getter(lazy = true)
     private static final MemoryMappingTree offMojmap = loadOffMojmap();
@@ -60,20 +63,65 @@ public final class MappingKeeper {
     }
 
     public static String toNamed(Field field) {
-        int id = getMojmapTarget().getNamespaceId(NAMESPACE);
-        var cls = getMojmapTarget().getClass(Type.getInternalName(field.getDeclaringClass()), id);
-        if (cls == null) return field.getName();
-        var fld = cls.getField(field.getName(), Type.getDescriptor(field.getType()), id);
-        if (fld == null) return field.getName();
-        return fld.getName("mojang");
+        return Commander.getRemapper().getEnvironment().getRemapper().mapFieldName(Type.getInternalName(field.getDeclaringClass()), field.getName(), Type.getDescriptor(field.getType()));
     }
 
     public static String toNamed(Method method) {
-        int id = getMojmapTarget().getNamespaceId(NAMESPACE);
-        var cls = getMojmapTarget().getClass(Type.getInternalName(method.getDeclaringClass()), id);
-        if (cls == null) return method.getName();
-        var mthd = cls.getMethod(method.getName(), Type.getMethodDescriptor(method), id);
-        if (mthd == null) return method.getName();
-        return mthd.getName("mojang");
+        return Commander.getRemapper().getEnvironment().getRemapper().mapMethodName(Type.getInternalName(method.getDeclaringClass()), method.getName(), Type.getMethodDescriptor(method));
+    }
+
+    private static IMappingProvider.Member memberOf(String className, String memberName, String descriptor) {
+        return new IMappingProvider.Member(className, memberName, descriptor);
+    }
+
+    public static IMappingProvider create(MappingTree first, String from, String to) {
+        return (acceptor) -> {
+            int fromId = first.getNamespaceId(from);
+            int toId = first.getNamespaceId(to);
+
+            for (MappingTree.ClassMapping classDef : first.getClasses()) {
+                String className = classDef.getName(fromId);
+                if (className == null) continue;
+
+                String dstName = getName(classDef, toId, fromId);
+
+                acceptor.acceptClass(className, dstName);
+                for (MappingTree.FieldMapping field : classDef.getFields()) {
+                    var fieldId = memberOf(className, field.getName(fromId), field.getDesc(fromId));
+                    if (fieldId.name == null) continue;
+
+                    try {
+                        acceptor.acceptField(fieldId, getName(field, toId, fromId));
+                    } catch (Exception e) {
+                        throw new RuntimeException("from: %s to:%s cls:%s dstCls:%s field:%s fieldMth:%s"
+                                .formatted(from, to, className, dstName, fieldId.name, getName(field, toId, fromId)));
+                    }
+                }
+
+                for (MappingTree.MethodMapping method : classDef.getMethods()) {
+                    var methodIdentifier = memberOf(className, method.getName(fromId), method.getDesc(fromId));
+                    if (methodIdentifier.name == null) continue;
+
+                    try {
+                        acceptor.acceptMethod(methodIdentifier, getName(method, toId, fromId));
+                    } catch (Exception e) {
+                        throw new RuntimeException("from: %s to:%s cls:%s dstCls:%s mth:%s dstMth:%s"
+                                .formatted(from, to, className, dstName, methodIdentifier.name, getName(method, toId, fromId)));
+                    }
+                }
+            }
+        };
+    }
+
+    private static String getName(MappingTree.ClassMapping classDef, int id, int fallback) {
+        var s = classDef.getName(id);
+        if (s != null) return s;
+        return classDef.getName(fallback);
+    }
+
+    public static String getName(MappingTreeView.MemberMappingView method, int id, int fallback) {
+        var s = method.getName(id);
+        if (s != null) return s;
+        return method.getName(fallback);
     }
 }
