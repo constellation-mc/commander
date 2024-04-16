@@ -145,13 +145,21 @@ public class EvalUtils {
 
     public static class MapBasedDataAccessor implements DataAccessorIfc {
 
+        private static final Map<Identifier, Function<LootContext, Object>> overrides = ImmutableMap.of(
+                new Identifier("world"), LootContext::getWorld,
+                new Identifier("luck"), LootContext::getLuck
+        );
         public final ThreadLocal<LootContext> local = new ThreadLocal<>();
 
         @Override
         public EvaluationValue getData(String variable) {
-            var object = local.get().get(ExtractionTypes.getParameter(new Identifier(variable.replace("__idcl__", ":"))));
+            var id = new Identifier(variable.replace("__idcl__", ":"));
+            var func = overrides.get(id);
+            if (func != null) return CONFIGURATION.getEvaluationValueConverter().convertObject(func.apply(local.get()), CONFIGURATION);
+
+            var object = local.get().get(ExtractionTypes.getParameter(id));
             if (object == null) return null;
-            return EvaluationValue.structureValue(new ReflectiveMapStructure(object));
+            return CONFIGURATION.getEvaluationValueConverter().convertObject(object, CONFIGURATION);
         }
 
         @Override
