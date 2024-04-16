@@ -26,7 +26,7 @@ public class ArithmeticaCommand {
             cmd.then(CommandManager.literal(cast).executes(context -> execute(context, StringArgumentType.getString(context, "expression"), cast)));
         }
 
-        dispatcher.register(CommandManager.literal("cmd:arithmetica").then(cmd));
+        dispatcher.register(CommandManager.literal("cmd:arithmetica").requires(source -> source.hasPermissionLevel(2)).then(cmd));
     }
 
     private static int execute(CommandContext<ServerCommandSource> context, String expression, String cast) {

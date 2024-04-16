@@ -1,5 +1,7 @@
 package me.melontini.commander.impl.util.eval;
 
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.melontini.commander.impl.util.mappings.MappingKeeper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,12 +14,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class ReflectiveMapStructure implements Map<String, Object> {
 
-    private static final Map<Class<?>, Map<String, Accessor>> MAPPINGS = new HashMap<>();
+    private static final Map<Class<?>, Map<String, Accessor>> MAPPINGS = new Reference2ReferenceOpenHashMap<>();
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     private final Map<String, Accessor> mappings;
@@ -31,20 +36,22 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     public static Map<String, Accessor> getAccessors(Class<?> cls) {
         Map<String, Accessor> map = MAPPINGS.get(cls);
         if (map == null) {
-            map = new HashMap<>();
-            for (Field field : cls.getFields()) {
-                if (Modifier.isStatic(field.getModifiers())) continue;
-                map.put(MappingKeeper.toNamed(field), field::get);
-            }
-            for (Method method : cls.getMethods()) {
-                if (Modifier.isStatic(method.getModifiers())) continue;
-                if (method.getParameterCount() > 0) continue;
-                if (method.getReturnType() == void.class) continue;
+            synchronized (MAPPINGS) {
+                map = new Object2ReferenceOpenHashMap<>();
+                for (Field field : cls.getFields()) {
+                    if (Modifier.isStatic(field.getModifiers())) continue;
+                    map.put(MappingKeeper.toNamed(field), field::get);
+                }
+                for (Method method : cls.getMethods()) {
+                    if (Modifier.isStatic(method.getModifiers())) continue;
+                    if (method.getParameterCount() > 0) continue;
+                    if (method.getReturnType() == void.class) continue;
 
-                var accessor = methodAccessor(method);
-                map.put(MappingKeeper.toNamed(method), accessor::apply);
+                    var accessor = methodAccessor(method);
+                    map.put(MappingKeeper.toNamed(method), accessor::apply);
+                }
+                MAPPINGS.put(cls, map);
             }
-            MAPPINGS.put(cls, map);
         }
         return map;
     }
