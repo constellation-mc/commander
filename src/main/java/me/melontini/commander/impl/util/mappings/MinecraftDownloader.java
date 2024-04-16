@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.log4j.Log4j2;
-import net.fabricmc.loader.api.FabricLoader;
+import me.melontini.commander.impl.Commander;
 
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -26,7 +26,7 @@ public final class MinecraftDownloader {
 
     @SneakyThrows
     public static void downloadMappings() {
-        Path mappings = FabricLoader.getInstance().getGameDir().resolve("commander/mappings/client_mappings.txt");
+        Path mappings = Commander.COMMANDER_PATH.resolve("mappings/client_mappings.txt");
         if (mappings.exists()) return;
         downloadIfNotExists(mappings, url(getManifest().getAsJsonObject("downloads")
                 .getAsJsonObject("client_mappings").get("url").getAsString()));
@@ -45,19 +45,13 @@ public final class MinecraftDownloader {
     }
 
     public static JsonObject getManifest() {
-        var version = getVersion();
         var o = downloadObject(MANIFEST);
         for (JsonElement versions : o.getAsJsonArray("versions")) {
-            if (version.equals(versions.getAsJsonObject().get("id").getAsString())) {
+            if (Commander.MINECRAFT_VERSION.equals(versions.getAsJsonObject().get("id").getAsString())) {
                 return downloadObject(url(versions.getAsJsonObject().get("url").getAsString()));
             }
         }
-        throw new IllegalStateException("Unknown version '%s'".formatted(version));
-    }
-
-    private static String getVersion() {
-        JsonObject o = JsonParser.parseReader(new InputStreamReader(MinecraftDownloader.class.getResourceAsStream("/version.json"))).getAsJsonObject();
-        return o.getAsJsonPrimitive("id").getAsString();
+        throw new IllegalStateException("Unknown version '%s'".formatted(Commander.MINECRAFT_VERSION));
     }
 
     @SneakyThrows

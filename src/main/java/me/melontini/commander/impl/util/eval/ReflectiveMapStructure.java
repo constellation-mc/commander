@@ -4,43 +4,66 @@ import me.melontini.commander.impl.util.mappings.MappingKeeper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Function;
 
 public class ReflectiveMapStructure implements Map<String, Object> {
 
     private static final Map<Class<?>, Map<String, Accessor>> MAPPINGS = new HashMap<>();
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+
     private final Map<String, Accessor> mappings;
     private final Object object;
 
     public ReflectiveMapStructure(Object object) {
         this.object = object;
+        this.mappings = getAccessors(object.getClass());
+    }
 
-        Map<String, Accessor> map = MAPPINGS.get(object.getClass());
+    public static Map<String, Accessor> getAccessors(Class<?> cls) {
+        Map<String, Accessor> map = MAPPINGS.get(cls);
         if (map == null) {
             map = new HashMap<>();
-            for (Field field : object.getClass().getFields()) {
+            for (Field field : cls.getFields()) {
                 if (Modifier.isStatic(field.getModifiers())) continue;
                 map.put(MappingKeeper.toNamed(field), field::get);
             }
-            for (Method method : object.getClass().getMethods()) {
+            for (Method method : cls.getMethods()) {
                 if (Modifier.isStatic(method.getModifiers())) continue;
                 if (method.getParameterCount() > 0) continue;
                 if (method.getReturnType() == void.class) continue;
 
-                String name = MappingKeeper.toNamed(method);
-
-                map.put((name.startsWith("get") && name.length() > 3 && Character.isUpperCase(name.charAt(3))) ? name :  "m_" + name, method::invoke);
+                var accessor = methodAccessor(method);
+                map.put(MappingKeeper.toNamed(method), accessor::apply);
             }
-            MAPPINGS.put(object.getClass(), map);
+            MAPPINGS.put(cls, map);
         }
-        this.mappings = map;
+        return map;
     }
 
-    private interface Accessor {
+    private static Function<Object, Object> methodAccessor(Method method) {
+        try {
+            var handle = LOOKUP.unreflect(method);
+            CallSite getterSite = LambdaMetafactory.metafactory(LOOKUP,
+                        "apply",
+                        MethodType.methodType(Function.class),
+                        MethodType.methodType(Object.class, Object.class),
+                        handle, handle.type().wrap());
+            return (Function<Object, Object>) getterSite.getTarget().invoke();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public interface Accessor {
         Object access(Object object) throws IllegalAccessException, InvocationTargetException;
     }
 
