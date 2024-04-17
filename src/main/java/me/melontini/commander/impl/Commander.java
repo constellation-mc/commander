@@ -13,6 +13,7 @@ import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.util.eval.EvalUtils;
 import me.melontini.commander.impl.util.loot.ArithmeticaLootNumberProvider;
 import me.melontini.commander.impl.util.loot.ExpressionLootCondition;
+import me.melontini.commander.impl.util.mappings.AmbiguousRemapper;
 import me.melontini.commander.impl.util.mappings.MappingKeeper;
 import me.melontini.commander.impl.util.mappings.MinecraftDownloader;
 import me.melontini.dark_matter.api.base.util.Exceptions;
@@ -50,7 +51,7 @@ public class Commander implements ModInitializer {
     public static final String MINECRAFT_VERSION = getVersion();
 
     @Getter
-    private static MappingKeeper mappingKeeper;
+    private static AmbiguousRemapper mappingKeeper;
 
     public static Identifier id(String path) {
         return new Identifier("commander", path);
@@ -70,11 +71,17 @@ public class Commander implements ModInitializer {
 
         ServerReloadersEvent.EVENT.register(context -> context.register(new DynamicEventManager()));
         EvalUtils.init();
-        MinecraftDownloader.downloadMappings();
 
-        CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.supplyAsync(MappingKeeper::loadOffMojmap, Util.getMainWorkerExecutor());
-        CompletableFuture<MemoryMappingTree> offTarget = CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
-        mappingKeeper = new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
+        try {
+            MinecraftDownloader.downloadMappings();
+
+            CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.supplyAsync(MappingKeeper::loadOffMojmap, Util.getMainWorkerExecutor());
+            CompletableFuture<MemoryMappingTree> offTarget = CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
+            mappingKeeper = new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
+        } catch (Throwable t) {
+            log.error("Failed to download and prepare mappings! Data access remapping will not work!!!", t);
+            mappingKeeper = (cls, name) -> name;//Returning null will force it to traverse the hierarchy.
+        }
 
         BuiltInEvents.init();
         BuiltInCommands.init();

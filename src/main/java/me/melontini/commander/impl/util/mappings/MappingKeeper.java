@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Log4j2
-public record MappingKeeper(MemoryMappingTree mojmapTarget) {
+public record MappingKeeper(MemoryMappingTree mojmapTarget) implements AmbiguousRemapper {
 
     public static final String NAMESPACE = FabricLoader.getInstance().getMappingResolver().getCurrentRuntimeNamespace();
 
