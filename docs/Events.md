@@ -66,5 +66,3 @@ The subscription file can contain multiple subscriptions to different (or identi
 Commander wraps most compatible fabric events under the `commander` namespace. "Return" here means the [cancel command](Commands#commandercancel)
 
 Currently available events can be seen here: [EntityEvents](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/EntityEvents.java), [PlayerEvents](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/PlayerEvents.java), [ServerLifecycle](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/ServerLifecycle.java), [ServerTick](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/events/ServerTick.java)
-
-TODO: Automatically generate event list.

@@ -5,7 +5,7 @@ comment: false
 
 Commander is an extension of the vanilla data pack system.
 
-It adds a new event system, flexible json commands, new `/` commands, support for advanced mathematical expressions and more!
+It adds a new event system, flexible json commands, new `/` commands, support for advanced expressions with data access and more!
 
 There are no client-side features available, everything is executed on the server. 
 

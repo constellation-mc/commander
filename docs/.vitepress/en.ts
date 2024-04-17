@@ -12,7 +12,7 @@ export const en = defineConfig({
                     { text: 'Welcome!', link: '/' },
                     { text: 'Events', link: '/Events' },
                     { text: 'Commands', link: '/Commands' },
-                    { text: 'Arithmetica', link: '/Arithmetica' },
+                    { text: 'Expressions', link: '/Expressions' },
                 ]
             },
             {
