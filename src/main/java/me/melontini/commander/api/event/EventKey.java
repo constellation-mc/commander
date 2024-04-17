@@ -7,6 +7,8 @@ import lombok.experimental.Accessors;
 import me.melontini.commander.impl.Commander;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,7 +22,8 @@ public final class EventKey<T> {
 
     private final Identifier id;
 
-    public static <T> EventKey<T> create(Identifier id) {
+    @Contract("_ -> new")
+    public static <T> @NotNull EventKey<T> create(Identifier id) {
         return new EventKey<>(id);
     }
 }

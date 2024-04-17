@@ -2,13 +2,15 @@ package me.melontini.commander.api.event;
 
 import me.melontini.commander.impl.event.EventContextImpl;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 public interface EventContext {
 
-    static EventContext.Builder builder(EventType type) {
+    @Contract("_ -> new")
+    static EventContext.@NotNull Builder builder(EventType type) {
         return new EventContextImpl.Builder(type);
     }
 

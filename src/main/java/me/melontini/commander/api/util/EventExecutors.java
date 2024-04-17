@@ -10,13 +10,14 @@ import me.melontini.dark_matter.api.base.util.MakeSure;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Supplier;
 
 @UtilityClass
 public class EventExecutors {
-    public static void runVoid(EventType type, World world, Supplier<LootContext> supplier) {
+    public static void runVoid(EventType type, @NotNull World world, Supplier<LootContext> supplier) {
         if (world.isClient()) return;
 
         List<Command.Conditioned> subscribers = Subscription.getData(MakeSure.notNull(world.getServer()), type);
@@ -28,7 +29,7 @@ public class EventExecutors {
         for (Command.Conditioned subscriber : subscribers) subscriber.execute(context);
     }
 
-    public static boolean runBoolean(EventType type, boolean def, World world, Supplier<LootContext> supplier) {
+    public static boolean runBoolean(EventType type, boolean def, @NotNull World world, Supplier<LootContext> supplier) {
         if (world.isClient()) return def;
 
         List<Command.Conditioned> subscribers = Subscription.getData(MakeSure.notNull(world.getServer()), type);
@@ -49,7 +50,7 @@ public class EventExecutors {
         return runBoolean(type, true, world, supplier);
     }
 
-    public static <T extends Enum<T>> T runEnum(EventType type, T def, World world, Supplier<LootContext> supplier) {
+    public static <T extends Enum<T>> T runEnum(EventType type, T def, @NotNull World world, Supplier<LootContext> supplier) {
         if (world.isClient()) return def;
 
         List<Command.Conditioned> subscribers = Subscription.getData(MakeSure.notNull(world.getServer()), type);

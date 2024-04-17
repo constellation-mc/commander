@@ -10,8 +10,13 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Function;
 
-public interface Selector {
+/**
+ * Base selector function. Selectors transform input {@link LootContext} parameters into {@link ServerCommandSource}.
+ * <p>Selectors must be registered with {@link Selector#register(Identifier, Selector)}</p>
+ */
+public interface Selector extends Function<LootContext, ServerCommandSource> {
 
     Codec<Conditioned> CODEC = (Codec<Conditioned>) ConditionedSelector.CODEC;
 
@@ -19,8 +24,16 @@ public interface Selector {
         return SelectorTypes.register(identifier, selector);
     }
 
+    @Override
+    default ServerCommandSource apply(LootContext context) {
+        return this.select(context);
+    }
+
     @Nullable ServerCommandSource select(LootContext context);
 
+    /**
+     * Executable selector proxy.
+     */
     interface Conditioned {
         Optional<ServerCommandSource> select(EventContext context);
     }
