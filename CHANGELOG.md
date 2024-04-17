@@ -16,7 +16,7 @@ New:
 ```
 /say hi ${{this_entity.getX}}
 
-/say hi ${{round(sqrt(abs(world.getSeed)), 0)}}
+/say hi ${{round(sqrt(abs(level.getSeed)), 0)}}
 ```
 
 * Added additional casts to the `$(){{}}` syntax. `bool`, `int`, `double`

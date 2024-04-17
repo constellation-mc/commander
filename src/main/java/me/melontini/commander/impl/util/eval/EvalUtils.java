@@ -146,7 +146,7 @@ public class EvalUtils {
     public static class MapBasedDataAccessor implements DataAccessorIfc {
 
         private static final Map<Identifier, Function<LootContext, Object>> overrides = ImmutableMap.of(
-                new Identifier("world"), LootContext::getWorld,
+                new Identifier("level"), LootContext::getWorld,
                 new Identifier("luck"), LootContext::getLuck
         );
         public final ThreadLocal<LootContext> local = new ThreadLocal<>();
