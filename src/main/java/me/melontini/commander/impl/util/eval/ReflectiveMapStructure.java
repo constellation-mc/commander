@@ -2,7 +2,8 @@ package me.melontini.commander.impl.util.eval;
 
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import me.melontini.commander.impl.util.mappings.MappingKeeper;
+import lombok.extern.log4j.Log4j2;
+import me.melontini.commander.impl.Commander;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,12 +15,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
+@Log4j2
 public class ReflectiveMapStructure implements Map<String, Object> {
 
     private static final Map<Class<?>, Map<String, Accessor>> MAPPINGS = new Reference2ReferenceOpenHashMap<>();
@@ -38,18 +37,6 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         if (map == null) {
             synchronized (MAPPINGS) {
                 map = new Object2ReferenceOpenHashMap<>();
-                for (Field field : cls.getFields()) {
-                    if (Modifier.isStatic(field.getModifiers())) continue;
-                    map.put(MappingKeeper.toNamed(field), field::get);
-                }
-                for (Method method : cls.getMethods()) {
-                    if (Modifier.isStatic(method.getModifiers())) continue;
-                    if (method.getParameterCount() > 0) continue;
-                    if (method.getReturnType() == void.class) continue;
-
-                    var accessor = methodAccessor(method);
-                    map.put(MappingKeeper.toNamed(method), accessor::apply);
-                }
                 MAPPINGS.put(cls, map);
             }
         }
@@ -86,7 +73,61 @@ public class ReflectiveMapStructure implements Map<String, Object> {
 
     @Override
     public boolean containsKey(Object key) {
-        return this.mappings.containsKey(key);
+        if (key == null) return false;
+        if (key.getClass() != String.class) return false;
+
+        var cache = this.mappings.get(key);
+        if (cache != null) return true;
+
+        var accessor = findFieldOrMethod(this.object.getClass(), (String) key);
+        if (accessor == null) return false;
+
+        synchronized (this.mappings) {
+            this.mappings.put((String) key, accessor);
+        }
+        return true;
+    }
+
+    private static Accessor findFieldOrMethod(Class<?> cls, String name) {
+        String mapped;
+        Class<?> target = cls;
+        do {
+            if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(target, name)) != null) break;
+            var targetItfs = target.getInterfaces();
+            if (targetItfs.length == 0) continue;
+
+            Queue<Class<?>> interfaces = new ArrayDeque<>(List.of(targetItfs));
+            while (!interfaces.isEmpty()) {
+                var itf = interfaces.poll();
+
+                if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(itf, name)) != null) {
+                    target = Object.class;
+                    break;
+                }
+                if ((targetItfs = itf.getInterfaces()).length > 0) interfaces.addAll(List.of(targetItfs));
+            }
+        } while ((target = target.getSuperclass()) != null);
+        if (mapped == null) mapped = name;
+
+        for (Method method : cls.getMethods()) {
+            if (!method.getName().equals(mapped)) continue;
+            if (Modifier.isStatic(method.getModifiers())) continue;
+            if (method.getParameterCount() > 0) continue;
+            if (method.getReturnType() == void.class) continue;
+
+            var ma = methodAccessor(method);
+            return ma::apply;
+        }
+
+        do {
+            for (Field field : cls.getFields()) {
+                if (!field.getName().equals(mapped)) continue;
+                if (Modifier.isStatic(field.getModifiers())) continue;
+                return field::get;
+            }
+        } while ((cls = cls.getSuperclass()) != null);
+
+        return null;
     }
 
     @Override

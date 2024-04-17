@@ -45,8 +45,8 @@ tasks.register('fullDependenciesJar', ShadowJar) {
     var pck = "me.melontini.commander.impl.lib."
 
     mergeServiceFiles()
-    relocate("net.fabricmc.mappingio", pck + "net.fabricmc.mappingio")
     relocate("com.ezylang.evalex", pck + "com.ezylang.evalex")
+    relocate("net.fabricmc.mappingio", pck + "net.fabricmc.mappingio")
 }
 
 remapJar {
@@ -71,7 +71,6 @@ dependencies {
 
     implementation shade("com.ezylang:EvalEx:${project.evalex_version}")
     implementation shade("net.fabricmc:mapping-io:${project.mappingio_version}")
-    implementation shade("net.fabricmc:tiny-remapper:${tiny_remapper_version}")
 }
 
 loom {

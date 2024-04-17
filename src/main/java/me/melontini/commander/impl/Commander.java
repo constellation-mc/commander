@@ -12,7 +12,6 @@ import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.util.ArithmeticaLootNumberProvider;
 import me.melontini.commander.impl.util.eval.EvalUtils;
-import me.melontini.commander.impl.util.eval.ReflectiveMapStructure;
 import me.melontini.commander.impl.util.mappings.MappingKeeper;
 import me.melontini.commander.impl.util.mappings.MinecraftDownloader;
 import me.melontini.dark_matter.api.base.util.Exceptions;
@@ -21,29 +20,18 @@ import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.tinyremapper.IMappingProvider;
-import net.fabricmc.tinyremapper.TinyRemapper;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.loot.provider.number.LootNumberProviderType;
 import net.minecraft.loot.provider.number.LootNumberProviderTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.loot.context.LootContextParameters.*;
 
@@ -57,7 +45,7 @@ public class Commander implements ModInitializer {
     public static final String MINECRAFT_VERSION = getVersion();
 
     @Getter
-    private static TinyRemapper remapper;
+    private static MappingKeeper mappingKeeper;
 
     public static Identifier id(String path) {
         return new Identifier("commander", path);
@@ -79,37 +67,9 @@ public class Commander implements ModInitializer {
         EvalUtils.init();
         MinecraftDownloader.downloadMappings();
 
-        IMappingProvider provider = MappingKeeper.create(MappingKeeper.getMojmapTarget(), MappingKeeper.NAMESPACE, "mojang");
-        remapper = TinyRemapper.newRemapper()
-                .renameInvalidLocals(false)
-                .withMappings(provider)
-                .build();
-        remapper.readInputs(remapper.createInputTag(), FabricLoader.getInstance().getModContainer("minecraft").orElseThrow().getOrigin().getPaths().toArray(Path[]::new));
-
-        log.info("Scanning common context classes!");
-        Util.getMainWorkerExecutor().submit(() -> {
-            Set.of(
-                    ServerPlayerEntity.class,
-                    Vec3d.class, BlockPos.class,
-                    BlockState.class, BlockEntity.class,
-                    ItemStack.class, DamageSource.class,
-                    ServerWorld.class
-            ).forEach(aClass -> {
-                do {
-                    ReflectiveMapStructure.getAccessors(aClass);
-                    for (Field field : aClass.getFields()) {
-                        ReflectiveMapStructure.getAccessors(field.getType());
-                    }
-                    for (Method method : aClass.getMethods()) {
-                        if (method.getReturnType() == void.class) continue;
-                        ReflectiveMapStructure.getAccessors(method.getReturnType());
-                    }
-                    aClass = aClass.getSuperclass();
-                }
-                while (aClass.getSuperclass() != null);
-            });
-            log.info("Finished scanning classes!");
-        });
+        CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.supplyAsync(MappingKeeper::loadOffMojmap, Util.getMainWorkerExecutor());
+        CompletableFuture<MemoryMappingTree> offTarget = CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
+        mappingKeeper = new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
 
         BuiltInEvents.init();
         BuiltInCommands.init();
