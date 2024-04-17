@@ -10,8 +10,9 @@ import me.melontini.commander.impl.builtin.BuiltInCommands;
 import me.melontini.commander.impl.builtin.BuiltInEvents;
 import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
-import me.melontini.commander.impl.util.ArithmeticaLootNumberProvider;
 import me.melontini.commander.impl.util.eval.EvalUtils;
+import me.melontini.commander.impl.util.loot.ArithmeticaLootNumberProvider;
+import me.melontini.commander.impl.util.loot.ExpressionLootCondition;
 import me.melontini.commander.impl.util.mappings.MappingKeeper;
 import me.melontini.commander.impl.util.mappings.MinecraftDownloader;
 import me.melontini.dark_matter.api.base.util.Exceptions;
@@ -21,8 +22,11 @@ import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
+import net.minecraft.loot.condition.LootConditionType;
 import net.minecraft.loot.provider.number.LootNumberProviderType;
 import net.minecraft.loot.provider.number.LootNumberProviderTypes;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 
@@ -40,6 +44,7 @@ public class Commander implements ModInitializer {
 
     public static final PrependingLogger LOGGER = PrependingLogger.get();
     public static final LootNumberProviderType ARITHMETICA_PROVIDER = LootNumberProviderTypes.register("commander:arithmetica", ExtraCodecs.toJsonSerializer(Arithmetica.CODEC.xmap(ArithmeticaLootNumberProvider::new, ArithmeticaLootNumberProvider::value)));
+    public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExtraCodecs.toJsonSerializer(ExpressionLootCondition.CODEC)));
 
     public static final Path COMMANDER_PATH = FabricLoader.getInstance().getGameDir().resolve(".commander");
     public static final String MINECRAFT_VERSION = getVersion();

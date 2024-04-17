@@ -47,7 +47,7 @@ public class PatternParser {
     }
 
     public static DataResult<Function<LootContext, String>> parseExpression(String expression, String cast) {
-        var result = EvalUtils.parseExpression(expression);
+        var result = EvalUtils.wrapExpression(EvalUtils.parseExpression(expression));
         if (cast != null) {
             return switch (cast) {
                 case "long" -> result.map(function -> context -> String.valueOf(function.apply(context).getNumberValue().longValue()));

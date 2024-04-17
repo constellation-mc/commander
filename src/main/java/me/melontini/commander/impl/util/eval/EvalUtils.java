@@ -130,14 +130,18 @@ public class EvalUtils {
     }
 
     public static DataResult<Arithmetica> parseEither(Either<Double, String> either) {
-        return either.map(d -> DataResult.success(Arithmetica.constant(d)), string -> parseExpression(string).map(func -> Arithmetica.of(context -> func.apply(context).getNumberValue().doubleValue(), string)));
+        return either.map(d -> DataResult.success(Arithmetica.constant(d)), string -> wrapExpression(parseExpression(string)).map(func -> Arithmetica.of(context -> func.apply(context).getNumberValue().doubleValue(), string)));
     }
 
-    public static DataResult<Function<LootContext, EvaluationValue>> parseExpression(String expression) {
+    public static DataResult<Function<LootContext, EvaluationValue>> wrapExpression(DataResult<Expression> result) {
+        return result.map(expression -> context -> evaluate(context, expression));
+    }
+
+    public static DataResult<Expression> parseExpression(String expression) {
         try {
             Expression exp = new Expression(expression.replace(":", "__idcl__"), CONFIGURATION);
             exp.validate();
-            return DataResult.success(context -> evaluate(context, exp));
+            return DataResult.success(exp);
         } catch (Throwable throwable) {
             return DataResult.error(throwable::getLocalizedMessage);
         }

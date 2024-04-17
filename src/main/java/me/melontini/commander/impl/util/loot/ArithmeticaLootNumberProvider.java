@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.util;
+package me.melontini.commander.impl.util.loot;
 
 import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.impl.Commander;
