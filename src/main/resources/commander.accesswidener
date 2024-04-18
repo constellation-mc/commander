@@ -1,3 +1,1 @@
 accessWidener  v2	named
-
-accessible method net/minecraft/loot/provider/number/LootNumberProviderTypes register (Ljava/lang/String;Lnet/minecraft/util/JsonSerializer;)Lnet/minecraft/loot/provider/number/LootNumberProviderType;
