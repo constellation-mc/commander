@@ -33,7 +33,7 @@ public record ConditionedSelector(Optional<LootCondition> condition, Selector ot
         LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder(context.lootContext().getWorld());
         builder.add(LootContextParameters.ORIGIN, source.getPosition());
         builder.addOptional(LootContextParameters.THIS_ENTITY, source.getEntity());
-        LootContext sourceContext = new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(null);
+        LootContext sourceContext = new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(Optional.empty());
 
         return condition.get().test(sourceContext) ? Optional.of(source) : Optional.empty();
     }
