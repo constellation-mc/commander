@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
+import me.melontini.dark_matter.api.base.util.tuple.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 @Log4j2
@@ -35,13 +37,25 @@ public class ReflectiveMapStructure implements Map<String, Object> {
 
     private static Struct getAccessors(Class<?> cls) {
         Struct map = MAPPINGS.get(cls);
-        if (map == null) {
-            synchronized (MAPPINGS) {
-                map = new Struct(new Object2ReferenceOpenHashMap<>(), new ObjectOpenHashSet<>());
-                MAPPINGS.put(cls, map);
+        if (map != null) return map;
+
+        synchronized (MAPPINGS) {
+            Struct struct = new Struct(new Object2ReferenceOpenHashMap<>(), new ObjectOpenHashSet<>(), new ObjectOpenHashSet<>());
+
+            for (Class<?> anInterface : cls.getInterfaces()) {
+                getAccessors(anInterface).addListener(struct);
             }
+            Class<?> target = cls;
+            while ((target = target.getSuperclass()) != null) {
+                getAccessors(target).addListener(struct);
+                for (Class<?> anInterface : cls.getInterfaces()) {
+                    getAccessors(anInterface).addListener(struct);
+                }
+            }
+
+            MAPPINGS.put(cls, struct);
+            return struct;
         }
-        return map;
     }
 
     private static Function<Object, Object> methodAccessor(Method method) {
@@ -64,12 +78,12 @@ public class ReflectiveMapStructure implements Map<String, Object> {
 
     @Override
     public int size() {
-        return 1;
+        return 0;
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return true;
     }
 
     @Override
@@ -88,17 +102,17 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             return false;
         }
 
-        synchronized (this.mappings) {
-            this.mappings.accessors().put((String) key, accessor);
+        synchronized (MAPPINGS) {
+            getAccessors(accessor.left()).addAccessor((String) key, accessor.right());
         }
         return true;
     }
 
-    private static Accessor findFieldOrMethod(Class<?> cls, String name) {
+    private static Tuple<Class<?>, Accessor> findFieldOrMethod(Class<?> cls, String name) {
         String mapped;
         Class<?> target = cls;
         do {
-            if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(target, name)) != null) break;
+            if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(target, name)) != null) return findAccessor(target, mapped);
             var targetItfs = target.getInterfaces();
             if (targetItfs.length == 0) continue;
 
@@ -106,15 +120,14 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             while (!interfaces.isEmpty()) {
                 var itf = interfaces.poll();
 
-                if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(itf, name)) != null) {
-                    target = Object.class;
-                    break;
-                }
+                if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(itf, name)) != null) return findAccessor(itf, mapped);
                 if ((targetItfs = itf.getInterfaces()).length > 0) interfaces.addAll(List.of(targetItfs));
             }
         } while ((target = target.getSuperclass()) != null);
-        if (mapped == null) mapped = name;
+        return findAccessor(cls, name);
+    }
 
+    private static Tuple<Class<?>, Accessor> findAccessor(Class<?> cls, String mapped) {
         for (Method method : cls.getMethods()) {
             if (!method.getName().equals(mapped)) continue;
             if (Modifier.isStatic(method.getModifiers())) continue;
@@ -122,14 +135,14 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             if (method.getReturnType() == void.class) continue;
 
             var ma = methodAccessor(method);
-            return ma::apply;
+            return Tuple.of(method.getDeclaringClass(), ma::apply);
         }
 
         do {
             for (Field field : cls.getFields()) {
                 if (!field.getName().equals(mapped)) continue;
                 if (Modifier.isStatic(field.getModifiers())) continue;
-                return field::get;
+                return Tuple.of(field.getDeclaringClass(), field::get);
             }
         } while ((cls = cls.getSuperclass()) != null);
 
@@ -155,22 +168,22 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     @Nullable
     @Override
     public Object put(String key, Object value) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Object remove(Object key) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void putAll(@NotNull Map<? extends String, ?> m) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void clear() {
-
+        throw new UnsupportedOperationException();
     }
 
     @NotNull
@@ -196,5 +209,17 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         return String.valueOf(this.object);
     }
 
-    record Struct(Map<String, Accessor> accessors, Set<String> invalid) {}
+    record Struct(Map<String, Accessor> accessors, Set<String> invalid, Set<BiConsumer<String, Accessor>> consumers) {
+        public void addAccessor(String key, Accessor accessor) {
+            this.accessors().put(key, accessor);
+            for (BiConsumer<String, Accessor> consumer : consumers()) {
+                consumer.accept(key, accessor);
+            }
+        }
+
+        public void addListener(Struct other) {
+            this.consumers().add(other::addAccessor);
+            other.accessors().forEach(other::addAccessor);
+        }
+    }
 }
