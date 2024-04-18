@@ -119,6 +119,8 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}"}
     }
+    from("LICENSE_mapping-io")
+    from("LICENSE_EvalEx")
 }
 
 sourcesJar {
