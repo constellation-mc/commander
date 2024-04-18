@@ -10,6 +10,8 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.Optional;
+
 import static me.melontini.commander.api.util.EventExecutors.runVoid;
 import static me.melontini.commander.impl.Commander.id;
 
@@ -31,6 +33,6 @@ public class ServerTick {
 
     private static LootContext forWorld(ServerWorld world) {
         LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder(world).add(LootContextParameters.ORIGIN, Vec3d.ZERO);
-        return new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(null);
+        return new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(Optional.empty());
     }
 }

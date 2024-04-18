@@ -14,6 +14,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class ArithmeticaCommand {
@@ -39,7 +40,7 @@ public class ArithmeticaCommand {
             LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(context.getSource().getWorld())
                     .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
                     .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
-                    .build(LootContextTypes.COMMAND)).build(null);
+                    .build(LootContextTypes.COMMAND)).build(Optional.empty());
 
             context.getSource().sendMessage(Text.literal(r.result().orElseThrow().apply(context1)));
             return 1;

@@ -64,7 +64,7 @@ public final class BuiltInSelectors {
         return new ServerCommandSource(
                 entity.getWorld().getServer(), entity.getPos(),
                 new Vec2f(entity.getPitch(), entity.getYaw()),
-                (ServerWorld) entity.getWorld(), 4, entity.getEntityName(), entity.getName(),
+                (ServerWorld) entity.getWorld(), 4, entity.getNameForScoreboard(), entity.getName(),
                 entity.getWorld().getServer(), entity
         );
     }

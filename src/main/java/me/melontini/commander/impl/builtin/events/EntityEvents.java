@@ -19,6 +19,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static me.melontini.commander.api.util.EventExecutors.*;
 import static me.melontini.commander.impl.Commander.id;
@@ -60,7 +61,7 @@ public class EntityEvents {
             LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder((ServerWorld) entity.getWorld());
             builder.add(THIS_ENTITY, killedEntity).add(ORIGIN, killedEntity.getPos());
             builder.add(DAMAGE_SOURCE, world.getDamageSources().generic()).add(KILLER_ENTITY, entity);
-            return new LootContext.Builder(builder.build(LootContextTypes.ENTITY)).build(null);
+            return new LootContext.Builder(builder.build(LootContextTypes.ENTITY)).build(Optional.empty());
         }));
     }
 
@@ -72,6 +73,6 @@ public class EntityEvents {
             builder.addOptional(DIRECT_KILLER_ENTITY, source.getAttacker());
             builder.addOptional(KILLER_ENTITY, source.getSource());
         }
-        return new LootContext.Builder(builder.build(source == null ? LootContextTypes.COMMAND : LootContextTypes.ENTITY)).build(null);
+        return new LootContext.Builder(builder.build(source == null ? LootContextTypes.COMMAND : LootContextTypes.ENTITY)).build(Optional.empty());
     }
 }

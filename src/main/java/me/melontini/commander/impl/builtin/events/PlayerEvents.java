@@ -24,6 +24,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 import static me.melontini.commander.impl.Commander.id;
 import static net.minecraft.loot.context.LootContextParameters.*;
 
@@ -54,7 +56,7 @@ public class PlayerEvents {
                     .add(THIS_ENTITY, player)
                     .add(ORIGIN, player.getPos())
                     .add(TOOL, player.getStackInHand(hand));
-            return new LootContext.Builder(builder.build(LootContextTypes.FISHING)).build(null);
+            return new LootContext.Builder(builder.build(LootContextTypes.FISHING)).build(Optional.empty());
         }), player.getStackInHand(hand)));
 
         PlayerBlockBreakEvents.BEFORE.register((world, player, pos, state, blockEntity) -> EventExecutors.runBoolean(BEFORE_BREAK, world, () -> breakContext(world, player, pos, state, blockEntity)));
@@ -67,7 +69,7 @@ public class PlayerEvents {
                 .add(THIS_ENTITY, player).add(ORIGIN, Vec3d.ofCenter(pos))
                 .add(BLOCK_STATE, state).add(TOOL, ItemStack.EMPTY)
                 .addOptional(BLOCK_ENTITY, blockEntity);
-        return new LootContext.Builder(builder.build(LootContextTypes.BLOCK)).build(null);
+        return new LootContext.Builder(builder.build(LootContextTypes.BLOCK)).build(Optional.empty());
     }
 
     private static ActionResult entityCallback(EventType type, World world, PlayerEntity player, Hand hand, Entity entity) {
@@ -80,7 +82,7 @@ public class PlayerEvents {
                     .add(THIS_ENTITY, entity).add(ORIGIN, entity.getPos())
                     .add(TOOL, tool).add(LAST_DAMAGE_PLAYER, player)
                     .add(DAMAGE_SOURCE, source);
-            return new LootContext.Builder(builder.build(LootContextTypes.ENTITY)).build(null);
+            return new LootContext.Builder(builder.build(LootContextTypes.ENTITY)).build(Optional.empty());
         });
     }
 
@@ -94,7 +96,7 @@ public class PlayerEvents {
                     .add(THIS_ENTITY, player).add(ORIGIN,origin)
                     .add(BLOCK_STATE, state).add(TOOL, tool)
                     .addOptional(BLOCK_ENTITY, blockEntity);
-            return new LootContext.Builder(builder.build(LootContextTypes.BLOCK)).build(null);
+            return new LootContext.Builder(builder.build(LootContextTypes.BLOCK)).build(Optional.empty());
         });
     }
 }

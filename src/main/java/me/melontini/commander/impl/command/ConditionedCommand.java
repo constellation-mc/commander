@@ -5,8 +5,8 @@ import me.melontini.commander.api.command.Command;
 import me.melontini.commander.api.event.EventContext;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.impl.event.data.types.CommandTypes;
-import me.melontini.commander.impl.util.MagicCodecs;
 import net.minecraft.loot.condition.LootCondition;
+import net.minecraft.loot.condition.LootConditionTypes;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -18,7 +18,7 @@ public record ConditionedCommand(Optional<LootCondition> condition, Command othe
         @Override
         public <T> RecordBuilder<T> encode(ConditionedCommand input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
             var r = ((MapCodecCodec<Command>) CommandTypes.CODEC).codec().encode(input.other(), ops, prefix);
-            input.condition().map(condition1 -> MagicCodecs.LOOT_CONDITION.encodeStart(ops, condition1)).ifPresent(tDataResult -> r.add("condition", tDataResult));
+            input.condition().map(condition1 -> LootConditionTypes.CODEC.encodeStart(ops, condition1)).ifPresent(tDataResult -> r.add("condition", tDataResult));
             return r;
         }
 
@@ -27,7 +27,7 @@ public record ConditionedCommand(Optional<LootCondition> condition, Command othe
             var r = ((MapCodecCodec<Command>) CommandTypes.CODEC).codec().decode(ops, input);
             T condition = input.get("condition");
             if (condition == null) return r.map(command -> new ConditionedCommand(Optional.empty(), command));
-            return r.map(command -> MagicCodecs.LOOT_CONDITION.parse(ops, condition).map(condition1 -> new ConditionedCommand(Optional.of(condition1), command))).flatMap(Function.identity());
+            return r.map(command -> LootConditionTypes.CODEC.parse(ops, condition).map(condition1 -> new ConditionedCommand(Optional.of(condition1), command))).flatMap(Function.identity());
         }
 
         @Override
