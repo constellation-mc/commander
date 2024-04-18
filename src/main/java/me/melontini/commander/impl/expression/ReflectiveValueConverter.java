@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.util.eval;
+package me.melontini.commander.impl.expression;
 
 import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.data.EvaluationValue;

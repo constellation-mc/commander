@@ -2,7 +2,7 @@ package me.melontini.commander.api.expression;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import me.melontini.commander.impl.util.eval.EvalUtils;
+import me.melontini.commander.impl.expression.EvalUtils;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.Contract;
@@ -13,6 +13,8 @@ import java.util.function.ToDoubleFunction;
 /**
  * A simple {@code context -> double} functions, which is encoded as either a double or an expression.
  * <p>Can be used as a substitute for {@link Codec#DOUBLE} if {@link LootContext} is available</p>
+ *
+ * @see Expression
  */
 public interface Arithmetica extends ToDoubleFunction<LootContext> {
 
