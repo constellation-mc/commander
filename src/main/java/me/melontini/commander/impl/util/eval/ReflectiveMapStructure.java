@@ -1,6 +1,7 @@
 package me.melontini.commander.impl.util.eval;
 
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
@@ -21,10 +22,10 @@ import java.util.function.Function;
 @Log4j2
 public class ReflectiveMapStructure implements Map<String, Object> {
 
-    private static final Map<Class<?>, Map<String, Accessor>> MAPPINGS = new Reference2ReferenceOpenHashMap<>();
+    private static final Map<Class<?>, Struct> MAPPINGS = new Reference2ReferenceOpenHashMap<>();
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
-    private final Map<String, Accessor> mappings;
+    private final Struct mappings;
     private final Object object;
 
     public ReflectiveMapStructure(Object object) {
@@ -32,11 +33,11 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         this.mappings = getAccessors(object.getClass());
     }
 
-    public static Map<String, Accessor> getAccessors(Class<?> cls) {
-        Map<String, Accessor> map = MAPPINGS.get(cls);
+    private static Struct getAccessors(Class<?> cls) {
+        Struct map = MAPPINGS.get(cls);
         if (map == null) {
             synchronized (MAPPINGS) {
-                map = new Object2ReferenceOpenHashMap<>();
+                map = new Struct(new Object2ReferenceOpenHashMap<>(), new ObjectOpenHashSet<>());
                 MAPPINGS.put(cls, map);
             }
         }
@@ -76,14 +77,19 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         if (key == null) return false;
         if (key.getClass() != String.class) return false;
 
-        var cache = this.mappings.get(key);
+        if (this.mappings.invalid().contains(key)) return false;
+
+        var cache = this.mappings.accessors().get(key);
         if (cache != null) return true;
 
         var accessor = findFieldOrMethod(this.object.getClass(), (String) key);
-        if (accessor == null) return false;
+        if (accessor == null) {
+            this.mappings.invalid().add((String) key);
+            return false;
+        }
 
         synchronized (this.mappings) {
-            this.mappings.put((String) key, accessor);
+            this.mappings.accessors().put((String) key, accessor);
         }
         return true;
     }
@@ -138,7 +144,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     @Override
     public Object get(Object key) {
         try {
-            Accessor field = this.mappings.get(key);
+            Accessor field = this.mappings.accessors().get(key);
             if (field == null) throw new RuntimeException("%s has no public field or method '%s'".formatted(this.object.getClass().getSimpleName(), key));
             return EvalUtils.CONFIGURATION.getEvaluationValueConverter().convertObject(field.access(this.object), EvalUtils.CONFIGURATION);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -170,7 +176,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     @NotNull
     @Override
     public Set<String> keySet() {
-        return this.mappings.keySet();
+        return Collections.emptySet();
     }
 
     @NotNull
@@ -189,4 +195,6 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     public String toString() {
         return String.valueOf(this.object);
     }
+
+    record Struct(Map<String, Accessor> accessors, Set<String> invalid) {}
 }
