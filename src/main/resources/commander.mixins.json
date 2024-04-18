@@ -1,9 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "me.melontini.commander.mixin",
+  "package": "me.melontini.commander.impl.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AdvancementRewardsMixin"
   ],
   "client": [
   ],
