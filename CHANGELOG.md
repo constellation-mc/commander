@@ -1,5 +1,7 @@
 ### What's New:
 
-* Added `structContainsKey` function to expressions.
-* Moved custom `random`, `lerp` and `clamp` functions to BigDecimal.
-* There was an attempt at optimizing reflective field lookups by caching invalid fields and constructing a lazy class hierarchy which propagates found fields and methods downstream.
+* Exposed Expressions in the `api` package.
+* You can now specify `commander:commands` in advancement rewards.
+* Mappings are no longer downloaded on startup.
+* Added shaded licenses.
+* Fixed conditioned selector crash on 1.20.4.
