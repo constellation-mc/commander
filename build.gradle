@@ -19,6 +19,8 @@ base {
 apply from: "https://raw.githubusercontent.com/constellation-mc/artifacts/main/artifacts.groovy"
 constellationRepo(project, "dark-matter")
 
+apply from: "gradle/mappings.gradle"
+
 repositories {
     maven { url 'https://jitpack.io' }
 }
