@@ -3,6 +3,8 @@ package me.melontini.commander.impl.util.eval;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
 import me.melontini.dark_matter.api.base.util.tuple.Tuple;
@@ -18,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 @Log4j2
@@ -40,7 +41,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         if (map != null) return map;
 
         synchronized (MAPPINGS) {
-            Struct struct = new Struct(new Object2ReferenceOpenHashMap<>(), new ObjectOpenHashSet<>(), new ObjectOpenHashSet<>());
+            Struct struct = new Struct();
 
             for (Class<?> anInterface : cls.getInterfaces()) {
                 getAccessors(anInterface).addListener(struct);
@@ -62,10 +63,10 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         try {
             var handle = LOOKUP.unreflect(method);
             CallSite getterSite = LambdaMetafactory.metafactory(LOOKUP,
-                        "apply",
-                        MethodType.methodType(Function.class),
-                        MethodType.methodType(Object.class, Object.class),
-                        handle, handle.type().wrap());
+                    "apply",
+                    MethodType.methodType(Function.class),
+                    MethodType.methodType(Object.class, Object.class),
+                    handle, handle.type().wrap());
             return (Function<Object, Object>) getterSite.getTarget().invoke();
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -87,23 +88,23 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     }
 
     @Override
-    public boolean containsKey(Object key) {
-        if (key == null) return false;
-        if (key.getClass() != String.class) return false;
+    public boolean containsKey(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof String key)) return false;
 
-        if (this.mappings.invalid().contains(key)) return false;
+        if (this.mappings.isInvalid(key)) return false;
 
-        var cache = this.mappings.accessors().get(key);
+        var cache = this.mappings.getAccessor(key);
         if (cache != null) return true;
 
-        var accessor = findFieldOrMethod(this.object.getClass(), (String) key);
+        var accessor = findFieldOrMethod(this.object.getClass(), key);
         if (accessor == null) {
-            this.mappings.invalid().add((String) key);
+            this.mappings.invalidate(key);
             return false;
         }
 
         synchronized (MAPPINGS) {
-            getAccessors(accessor.left()).addAccessor((String) key, accessor.right());
+            getAccessors(accessor.left()).addAccessor(key, accessor.right());
         }
         return true;
     }
@@ -157,11 +158,11 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     @Override
     public Object get(Object key) {
         try {
-            Accessor field = this.mappings.accessors().get(key);
+            Accessor field = this.mappings.getAccessor((String) key);
             if (field == null) throw new RuntimeException("%s has no public field or method '%s'".formatted(this.object.getClass().getSimpleName(), key));
             return EvalUtils.CONFIGURATION.getEvaluationValueConverter().convertObject(field.access(this.object), EvalUtils.CONFIGURATION);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e.getLocalizedMessage());
+            throw new CmdEvalException(e.getMessage());
         }
     }
 
@@ -209,17 +210,46 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         return String.valueOf(this.object);
     }
 
-    record Struct(Map<String, Accessor> accessors, Set<String> invalid, Set<BiConsumer<String, Accessor>> consumers) {
+    static final class Struct {
+        private Map<String, Accessor> accessors;
+        private Set<String> invalid;
+        private Set<Struct> consumers;
+
+        public boolean isInvalid(String key) {
+            return this.invalid != null && this.invalid.contains(key);
+        }
+
+        @Synchronized
+        public void invalidate(String key) {
+            if (this.invalid == null) this.invalid = new ObjectOpenHashSet<>();
+            this.invalid.add(key);
+        }
+
+        public Accessor getAccessor(String key) {
+            return this.accessors == null ? null : this.accessors.get(key);
+        }
+
+        @Synchronized
         public void addAccessor(String key, Accessor accessor) {
-            this.accessors().put(key, accessor);
-            for (BiConsumer<String, Accessor> consumer : consumers()) {
-                consumer.accept(key, accessor);
+            if (this.accessors == null) this.accessors = new Object2ReferenceOpenHashMap<>();
+            this.accessors.putIfAbsent(key, accessor);
+
+            if (this.consumers == null) return;
+            for (Struct consumer : consumers) {
+                consumer.addAccessor(key, accessor);
             }
         }
 
+        @Synchronized
         public void addListener(Struct other) {
-            this.consumers().add(other::addAccessor);
-            other.accessors().forEach(other::addAccessor);
+            if (this.consumers == null) this.consumers = new ReferenceOpenHashSet<>();
+            this.consumers.add(other);
+            if (this.accessors != null) this.accessors.forEach(other::addAccessor);
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(this.accessors);
         }
     }
 }
