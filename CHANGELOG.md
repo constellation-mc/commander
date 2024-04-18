@@ -1,23 +1,5 @@
 ### What's New:
 
-* Switched to [EvalEX](https://ezylang.github.io/EvalEx/) for expression parsing.
-
-This comes with a bunch of improvements. The main of which is support for all object fields and methods, for example:
-
-Before you had a limited number of "extractions" you could use on an object, like `x` and `player/level`, but now, you can specify **any** field or method:
-
-Old:
-
-```
-/say hi ${{this_entity[x]}}
-```
-
-New:
-```
-/say hi ${{this_entity.getX}}
-
-/say hi ${{round(sqrt(abs(level.getSeed)), 0)}}
-```
-
-* Added additional casts to the `$(){{}}` syntax. `bool`, `int`, `double`
-* `cmd:arithmetica` now supports casts and returns strings by default. Now it also requires permission level 2.
+* Added `structContainsKey` function to expressions.
+* Moved custom `random`, `lerp` and `clamp` functions to BigDecimal.
+* There was an attempt at optimizing reflective field lookups by caching invalid fields and constructing a lazy class hierarchy which propagates found fields and methods downstream.
