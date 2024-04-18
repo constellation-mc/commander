@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.util.macro;
+package me.melontini.commander.impl.expression.macro;
 
 import me.melontini.commander.api.expression.BrigadierMacro;
 import net.minecraft.loot.context.LootContext;

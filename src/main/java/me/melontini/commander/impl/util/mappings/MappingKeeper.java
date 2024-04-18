@@ -2,7 +2,6 @@ package me.melontini.commander.impl.util.mappings;
 
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import me.melontini.commander.impl.Commander;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
@@ -11,8 +10,10 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import org.objectweb.asm.Type;
 
 import java.io.InputStreamReader;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
+import java.util.zip.InflaterInputStream;
 
 @Log4j2
 public record MappingKeeper(MemoryMappingTree mojmapTarget) implements AmbiguousRemapper {
@@ -36,11 +37,10 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
     public static MemoryMappingTree loadOffMojmap() {
         if (NAMESPACE.equals("mojang")) return null;
         log.info("Loading official->mojmap mappings...");
+        Path path = FabricLoader.getInstance().getModContainer("commander").orElseThrow().findPath("commander/mappings/processed.bin").orElseThrow();
 
         var tree = new MemoryMappingTree();
-        MappingReader.read(Commander.COMMANDER_PATH.resolve("mappings/client_mappings.txt"), new MappingSourceNsSwitch(tree, "target"));
-        tree.setSrcNamespace("official");
-        tree.setDstNamespaces(List.of("mojang"));
+        MappingReader.read(new InputStreamReader(new InflaterInputStream(Files.newInputStream(path))), tree);
         return tree;
     }
 

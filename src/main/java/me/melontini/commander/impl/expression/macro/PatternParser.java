@@ -1,14 +1,16 @@
-package me.melontini.commander.impl.util.macro;
+package me.melontini.commander.impl.expression.macro;
 
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.api.expression.BrigadierMacro;
-import me.melontini.commander.impl.util.eval.EvalUtils;
+import me.melontini.commander.impl.expression.EvalUtils;
 import net.minecraft.loot.context.LootContext;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static me.melontini.commander.impl.expression.EvalUtils.evaluate;
 
 public class PatternParser {
 
@@ -47,16 +49,16 @@ public class PatternParser {
     }
 
     public static DataResult<Function<LootContext, String>> parseExpression(String expression, String cast) {
-        var result = EvalUtils.wrapExpression(EvalUtils.parseExpression(expression));
+        var result = EvalUtils.parseExpression(expression);
         if (cast != null) {
             return switch (cast) {
-                case "long" -> result.map(function -> context -> String.valueOf(function.apply(context).getNumberValue().longValue()));
-                case "int" -> result.map(function -> context -> String.valueOf(function.apply(context).getNumberValue().intValue()));
-                case "double" -> result.map(function -> context -> String.valueOf(function.apply(context).getNumberValue().doubleValue()));
-                case "bool" -> result.map(function -> context -> String.valueOf(function.apply(context).getBooleanValue()));
+                case "long" -> result.map(exp -> context -> String.valueOf(evaluate(context, exp).getNumberValue().longValue()));
+                case "int" -> result.map(exp -> context -> String.valueOf(evaluate(context, exp).getNumberValue().intValue()));
+                case "double" -> result.map(exp -> context -> String.valueOf(evaluate(context, exp).getNumberValue().doubleValue()));
+                case "bool" -> result.map(exp -> context -> String.valueOf(evaluate(context, exp).getBooleanValue()));
                 default -> DataResult.error(() -> "Unknown cast type %s".formatted(cast));
             };
         }
-        return result.map(function -> context -> function.apply(context).getStringValue());
+        return result.map(exp -> context -> evaluate(context, exp).getStringValue());
     }
 }

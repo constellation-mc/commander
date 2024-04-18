@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.util.eval;
+package me.melontini.commander.impl.expression;
 
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
@@ -133,11 +133,7 @@ public class EvalUtils {
     }
 
     public static DataResult<Arithmetica> parseEither(Either<Double, String> either) {
-        return either.map(d -> DataResult.success(Arithmetica.constant(d)), string -> wrapExpression(parseExpression(string)).map(func -> Arithmetica.of(context -> func.apply(context).getNumberValue().doubleValue(), string)));
-    }
-
-    public static DataResult<Function<LootContext, EvaluationValue>> wrapExpression(DataResult<Expression> result) {
-        return result.map(expression -> context -> evaluate(context, expression));
+        return either.map(d -> DataResult.success(Arithmetica.constant(d)), string -> parseExpression(string).map(exp -> Arithmetica.of(context -> evaluate(context, exp).getNumberValue().doubleValue(), string)));
     }
 
     public static DataResult<Expression> parseExpression(String expression) {
