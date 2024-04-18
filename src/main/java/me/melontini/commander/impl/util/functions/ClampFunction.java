@@ -6,7 +6,8 @@ import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.Token;
-import net.minecraft.util.math.MathHelper;
+
+import java.math.BigDecimal;
 
 @FunctionParameter(name = "value")
 @FunctionParameter(name = "min")
@@ -14,6 +15,9 @@ import net.minecraft.util.math.MathHelper;
 public class ClampFunction extends AbstractFunction {
     @Override
     public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
-        return expression.convertDoubleValue(MathHelper.clamp(par[0].getNumberValue().doubleValue(), par[1].getNumberValue().doubleValue(), par[2].getNumberValue().doubleValue()));
+        BigDecimal value = par[0].getNumberValue();
+        BigDecimal min = par[1].getNumberValue();
+        BigDecimal max = par[2].getNumberValue();
+        return expression.convertValue(value.compareTo(min) < 0 ? min : value.min(max));
     }
 }
