@@ -21,6 +21,7 @@ import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.util.functions.ClampFunction;
 import me.melontini.commander.impl.util.functions.LerpFunction;
 import me.melontini.commander.impl.util.functions.RangedRandomFunction;
+import me.melontini.commander.impl.util.functions.StructContainsKeyFunction;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.util.Identifier;
 
@@ -63,6 +64,8 @@ public class EvalUtils {
                             .put("random", new RangedRandomFunction())
                             .put("lerp", new LerpFunction())
                             .put("clamp", new ClampFunction())
+                            //maps
+                            .put("structContainsKey", new StructContainsKeyFunction())
                             // trigonometric
                             .put("acos", new AcosFunction())
                             .put("acosh", new AcosHFunction())
