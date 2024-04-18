@@ -101,7 +101,7 @@ jobs:
             build/libs/!(*-@(dev|sources|javadoc|dependencies|full-dependencies)).jar
             build/libs/*-@(dev|sources|javadoc).jar
 
-          github-tag: v${{ needs.build.outputs.version_plain }}
+          github-tag: ${{ needs.build.outputs.version_plain }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           github-commitish: ${{ github.sha }}
           github-prerelease: false
