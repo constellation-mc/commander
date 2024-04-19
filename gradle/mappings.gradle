@@ -35,7 +35,7 @@ tasks.register("downloadCommanderMappings") {
         Files.createDirectories(processed.toPath().getParent())
 
         MemoryMappingTree tree = new MemoryMappingTree()
-        MappingReader.read(new InputStreamReader(new URL(getManifest().getAsJsonObject("downloads").getAsJsonObject("client_mappings").get("url").getAsString()).openStream()), new MappingSourceNsSwitch(tree, "target", true))
+        MappingReader.read(new InputStreamReader(new URL(getManifest().getAsJsonObject("downloads").getAsJsonObject("server_mappings").get("url").getAsString()).openStream()), new MappingSourceNsSwitch(tree, "target", true))
         tree.setSrcNamespace("official")
         tree.setDstNamespaces(List.of("mojang"))
 
