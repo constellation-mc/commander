@@ -46,7 +46,7 @@
 ```
 这段命令在主世界中执行，将输出 `我的名字是minecraft:overworld`。
 
-You can learn more about expressions on this page: [Expressions](Expressions).
+你可以在这里了解到更多关于表达式的信息：[表达式](Expressions)。
 
 命令宏默认返回字符串，但你可以像这样将它转化为其它类型：
 
