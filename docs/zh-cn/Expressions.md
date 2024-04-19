@@ -39,7 +39,7 @@ minecraft:level.getDayTime
 
 通过使用 `cmd:arithmetica` 命令，你可以快速上手。记得用 `"` 括住表达式来满足格式要求。
 
-其他使用情境见 [命令宏](Commands#command-macros)，`commander:arithmetica` 的数字提供器以及 `commander:expression` 接口。
+其他使用情境见[命令宏](Commands#command-macros)，`commander:arithmetica` 的数字提供器以及 `commander:expression` 接口。
 
 使用接口的例子：
 
