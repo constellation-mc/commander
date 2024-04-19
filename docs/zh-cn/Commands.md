@@ -40,19 +40,20 @@
 
 对于想要在命令中插入一些东西的人，命令宏是不二之选。
 
-命令宏就是 `${{}}`，一个能让你从选择器中，动态插入内容的代码块。目前有两种命令宏：字符串宏和算术宏。
-
-正如其名，字符串宏能够在命令中插入字符串，比如：
+命令宏就是 `${{}}`，一个能让你通过表达式，动态插入内容的代码块。示例如下：
 ```
-"/say 我的名字是${{origin[world/key]}}!"
+"/say 我的名字是${{level.dimension.location}}！"
 ```
 这段命令在主世界中执行，将输出 `我的名字是minecraft:overworld`。
 
-相比之下，算术宏要有趣得多。算术宏由 [算术](Arithmetica) 支持，你可以在那个页面了解更多关于数学表达式的信息。
+You can learn more about expressions on this page: [Expressions](Expressions).
 
-算术宏永远会返回一个浮点数（比如 `1.7480`），但你可以通过在表达式前加上 `(long)` 来给它截断，比如：
+命令宏默认返回字符串，但你可以像这样将它转化为其它类型：
+
 ```
-$(long){{random(0, 34)}}
+$(long){{random(0, 34)}} 34.52946 -> 34
+$(double){{true}} true -> 1.0
+$(bool){{0}} 0 -> false
 ```
 
 ### `commander:cancel`
@@ -116,8 +117,7 @@ $(long){{random(0, 34)}}
 :::
 
 ### `commander:random`
-这一类型将按权重随机执行其中的命令。默认执行一轮。你可以在非必要的 `rolls` 字段中指定轮次（支持 [算术](Arithmetica)）。
-
+这一类型将按权重随机执行其中的命令。默认执行一轮。你可以在非必要的 `rolls` 字段中指定轮次（支持 [表达式](Expressions)）。
 ::: details 示例
 ```json
 {
