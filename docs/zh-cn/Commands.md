@@ -12,6 +12,10 @@
 
 [[toc]]
 
+## 选择器
+
+一些命令需要你指定“选择器”。选择器用于选择执行者，它可以是一个位置，也可以（可选）是一个实体。一些例外除外，选择器模仿了原版的战利品情境。你可以在这里了解到所有内置选择器：[内置选择器](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/BuiltInSelectors.java)。
+
 ## 内置命令
 本模组内置了少量命令，因为游戏内交互应该交给 `/` 样式的命令，或者函数。
 
