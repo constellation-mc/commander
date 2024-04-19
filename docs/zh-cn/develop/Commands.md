@@ -4,7 +4,7 @@
 
 ## 创建命令
 
-创建新的命令很简单，你要做的是：实现 `Command` 接口，通过创建一个 [编码器](https://forge.gemwire.uk/wiki/Codecs) 来序列化或反序列化命令，然后用 `CommandTypes.register()` 来注册编码器。
+创建新的命令很简单，你要做的是：实现 `Command` 接口，通过创建一个[编码器](https://forge.gemwire.uk/wiki/Codecs)来序列化或反序列化命令，然后用 `CommandTypes.register()` 来注册编码器。
 
 让我们创建一个能够将字符串转化为标准输出的命令。
 
@@ -24,7 +24,7 @@ public record DummyCommand(String text) implements Command {
 }
 ```
 
-接下来，我们再为这个命令 [编码器](https://forge.gemwire.uk/wiki/Codecs) 创建一个编码器。
+接下来，我们再为这个命令[编码器](https://forge.gemwire.uk/wiki/Codecs)创建一个编码器。
 
 ```java
 public static final Codec<DummyCommand> CODEC = Codec.STRING.fieldOf("text").xmap(DummyCommand::new, DummyCommand::text).codec();
