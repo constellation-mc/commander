@@ -10,9 +10,9 @@ comment: false
 本模组不会有客户端特性，一切都会在服务端执行。
 
 ::: danger 注意
-这个模组只能在 Modrinth，CurseForge 和 GitHub 的 Actions 上被下载到。如果你从*其他*任何地方下载这个模组，你的电脑很可能感染类似 [fractureiser](https://github.com/fractureiser-investigation/fractureiser) 的病毒。
+这个模组只能在 Modrinth，CurseForge 和 GitHub 的 Actions 上被下载到。如果你从*其他*任何地方下载到了这个模组，你的电脑很可能面临感染像 [fractureiser](https://github.com/fractureiser-investigation/fractureiser) 病毒的风险。
 
 这个页面 [拒绝模组再分发](https://stopmodreposts.org/) 展示了更详细的信息。
 
-可别怪我没提醒哦！
+切记！
 :::
