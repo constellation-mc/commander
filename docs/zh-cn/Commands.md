@@ -14,7 +14,7 @@
 
 ## 选择器
 
-一些命令需要你指定“选择器”。选择器用于选择执行者，它可以是一个位置，也可以（可选）是一个实体。一些例外除外，选择器模仿了原版的战利品情境。你可以在这里了解到所有内置选择器：[内置选择器](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/BuiltInSelectors.java)。
+一些命令需要你指定“选择器”。选择器用于选择执行者，它可以是一个位置，也可以（可选）是一个实体。一些例外除外，选择器模仿了原版的战利品情境。你可以在[内置选择器](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/BuiltInSelectors.java)页面，了解所有的内置选择器：。
 
 ## 内置命令
 本模组内置了少量命令，因为游戏内交互应该交给 `/` 样式的命令，或者函数。
@@ -46,7 +46,7 @@
 ```
 这段命令在主世界中执行，将输出 `我的名字是minecraft:overworld`。
 
-你可以在这里了解到更多关于表达式的信息：[表达式](Expressions)。
+你可以在[表达式](Expressions)页面中，了解更多关于它的信息。
 
 命令宏默认返回字符串，但你可以像这样将它转化为其它类型：
 
@@ -117,7 +117,7 @@ $(bool){{0}} 0 -> false
 :::
 
 ### `commander:random`
-这一类型将按权重随机执行其中的命令。默认执行一轮。你可以在非必要的 `rolls` 字段中指定轮次（支持 [表达式](Expressions)）。
+这一类型将按权重随机执行其中的命令。默认执行一轮。你可以在非必要的 `rolls` 字段中指定轮次（支持[表达式](Expressions)）。
 ::: details 示例
 ```json
 {
