@@ -1,12 +1,12 @@
-# Commands
+# 命令
 
-In general, you should prefer to implement Brigadier `/` commands, but there are some cases where some additional flexibility is required.
+大多情况下，你应该使用 `/` 类型的命令，但有时，我们会需要一些额外的发挥空间。
 
-## Creating commands
+## 创建命令
 
-Creating new commands is easy, you'll have to implement the `Command` interface, create a [Codec](https://forge.gemwire.uk/wiki/Codecs) to serialize/deserialize the command and register the codec with `CommandTypes.register()`.
+创建新的命令很简单，你要做的是：实现 `Command` 接口，通过创建一个 [编码器](https://forge.gemwire.uk/wiki/Codecs) 来序列化或反序列化命令，然后用 `CommandTypes.register()` 来注册编码器。
 
-Let's create a simple command which will print a string to standard output.
+让我们创建一个能够将字符串转化为标准输出的命令。
 
 ```java
 public record DummyCommand(String text) implements Command {
@@ -14,7 +14,7 @@ public record DummyCommand(String text) implements Command {
     @Override
     public boolean execute(EventContext context) {
         System.out.println(text());
-        return true; //Return if execution was successful.
+        return true; //执行成功则返回
     }
 
     @Override
@@ -24,19 +24,19 @@ public record DummyCommand(String text) implements Command {
 }
 ```
 
-Now create a [Codec](https://forge.gemwire.uk/wiki/Codecs) for your command.
+接下来，我们再为这个命令 [编码器](https://forge.gemwire.uk/wiki/Codecs) 创建一个编码器。
 
 ```java
 public static final Codec<DummyCommand> CODEC = Codec.STRING.fieldOf("text").xmap(DummyCommand::new, DummyCommand::text).codec();
 ```
 
-With that done, we'll have to register the command to get our `CommandType`.
+再然后，我们需要注册这一命令来获取 `CommandType`。
 
 ```java
 public static final CommandType DUMMY = CommandType.register(new Identifier("modid", "print"), DummyCommand.CODEC);
 ```
 
-Now return this type in `type()`.
+最后，在 `type()` 返回这个类型。
 
 ```java
 @Override
@@ -45,14 +45,14 @@ public CommandType type() {
 }
 ```
 
-## EventContext
+## 事件情境
 
-EventContext allows you to retrieve the `LootContext` which is passed with the event type.
+你可以通过事件情境，检索与事件类型一起传递的 `LootContext`。
 
 ```java
-context.lootContext().getWorld(); //Returns a ServerWorld.
+context.lootContext().getWorld(); //返回服务端世界
 
-context.lootContext().get(LootContextParameters.TOOL); //Returns the prameter or null if not present.
+context.lootContext().get(LootContextParameters.TOOL); //如果不存在，返回参数或空值。
 
-context.lootContext().requireParameter(LootContextParameters.TOOL); //Returns the parameter or throws an exception if not present.
+context.lootContext().requireParameter(LootContextParameters.TOOL); //如果不存在，返回参数或抛出异常。
 ```
