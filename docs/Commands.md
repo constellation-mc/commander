@@ -12,6 +12,10 @@ Although Commander avoids using commands outside events, other projects might in
 
 [[toc]]
 
+## Selectors
+
+Some commands require you to specify a "selector". A selector is a simple identifier that allows you to select a position and (optionally) an entity that will be used to perform an action. Selectors, with some exceptions, mimic vanilla loot contexts, built-in selectors can be found here: [BuiltInSelectors](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/BuiltInSelectors.java)
+
 ## Built-in commands
 The mod comes with a minimal set of commands, this is by design, as game interactions should be handled by brigadier `/` commands, or functions.
 
@@ -36,19 +40,20 @@ This command type expects a selector and either a list of commands or a function
 
 If you opt into specifying commands using the array, you are a given an option of using command macros.
 
-A macro is a simple `${{}}` block, which allows you to dynamically insert info using extractions. There are two types of macros: string and arithmetic.
-
-A string macro is self-explanatory, it will insert a string into the command, for example:
+A macro is a simple `${{}}` block, which allows you to dynamically insert info using expressions. For example:
 ```
-"/say hi, my name is ${{origin[world/key]}}!"
+"/say hi, my name is ${{level.dimension.location}}!"
 ```
 will say `hi, my name is minecraft:overworld` in the overworld.
 
-An arithmetic macro is a lot more interesting. Arithmetic macros are supported by [Arithmetica](Arithmetica). You can learn more about mathematical expressions on that page.
+You can learn more about expressions on this page: [Expressions](Expressions).
 
-Arithmetic macros always return a floating point number (`1.7480`), but you can truncate the floating point by adding `(long)` to your expression like so:
+By default macros return a string, but you can cast (convert) a macro into some other types like so:
+
 ```
-$(long){{random(0, 34)}}
+$(long){{random(0, 34)}} 34.52946 -> 34
+$(double){{true}} true -> 1.0
+$(bool){{0}} 0 -> false
 ```
 
 ### `commander:cancel`
@@ -112,7 +117,7 @@ Note: even if the condition is true early, the command will still execute all co
 :::
 
 ### `commander:random`
-This command type takes a weighted list of other commands and randomly executes some of them. By default, it rolls only once, but the number of rolls can be adjusted using the optional `rolls` field (Supports [Arithmetica](Arithmetica)).
+This command type takes a weighted list of other commands and randomly executes some of them. By default, it rolls only once, but the number of rolls can be adjusted using the optional `rolls` field (Supports [Expressions](Expressions)).
 
 ::: details Example
 ```json

@@ -9,12 +9,34 @@ export const en = defineConfig({
         sidebar: [
             {
                 items: [
-                    { text: 'Welcome!', link: '/' },
+                    { text: 'Welcome!', link: '/' }
+                ]
+            },
+            {
+                text: 'Use',
+                items: [
                     { text: 'Events', link: '/Events' },
                     { text: 'Commands', link: '/Commands' },
-                    { text: 'Arithmetica', link: '/Arithmetica' }
+                    { text: 'Expressions', link: '/Expressions' },
+                ]
+            },
+            {
+                text: 'Develop',
+                items: [
+                    { text: 'Events', link: '/develop/Events'},
+                    { text: 'Commands', link: '/develop/Commands'}
+                ]
+            },
+            {
+                text: 'Meta',
+                items: [
+                    { text: 'Badges', link: 'https://github.com/constellation-mc/commander/discussions/3' }
                 ]
             }
-        ]
+        ],
+
+        search: {
+            provider: 'local',
+        }
     }
 })
