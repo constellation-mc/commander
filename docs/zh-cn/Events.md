@@ -4,12 +4,27 @@
 
 ## 订阅文件的引入
 
-当你订阅文件中声明一个事件时，实际上是在标识你想要订阅的事件。事件可以在 `parameters` 代码块中接受额外的参数，但（目前）内置事件并不要求具备它们。
+当你订阅文件中声明一个事件时，实际上是在标识你想要订阅的事件。事件可以在 `parameters` 代码块中接受额外的参数，但（目前）内置事件并不要求具备它们。订阅文件将在 `commander/events` 下被读取。
+
+```
+|- recipes
+|- commander
+  |- events
+    |- test_event.json
+    |- folder
+      |- nested.json
+|- tags
+```
+
+声明事件的典型例子如下：
 
 ::: details 示例
 ```json
 {
   "event": "commander:after_killed_by_other"
+  "commands": [
+
+  ]
 }
 ```
 <br/>
@@ -18,7 +33,10 @@
 {
   "event": "modid:custom_event",
   "parameters": {
-  }
+  },
+  "commands": [
+
+  ]
 }
 ```
 :::
