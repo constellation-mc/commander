@@ -102,7 +102,7 @@ $(bool){{0}} 0 -> false
           "type": "commander:commands",
           "selector": "this_entity",
           "commands": [
-            "/say mmm... diamond..."
+            "/say 是钻石..."
           ]
         },
         {
