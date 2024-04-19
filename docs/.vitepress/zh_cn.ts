@@ -9,36 +9,34 @@ export const zh_cn = defineConfig({
         sidebar: [
             {
                 items: [
-                    { text: '欢迎', link: '/zh-cn/' },
-                    { text: '事件', link: '/zh-cn/Events' },
-                    { text: '命令', link: '/zh-cn/Commands' },
-                    { text: '算术', link: '/zh-cn/Arithmetica' }
+                    { text: '欢迎！', link: '/' }
+                ]
+            },
+            {
+                text: 'Use',
+                items: [
+                    { text: '事件', link: '/Events' },
+                    { text: '命令', link: '/Commands' },
+                    { text: '表达式', link: '/Expressions' },
+                ]
+            },
+            {
+                text: '开发',
+                items: [
+                    { text: '事件', link: '/develop/Events'},
+                    { text: '命令', link: '/develop/Commands'}
+                ]
+            },
+            {
+                text: 'Meta',
+                items: [
+                    { text: '设计', link: 'https://github.com/constellation-mc/commander/discussions/3' }
                 ]
             }
         ],
 
         search: {
             provider: 'local',
-            options: {
-                locales: {
-                    "zh-cn": {
-                        translations: {
-                            button: {
-                                buttonText: '搜索文档',
-                                buttonAriaLabel: '搜索文档'
-                            },
-                            modal: {
-                                noResultsText: '无法找到相关结果',
-                                resetButtonTitle: '清除查询条件',
-                                footer: {
-                                    selectText: '选择',
-                                    navigateText: '切换'
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 })
