@@ -1,18 +1,18 @@
-# Events
+# 事件
 
-Commander introduces a new data pack event system, which allows data packs to listen to events just like mods.
+本模组引入了全新的数据包事件系统，使数据包能够像模组一样监听事件。
 
-The best practice is to have a generic Fabric event and register Commander as one of its listeners.
+最好的实践办法就是找到一个 Fabric 的事件，让本模组对它进行监听。
 
-## Creating event types
+## 创建事件类型
 
-To implement event support for your mod you must first register an event type for Commander to dispatch. You can build and register events with the `EventType.Builder` class.
+为了实现模组的事件支持，你需要先注册一个事件类型，以便本模组进行分发。你可以通过 `EventType.Builder` 类来构建并注册事件。
 
 ```java
 public static final EventType CUSTOM_EVENT = EventType.builder().build(new Identifier("modid", "custom_event"));
 ```
 
-If your event requires a return type, you can specify a cancel term codec with `cancelTerm()`.
+如果你的事件需要返回类型，你可以通过 `cancelTerm()` 来指定取消条件编解码器。
 
 ```java
 EventType.builder()
@@ -20,7 +20,7 @@ EventType.builder()
     .build(new Identifier("modid", "custom_event"));
 ```
 
-Events can aceepts additional parameters using `extension()`. After specifying an extension you can return a custom type.
+通过使用 `extension()`，事件可以接受额外的参数。在指定扩展后，你可以返回自定义类型。
 
 ```java
 EventType.builder()
@@ -31,13 +31,13 @@ EventType.builder()
     .build(new Identifier("modid", "custom_event"));
 ```
 
-The default return type is `List<Command.Conditioned>`.
+默认的返回类型是 `List<Command.Conditioned>`。
 
-## Invoking the event
+## 调用事件
 
-If you didn't specify an extension, or opted to return a `List<Command.Conditioned>`, you can use the included `EventExecutors` util.
+如果你没有指定扩展，或选择返回 `List<Command.Conditioned>`，你可以使用附带的 `EventExecutors` 辅助单元。
 
-To use the util, you have to pass the event type, the execution world, and a loot context supplier.
+为了使用这一辅助单元，你需要传递：事件类型、执行的世界，以及战利品情境提供者。
 
 ```java
 CustomEvent.EVENT.register((world, entity) -> runVoid(CUSTOM_EVENT, world, () -> makeContext(world, entity, entity.getPos())));
@@ -51,9 +51,9 @@ private static LootContext makeContext(ServerWorld world, Entity entity, Vec3d o
 }
 ```
 
-If you did specify an extension, or are using an unsupported return type, you'll have to write custom resolution logic.
+如果你指定了扩展，或者使用了不受支持的返回类型，就需要编写自定义的解析逻辑。
 
-To do that you'll simple have to create an `EventContext`. `EventContext` is used to pass execution parameters to commands. 
+为了编写这一逻辑，你需要创建 `EventContext`。`EventContext` 用于把执行参数传递给命令。
 
 ```java
 EventContext context = EventContext.builder(type)
@@ -61,7 +61,7 @@ EventContext context = EventContext.builder(type)
         .build();
 for (Command.Conditioned subscriber : subscribers) subscriber.execute(context);
 ```
-To get the return value, you can call `getReturnValue(def)`, the default value can be null. The return type is generic.
+你可以通过调用 `getReturnValue(def)` 来获取返回的值，默认值可以为空值。返回的类型是 generic。
 
 ```java
 boolean val = context.getReturnValue(def);
