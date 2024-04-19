@@ -9,22 +9,22 @@ export const zh_cn = defineConfig({
         sidebar: [
             {
                 items: [
-                    { text: '欢迎！', link: '/' }
+                    { text: '欢迎！', link: '/zh-cn/' }
                 ]
             },
             {
-                text: 'Use',
+                text: '使用',
                 items: [
-                    { text: '事件', link: '/Events' },
-                    { text: '命令', link: '/Commands' },
-                    { text: '表达式', link: '/Expressions' },
+                    { text: '事件', link: '/zh-cn/Events' },
+                    { text: '命令', link: '/zh-cn/Commands' },
+                    { text: '表达式', link: '/zh-cn/Expressions' },
                 ]
             },
             {
                 text: '开发',
                 items: [
-                    { text: '事件', link: '/develop/Events'},
-                    { text: '命令', link: '/develop/Commands'}
+                    { text: '事件', link: '/zh-cn/develop/Events'},
+                    { text: '命令', link: '/zh-cn/develop/Commands'}
                 ]
             },
             {
