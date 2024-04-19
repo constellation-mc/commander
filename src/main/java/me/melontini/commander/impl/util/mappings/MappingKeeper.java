@@ -1,5 +1,7 @@
 package me.melontini.commander.impl.util.mappings;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import net.fabricmc.loader.api.FabricLoader;
@@ -37,7 +39,7 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
     public static MemoryMappingTree loadOffMojmap() {
         if (NAMESPACE.equals("mojang")) return null;
         log.info("Loading official->mojmap mappings...");
-        Path path = FabricLoader.getInstance().getModContainer("commander").orElseThrow().findPath("commander/mappings/processed.bin").orElseThrow();
+        Path path = FabricLoader.getInstance().getModContainer("commander").orElseThrow().findPath("commander/mappings/%s.bin".formatted(getVersion())).orElseThrow();
 
         var tree = new MemoryMappingTree();
         MappingReader.read(new InputStreamReader(new InflaterInputStream(Files.newInputStream(path))), tree);
@@ -68,5 +70,10 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
             if (Objects.equals(field.getSrcName(), name)) return field.getName(NAMESPACE);
         }
         return null;
+    }
+
+    public static String getVersion() {
+        JsonObject o = JsonParser.parseReader(new InputStreamReader(MappingKeeper.class.getResourceAsStream("/version.json"))).getAsJsonObject();
+        return o.getAsJsonPrimitive("id").getAsString();
     }
 }

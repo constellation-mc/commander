@@ -29,12 +29,13 @@ import java.util.zip.DeflaterOutputStream
 ext.MANIFEST_URL = new URL("https://launchermeta.mojang.com/mc/game/version_manifest_v2.json")
 
 tasks.register("downloadCommanderMappings") {
-    File processed = new File("${project.layout.projectDirectory.getAsFile()}/.gradle/downloadCommanderMappings/${project.minecraft_version}/processed.bin")
+    File processed = new File("${project.layout.projectDirectory.getAsFile()}/.gradle/commander/mappings/${project.minecraft_version}.bin")
     if (!processed.exists()) {
+        project.logger.lifecycle("Downloading and Processing Mappings...")
         Files.createDirectories(processed.toPath().getParent())
 
         MemoryMappingTree tree = new MemoryMappingTree()
-        MappingReader.read(new InputStreamReader(new URL(getManifest().getAsJsonObject("downloads").getAsJsonObject("client_mappings").get("url").getAsString()).openStream()), new MappingSourceNsSwitch(tree, "target", true))
+        MappingReader.read(new InputStreamReader(new URL(getManifest().getAsJsonObject("downloads").getAsJsonObject("server_mappings").get("url").getAsString()).openStream()), new MappingSourceNsSwitch(tree, "target", true))
         tree.setSrcNamespace("official")
         tree.setDstNamespaces(List.of("mojang"))
 
@@ -45,8 +46,8 @@ tasks.register("downloadCommanderMappings") {
 
 processResources {
     mustRunAfter(tasks.downloadCommanderMappings)
-    from(new File("${project.layout.projectDirectory.getAsFile()}/.gradle/downloadCommanderMappings/${project.minecraft_version}/processed.bin")) {
-        rename { "commander/mappings/processed.bin" }
+    from(new File("${project.layout.projectDirectory.getAsFile()}/.gradle/commander/mappings/${project.minecraft_version}.bin")) {
+        rename { "commander/mappings/${project.minecraft_version}.bin" }
     }
 }
 
