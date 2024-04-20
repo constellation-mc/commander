@@ -25,8 +25,8 @@ EventType.builder()
 ```java
 EventType.builder()
     .extension(Codec.STRING, subscriptions -> {
-        //handle data.
-        return /*Return listeners*/;
+        //处理数据
+        return /*返回监听者*/;
     })
     .build(new Identifier("modid", "custom_event"));
 ```
@@ -47,7 +47,7 @@ CustomEvent.EVENT.register((world, entity) -> runVoid(CUSTOM_EVENT, world, () ->
 private static LootContext makeContext(ServerWorld world, Entity entity, Vec3d origin) {
     LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder(world);
     builder.add(THIS_ENTITY, entity).add(ORIGIN, origin);
-    return new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(null /*Optional.empty() in 1.20.4*/);
+    return new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(null /*在 1.20.4，.empty()可选*/);
 }
 ```
 
@@ -57,7 +57,7 @@ private static LootContext makeContext(ServerWorld world, Entity entity, Vec3d o
 
 ```java
 EventContext context = EventContext.builder(type)
-        .addParameter(EventKey.LOOT_CONTEXT, /*instance of loot context*/)
+        .addParameter(EventKey.LOOT_CONTEXT, /*战利品情境的实例*/)
         .build();
 for (Command.Conditioned subscriber : subscribers) subscriber.execute(context);
 ```
