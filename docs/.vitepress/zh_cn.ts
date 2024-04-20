@@ -9,10 +9,28 @@ export const zh_cn = defineConfig({
         sidebar: [
             {
                 items: [
-                    { text: '欢迎', link: '/zh-cn/' },
+                    { text: '欢迎！', link: '/zh-cn/' }
+                ]
+            },
+            {
+                text: '使用',
+                items: [
                     { text: '事件', link: '/zh-cn/Events' },
                     { text: '命令', link: '/zh-cn/Commands' },
-                    { text: '算术', link: '/zh-cn/Arithmetica' }
+                    { text: '表达式', link: '/zh-cn/Expressions' },
+                ]
+            },
+            {
+                text: '开发',
+                items: [
+                    { text: '事件', link: '/zh-cn/develop/Events'},
+                    { text: '命令', link: '/zh-cn/develop/Commands'}
+                ]
+            },
+            {
+                text: 'Meta',
+                items: [
+                    { text: '设计', link: 'https://github.com/constellation-mc/commander/discussions/3' }
                 ]
             }
         ],
