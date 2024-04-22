@@ -25,6 +25,7 @@ public record ConditionedSelector(Optional<LootCondition> condition, Selector ot
                 SelectorTypes.CODEC.fieldOf("value").forGetter(ConditionedSelector::other)
         ).apply(data, ConditionedSelector::new)), SelectorTypes.CODEC).xmap(e -> e.map(Function.identity(), selector -> new ConditionedSelector(Optional.empty(), selector)), Either::left);
 
+    @Override
     public Optional<ServerCommandSource> select(EventContext context) {
         var source = other.select(context.lootContext());
         if (source == null) return Optional.empty();

@@ -24,9 +24,11 @@ import me.melontini.commander.impl.util.functions.RangedRandomFunction;
 import me.melontini.commander.impl.util.functions.StructContainsKeyFunction;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class EvalUtils {
@@ -123,12 +125,12 @@ public class EvalUtils {
 
     public static EvaluationValue evaluate(LootContext context, Expression exp) {
         try {
-            ((EvalUtils.MapBasedDataAccessor)exp.getDataAccessor()).local.set(context);
+            MapBasedDataAccessor.LOCAL.set(context);
             return exp.evaluate();
         } catch (EvaluationException | ParseException e) {
-            throw new CmdEvalException(e.getMessage(), e);
+            throw new CmdEvalException(Objects.requireNonNullElseGet(e.getMessage(), () -> "Failed to evaluate expression %s".formatted(exp.getExpressionString().replace("__idcl__", ":"))), e);
         } finally {
-            ((EvalUtils.MapBasedDataAccessor)exp.getDataAccessor()).local.remove();
+            MapBasedDataAccessor.LOCAL.remove();
         }
     }
 
@@ -152,15 +154,15 @@ public class EvalUtils {
                 new Identifier("level"), LootContext::getWorld,
                 new Identifier("luck"), LootContext::getLuck
         );
-        public final ThreadLocal<LootContext> local = new ThreadLocal<>();
+        public static final ThreadLocal<LootContext> LOCAL = new ThreadLocal<>();
 
         @Override
-        public EvaluationValue getData(String variable) {
+        public @Nullable EvaluationValue getData(String variable) {
             var id = new Identifier(variable.replace("__idcl__", ":"));
             var func = overrides.get(id);
-            if (func != null) return CONFIGURATION.getEvaluationValueConverter().convertObject(func.apply(local.get()), CONFIGURATION);
+            if (func != null) return CONFIGURATION.getEvaluationValueConverter().convertObject(func.apply(LOCAL.get()), CONFIGURATION);
 
-            var object = local.get().get(ExtractionTypes.getParameter(id));
+            var object = LOCAL.get().get(ExtractionTypes.getParameter(id));
             if (object == null) return null;
             return CONFIGURATION.getEvaluationValueConverter().convertObject(object, CONFIGURATION);
         }
@@ -182,7 +184,7 @@ public class EvalUtils {
         }
 
         @Override
-        public FunctionIfc getFunction(String functionName) {
+        public @Nullable FunctionIfc getFunction(String functionName) {
             return functions.get(functionName);
         }
 

@@ -21,7 +21,6 @@ public class BuiltInCommands {
     public static final CommandType ANY_OF = CommandType.register(id("any_of"), AnyOfCommand.CODEC);
     public static final CommandType DEFAULTED = CommandType.register(id("defaulted"), DefaultedCommand.CODEC);
 
-
     public static final CommandType CANCEL = CommandType.register(id("cancel"), CancelCommand.CODEC);
     public static final CommandType COMMANDS = CommandType.register(id("commands"), CommandCommand.CODEC);
     public static final CommandType PRINT = CommandType.register(id("print"), PrintCommand.CODEC);

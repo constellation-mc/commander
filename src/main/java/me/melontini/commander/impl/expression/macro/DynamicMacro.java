@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 public record DynamicMacro(String original, Function<LootContext, StringBuilder> start) implements BrigadierMacro {
 
+    @Override
     public String build(LootContext context) {
         return start.apply(context).toString();
     }

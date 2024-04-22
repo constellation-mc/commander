@@ -36,11 +36,13 @@ public record ConditionedCommand(Optional<LootCondition> condition, Command othe
         }
     }.codec();
 
+    @Override
     public boolean execute(EventContext context) {
         if (!this.condition.map(condition1 -> condition1.test(context.lootContext())).orElse(true)) return false;
         return other().execute(context);
     }
 
+    @Override
     public DataResult<Void> validate(EventType type) {
         return this.other().validate(type);
     }

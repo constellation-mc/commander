@@ -62,7 +62,7 @@ public class AdvancementRewardsMixin {
     @Inject(at = @At("TAIL"), method = "apply")
     private void commander$applyCommands(ServerPlayerEntity player, CallbackInfo ci) {
         if (this.commands == null) return;
-        LootContextParameterSet parameterSet = (new LootContextParameterSet.Builder(player.getServerWorld())).add(LootContextParameters.THIS_ENTITY, player).add(LootContextParameters.ORIGIN, player.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
+        LootContextParameterSet parameterSet = new LootContextParameterSet.Builder(player.getServerWorld()).add(LootContextParameters.THIS_ENTITY, player).add(LootContextParameters.ORIGIN, player.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
         LootContext context = new LootContext.Builder(parameterSet).build(null);
 
         EventContext context1 = EventContext.builder(EventType.NULL)

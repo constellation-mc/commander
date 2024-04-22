@@ -4,6 +4,7 @@ import com.mojang.serialization.DataResult;
 import me.melontini.commander.api.expression.BrigadierMacro;
 import me.melontini.commander.impl.expression.EvalUtils;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -48,7 +49,7 @@ public class PatternParser {
         return b.toString();
     }
 
-    public static DataResult<Function<LootContext, String>> parseExpression(String expression, String cast) {
+    public static DataResult<Function<LootContext, String>> parseExpression(String expression, @Nullable String cast) {
         var result = EvalUtils.parseExpression(expression);
         if (cast != null) {
             return switch (cast) {

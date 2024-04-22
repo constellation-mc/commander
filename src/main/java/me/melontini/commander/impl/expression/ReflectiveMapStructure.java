@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import lombok.NonNull;
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
@@ -109,7 +110,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         return true;
     }
 
-    private static Tuple<Class<?>, Accessor> findFieldOrMethod(Class<?> cls, String name) {
+    private static @Nullable Tuple<Class<?>, Accessor> findFieldOrMethod(Class<?> cls, String name) {
         String mapped;
         Class<?> target = cls;
         do {
@@ -128,7 +129,8 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         return findAccessor(cls, name);
     }
 
-    private static Tuple<Class<?>, Accessor> findAccessor(Class<?> cls, String mapped) {
+    @Nullable
+    private static Tuple<Class<?>, Accessor> findAccessor(@NonNull Class<?> cls, String mapped) {
         for (Method method : cls.getMethods()) {
             if (!method.getName().equals(mapped)) continue;
             if (Modifier.isStatic(method.getModifiers())) continue;
@@ -162,7 +164,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             if (field == null) throw new RuntimeException("%s has no public field or method '%s'".formatted(this.object.getClass().getSimpleName(), key));
             return EvalUtils.CONFIGURATION.getEvaluationValueConverter().convertObject(field.access(this.object), EvalUtils.CONFIGURATION);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new CmdEvalException(e.getMessage());
+            throw new CmdEvalException(Objects.requireNonNullElse(e.getMessage(), "Failed to reflectively access member!"));
         }
     }
 
@@ -225,7 +227,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             this.invalid.add(key);
         }
 
-        public Accessor getAccessor(String key) {
+        public @Nullable Accessor getAccessor(String key) {
             return this.accessors == null ? null : this.accessors.get(key);
         }
 

@@ -17,6 +17,7 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -64,7 +65,7 @@ public class EntityEvents {
         }));
     }
 
-    private static LootContext makeContext(Entity entity, Vec3d origin, DamageSource source) {
+    private static LootContext makeContext(Entity entity, Vec3d origin, @Nullable DamageSource source) {
         LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder((ServerWorld) entity.getWorld());
         builder.add(THIS_ENTITY, entity).add(ORIGIN, origin);
         if (source != null) {
