@@ -129,8 +129,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         return findAccessor(cls, name);
     }
 
-    @Nullable
-    private static Tuple<Class<?>, Accessor> findAccessor(@NonNull Class<?> cls, String mapped) {
+    @Nullable private static Tuple<Class<?>, Accessor> findAccessor(@NonNull Class<?> cls, String mapped) {
         for (Method method : cls.getMethods()) {
             if (!method.getName().equals(mapped)) continue;
             if (Modifier.isStatic(method.getModifiers())) continue;
@@ -168,8 +167,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         }
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public Object put(String key, Object value) {
         throw new UnsupportedOperationException();
     }
@@ -189,20 +187,17 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         throw new UnsupportedOperationException();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Set<String> keySet() {
         return Collections.emptySet();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Collection<Object> values() {
         return Collections.emptyList();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Set<Entry<String, Object>> entrySet() {
         return Collections.emptySet();
     }

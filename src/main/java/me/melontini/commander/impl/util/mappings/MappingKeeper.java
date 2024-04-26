@@ -38,8 +38,7 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
     }
 
     @SneakyThrows
-    @Nullable
-    public static MemoryMappingTree loadOffMojmap() {
+    @Nullable public static MemoryMappingTree loadOffMojmap() {
         if (NAMESPACE.equals("mojang")) return null;
         log.info("Loading official->mojmap mappings...");
         Path path = FabricLoader.getInstance().getModContainer("commander").orElseThrow().findPath("commander/mappings/%s.bin".formatted(getVersion())).orElseThrow();
