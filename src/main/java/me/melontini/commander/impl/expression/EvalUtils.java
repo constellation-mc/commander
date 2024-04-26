@@ -18,10 +18,7 @@ import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
-import me.melontini.commander.impl.util.functions.ClampFunction;
-import me.melontini.commander.impl.util.functions.LerpFunction;
-import me.melontini.commander.impl.util.functions.RangedRandomFunction;
-import me.melontini.commander.impl.util.functions.StructContainsKeyFunction;
+import me.melontini.commander.impl.util.functions.*;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -68,6 +65,8 @@ public class EvalUtils {
                             .put("clamp", new ClampFunction())
                             //maps
                             .put("structContainsKey", new StructContainsKeyFunction())
+                            //meta
+                            .put("hasContext", new HasContextFunction())
                             // trigonometric
                             .put("acos", new AcosFunction())
                             .put("acosh", new AcosHFunction())
