@@ -8,9 +8,13 @@ Expressions use [EvalEx](https://ezylang.github.io/EvalEx/) for evaluation, it m
 
 Commander adds some additional functions to EvalEx.
 
-- `random` generates a random number in range. Accepts 2 arguments (min, max)
-- `clamp` clamps the value between two other arguments. Accepts 3 arguments (value, min, max)
-- `lerp` smoothly progresses the value to the target. `start + delta * (end - start)`. Accepts 3 arguments (delta, start, end)
+| Function  |  Description |  Arguments | Example |
+|---|---|---|---|
+| `random`  | Generates a random number in range. | `min`, `max` | `random(0, 23)` |
+| `clamp`  | Clamps the value between two other arguments.  | `value`, `min`, `max` | `clamp(12, 14, 16)` |
+| `lerp`  | Smoothly progresses the value to the target.  | `delta`, `start`, `end` | `lerp(0.5, 10, 16)` |
+| `structContainsKey`  | Checks if a sctruct contains the specified key.  | `struct`, `key` | `structContainsKey(this_entity, "getHealth")` |
+| `hasContext`  | Checks if the specified context is avalable.  | `key` | `hasContext("killer_entity")` |
 
 ## Context data access
 
