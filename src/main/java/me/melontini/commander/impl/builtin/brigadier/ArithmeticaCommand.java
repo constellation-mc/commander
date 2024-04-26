@@ -15,15 +15,12 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
-
 public class ArithmeticaCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        Set<String> casts = Set.of("long", "int", "bool", "double");
         var cmd = CommandManager.argument("expression", StringArgumentType.string()).executes(context -> execute(context, StringArgumentType.getString(context, "expression"), null));
 
-        for (String cast : casts) {
+        for (String cast : PatternParser.CONVERTERS.keySet()) {
             cmd.then(CommandManager.literal(cast).executes(context -> execute(context, StringArgumentType.getString(context, "expression"), cast)));
         }
 
