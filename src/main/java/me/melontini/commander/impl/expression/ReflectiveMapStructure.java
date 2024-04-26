@@ -114,7 +114,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         String mapped;
         Class<?> target = cls;
         do {
-            if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(target, name)) != null) return findAccessor(target, mapped);
+            if ((mapped = Commander.get().mappingKeeper().getFieldOrMethod(target, name)) != null) return findAccessor(target, mapped);
             var targetItfs = target.getInterfaces();
             if (targetItfs.length == 0) continue;
 
@@ -122,7 +122,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             while (!interfaces.isEmpty()) {
                 var itf = interfaces.poll();
 
-                if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(itf, name)) != null) return findAccessor(itf, mapped);
+                if ((mapped = Commander.get().mappingKeeper().getFieldOrMethod(itf, name)) != null) return findAccessor(itf, mapped);
                 if ((targetItfs = itf.getInterfaces()).length > 0) interfaces.addAll(List.of(targetItfs));
             }
         } while ((target = target.getSuperclass()) != null);
