@@ -9,9 +9,11 @@ import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -31,18 +33,18 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
         offMojmap.accept(temp);
         if (!NAMESPACE.equals("mojang")) offTarget.accept(temp);
         temp.accept(new MappingSourceNsSwitch(tree, "mojang", true));
-        tree.getClass("net/minecraft/server/MinecraftServer").setDstName("net/minecraft/server/MinecraftServer", tree.getNamespaceId(NAMESPACE));
+        Objects.requireNonNull(tree.getClass("net/minecraft/server/MinecraftServer"), "No built-in MinecraftServer mapping?").setDstName("net/minecraft/server/MinecraftServer", tree.getNamespaceId(NAMESPACE));
         return tree;
     }
 
     @SneakyThrows
-    public static MemoryMappingTree loadOffMojmap() {
+    @Nullable public static MemoryMappingTree loadOffMojmap() {
         if (NAMESPACE.equals("mojang")) return null;
         log.info("Loading official->mojmap mappings...");
         Path path = FabricLoader.getInstance().getModContainer("commander").orElseThrow().findPath("commander/mappings/%s.bin".formatted(getVersion())).orElseThrow();
 
         var tree = new MemoryMappingTree();
-        MappingReader.read(new InputStreamReader(new InflaterInputStream(Files.newInputStream(path))), tree);
+        MappingReader.read(new InputStreamReader(new InflaterInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8), tree);
         return tree;
     }
 
@@ -51,11 +53,12 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
         log.info("Loading official->{} mappings...", NAMESPACE);
 
         var tree = new MemoryMappingTree();
-        MappingReader.read(new InputStreamReader(Objects.requireNonNull(MappingKeeper.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny"), "mappings/mappings.tiny is not available?")), tree);
+        MappingReader.read(new InputStreamReader(Objects.requireNonNull(MappingKeeper.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny"), "mappings/mappings.tiny is not available?"), StandardCharsets.UTF_8), tree);
         return tree;
     }
 
-    public String getFieldOrMethod(Class<?> cls, String name) {
+    @Override
+    public @Nullable String getFieldOrMethod(Class<?> cls, String name) {
         var clsData = mojmapTarget.getClass(Type.getInternalName(cls), mojmapTarget.getNamespaceId(NAMESPACE));
         if (clsData == null) return null;
 
@@ -73,7 +76,7 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
     }
 
     public static String getVersion() {
-        JsonObject o = JsonParser.parseReader(new InputStreamReader(MappingKeeper.class.getResourceAsStream("/version.json"))).getAsJsonObject();
+        JsonObject o = JsonParser.parseReader(new InputStreamReader(MappingKeeper.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8)).getAsJsonObject();
         return o.getAsJsonPrimitive("id").getAsString();
     }
 }

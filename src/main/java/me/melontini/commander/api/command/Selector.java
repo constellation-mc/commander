@@ -25,7 +25,7 @@ public interface Selector extends Function<LootContext, ServerCommandSource> {
     }
 
     @Override
-    default ServerCommandSource apply(LootContext context) {
+    default @Nullable ServerCommandSource apply(LootContext context) {
         return this.select(context);
     }
 

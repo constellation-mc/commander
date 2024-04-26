@@ -15,7 +15,6 @@ public final class SelectorTypes {
 
     public static final Codec<Selector> CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, SELECTORS);
 
-
     public static Selector register(Identifier identifier, Selector selector) {
         var old = SELECTORS.put(identifier, selector);
         if (old != null) throw new IllegalStateException("Already registered selector %s".formatted(identifier));

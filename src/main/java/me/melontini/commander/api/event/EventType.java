@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import me.melontini.commander.impl.event.EventTypeImpl;
 import me.melontini.dark_matter.api.base.util.Context;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
@@ -32,7 +33,7 @@ public interface EventType extends Context {
     }
 
     interface Builder {
-        <T, C> Builder extension(Codec<T> extension, Function<List<Subscription<T>>, C> finalizer);
+        <T, C> Builder extension(@Nullable Codec<T> extension, Function<List<Subscription<T>>, C> finalizer);
         <R> Builder cancelTerm(Codec<R> returnCodec);
         EventType build(Identifier identifier);
     }

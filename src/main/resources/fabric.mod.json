@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.melontini.commander.impl.Commander"
+      "me.melontini.commander.impl.Commander::init"
     ]
   },
   "mixins": [

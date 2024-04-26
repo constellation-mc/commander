@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,17 +21,17 @@ public class DynamicEventManager extends JsonCodecDataLoader<List<? extends Subs
 
     public static final ReloaderType<DynamicEventManager> RELOADER = ReloaderType.create(new Identifier("commander:events"));
 
-    final Map<EventType, Object> customData = new IdentityHashMap<>();
+    final IdentityHashMap<EventType, Object> customData = new IdentityHashMap<>();
 
     public DynamicEventManager() {
         super(RELOADER.identifier(), SubscriptionImpl.CODEC);
     }
 
-    public static <T> T getData(MinecraftServer server, EventType type) {
+    public static <T> @Nullable T getData(MinecraftServer server, EventType type) {
         return server.dm$getReloader(DynamicEventManager.RELOADER).getData(type);
     }
 
-    public <T> T getData(EventType type) {
+    public <T> @Nullable T getData(EventType type) {
         return (T) this.customData.get(type);
     }
 

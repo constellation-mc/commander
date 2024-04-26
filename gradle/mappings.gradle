@@ -23,6 +23,7 @@ import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch
 import net.fabricmc.mappingio.format.MappingFormat
 import net.fabricmc.mappingio.tree.MemoryMappingTree
 
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.zip.DeflaterOutputStream
 
@@ -35,12 +36,12 @@ tasks.register("downloadCommanderMappings") {
         Files.createDirectories(processed.toPath().getParent())
 
         MemoryMappingTree tree = new MemoryMappingTree()
-        MappingReader.read(new InputStreamReader(new URL(getManifest().getAsJsonObject("downloads").getAsJsonObject("server_mappings").get("url").getAsString()).openStream()), new MappingSourceNsSwitch(tree, "target", true))
+        MappingReader.read(new InputStreamReader(new URL(getManifest().getAsJsonObject("downloads").getAsJsonObject("server_mappings").get("url").getAsString()).openStream(), StandardCharsets.UTF_8), new MappingSourceNsSwitch(tree, "target", true))
         tree.setSrcNamespace("official")
         tree.setDstNamespaces(List.of("mojang"))
 
         OutputStream stream = Files.newOutputStream(processed.toPath())
-        tree.accept(MappingWriter.create(new OutputStreamWriter(new DeflaterOutputStream(stream)), MappingFormat.TINY_FILE))
+        tree.accept(MappingWriter.create(new OutputStreamWriter(new DeflaterOutputStream(stream), StandardCharsets.UTF_8), MappingFormat.TINY_FILE))
     }
 }
 
@@ -62,5 +63,5 @@ JsonObject getManifest() {
 }
 
 static JsonObject downloadObject(URL url) {
-    return JsonParser.parseReader(new InputStreamReader(url.openStream())).getAsJsonObject()
+    return JsonParser.parseReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)).getAsJsonObject()
 }

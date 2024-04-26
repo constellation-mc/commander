@@ -31,8 +31,7 @@ import java.util.function.Function;
 @Mixin(AdvancementRewards.class)
 public class AdvancementRewardsMixin {
 
-    @Unique
-    private List<Command.Conditioned> commands;
+    @Unique private List<Command.Conditioned> commands;
 
     //https://gist.github.com/kvverti/dec17e824922e1974313b8beadc621c5
     //I wonder if WrapOperation actually helps with anything here.
@@ -54,7 +53,7 @@ public class AdvancementRewardsMixin {
     @Inject(at = @At("TAIL"), method = "apply")
     private void commander$applyCommands(ServerPlayerEntity player, CallbackInfo ci) {
         if (this.commands == null) return;
-        LootContextParameterSet parameterSet = (new LootContextParameterSet.Builder(player.getServerWorld())).add(LootContextParameters.THIS_ENTITY, player).add(LootContextParameters.ORIGIN, player.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
+        LootContextParameterSet parameterSet = new LootContextParameterSet.Builder(player.getServerWorld()).add(LootContextParameters.THIS_ENTITY, player).add(LootContextParameters.ORIGIN, player.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
         LootContext context = new LootContext.Builder(parameterSet).build(Optional.empty());
 
         EventContext context1 = EventContext.builder(EventType.NULL)

@@ -13,24 +13,22 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-
 import java.util.Optional;
-import java.util.Set;
+import org.jetbrains.annotations.Nullable;
 
 public class ArithmeticaCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        Set<String> casts = Set.of("long", "int", "bool", "double");
         var cmd = CommandManager.argument("expression", StringArgumentType.string()).executes(context -> execute(context, StringArgumentType.getString(context, "expression"), null));
 
-        for (String cast : casts) {
+        for (String cast : PatternParser.CONVERTERS.keySet()) {
             cmd.then(CommandManager.literal(cast).executes(context -> execute(context, StringArgumentType.getString(context, "expression"), cast)));
         }
 
         dispatcher.register(CommandManager.literal("cmd:arithmetica").requires(source -> source.hasPermissionLevel(2)).then(cmd));
     }
 
-    private static int execute(CommandContext<ServerCommandSource> context, String expression, String cast) {
+    private static int execute(CommandContext<ServerCommandSource> context, String expression, @Nullable String cast) {
         try {
             var r = PatternParser.parseExpression(expression, cast);
             if (r.error().isPresent()) {

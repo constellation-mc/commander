@@ -8,6 +8,7 @@ import me.melontini.commander.api.event.Subscription;
 import me.melontini.commander.impl.event.data.types.EventTypes;
 import me.melontini.dark_matter.api.base.util.Utilities;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public record SubscriptionImpl<E>(EventType type, E parameters, List<Command.Conditioned> list) implements Subscription<E> {
+public record SubscriptionImpl<E>(EventType type, @Nullable E parameters, List<Command.Conditioned> list) implements Subscription<E> {
 
     private static final Codec<List<Command.Conditioned>> LIST_CODEC = ExtraCodecs.list(Command.CODEC);
     public static final MapCodec<? extends Subscription<?>> BASE_CODEC = new MapCodec<SubscriptionImpl<?>>() {

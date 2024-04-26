@@ -8,10 +8,12 @@ import net.minecraft.loot.provider.number.LootNumberProviderType;
 
 public record ArithmeticaLootNumberProvider(Arithmetica value) implements LootNumberProvider {
 
+    @Override
     public LootNumberProviderType getType() {
         return Commander.ARITHMETICA_PROVIDER;
     }
 
+    @Override
     public float nextFloat(LootContext context) {
         return this.value.asFloat(context);
     }

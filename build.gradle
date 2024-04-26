@@ -3,9 +3,14 @@ plugins {
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
     id 'io.freefair.lombok' version '8.3'
+    id 'com.github.spotbugs-base' version '6.0.12'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id "me.modmuss50.mod-publish-plugin" version "0.5.1"
 }
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.spotbugs.snom.SpotBugsTask
+import me.modmuss50.mpp.ReleaseType
 
 def local = !System.getenv().containsKey("GITHUB_RUN_NUMBER");
 
@@ -73,6 +78,38 @@ dependencies {
 
     implementation shade("com.ezylang:EvalEx:${project.evalex_version}")
     implementation shade("net.fabricmc:mapping-io:${project.mappingio_version}")
+}
+
+tasks.register("spotbugs", SpotBugsTask) { task ->
+    sourceSets.each {
+        task.sourceDirs.from(task.sourceDirs.files, it.allSource.sourceDirectories)
+        task.classDirs.from(task.classDirs.files, it.output)
+        task.auxClassPaths.from(task.auxClassPaths.files, it.compileClasspath)
+    }
+    excludeFilter = file("spotbugs.xml")
+    ignoreFailures = true
+    reports {
+        if (local) {
+            html {
+                required = true
+                outputLocation = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+                stylesheet = 'fancy-hist.xsl'
+            }
+        } else {
+            sarif {
+                required = true
+                outputLocation = file("$buildDir/reports/spotbugs/main/spotbugs.sarif")
+            }
+        }
+    }
+}
+
+spotless {
+    java {
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        formatAnnotations()
+    }
 }
 
 loom {
@@ -150,15 +187,45 @@ publishing {
         }
     }
 
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/constellation-mc/commander"
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+    if (!local) {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = "https://maven.pkg.github.com/constellation-mc/commander"
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR")
+                    password = System.getenv("GITHUB_TOKEN")
+                }
             }
         }
     }
+}
+
+publishMods {
+    file = remapJar.archiveFile
+    additionalFiles.from(remapSourcesJar.archiveFile)
+
+    changelog = file("CHANGELOG.md").text
+    type = ReleaseType.valueOf(providers.environmentVariable("VERSION_TYPE").getOrElse("BETA"))
+    modLoaders.add("fabric")
+
+    displayName = "${project.mod_version} (${project.minecraft_version})"
+
+    modrinth {
+        projectId = "86bUtxWv"
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.add("${project.minecraft_version}")
+
+        requires("fabric-api")
+        embeds("dark-matter")
+    }
+    github {
+        repository = "constellation-mc/commander"
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        commitish = providers.environmentVariable("GITHUB_SHA").getOrElse("${project.minecraft_version}-fabric")
+
+        type = STABLE
+    }
+
+    dryRun = local
 }

@@ -9,6 +9,8 @@ import me.melontini.commander.api.command.CommandType;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.util.Identifier;
 
+import java.util.Objects;
+
 @UtilityClass
 public final class CommandTypes {
 
@@ -17,11 +19,11 @@ public final class CommandTypes {
     public static final Codec<Command> CODEC = TYPE_CODEC.dispatch("type", Command::type, CommandType::codec);
 
     public static Identifier getId(CommandType type) {
-        return COMMANDS.inverse().get(type);
+        return Objects.requireNonNull(COMMANDS.inverse().get(type), () -> "Unregistered CommandType %s!".formatted(type));
     }
 
     public static CommandType getType(Identifier identifier) {
-        return COMMANDS.get(identifier);
+        return Objects.requireNonNull(COMMANDS.get(identifier), () -> "Unknown CommandType %s!".formatted(identifier));
     }
 
     public static CommandType register(Identifier identifier, CommandType type) {

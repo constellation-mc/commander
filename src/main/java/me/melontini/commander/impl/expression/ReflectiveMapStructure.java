@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import lombok.NonNull;
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
@@ -109,11 +110,11 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         return true;
     }
 
-    private static Tuple<Class<?>, Accessor> findFieldOrMethod(Class<?> cls, String name) {
+    private static @Nullable Tuple<Class<?>, Accessor> findFieldOrMethod(Class<?> cls, String name) {
         String mapped;
         Class<?> target = cls;
         do {
-            if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(target, name)) != null) return findAccessor(target, mapped);
+            if ((mapped = Commander.get().mappingKeeper().getFieldOrMethod(target, name)) != null) return findAccessor(target, mapped);
             var targetItfs = target.getInterfaces();
             if (targetItfs.length == 0) continue;
 
@@ -121,14 +122,14 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             while (!interfaces.isEmpty()) {
                 var itf = interfaces.poll();
 
-                if ((mapped = Commander.getMappingKeeper().getFieldOrMethod(itf, name)) != null) return findAccessor(itf, mapped);
+                if ((mapped = Commander.get().mappingKeeper().getFieldOrMethod(itf, name)) != null) return findAccessor(itf, mapped);
                 if ((targetItfs = itf.getInterfaces()).length > 0) interfaces.addAll(List.of(targetItfs));
             }
         } while ((target = target.getSuperclass()) != null);
         return findAccessor(cls, name);
     }
 
-    private static Tuple<Class<?>, Accessor> findAccessor(Class<?> cls, String mapped) {
+    @Nullable private static Tuple<Class<?>, Accessor> findAccessor(@NonNull Class<?> cls, String mapped) {
         for (Method method : cls.getMethods()) {
             if (!method.getName().equals(mapped)) continue;
             if (Modifier.isStatic(method.getModifiers())) continue;
@@ -162,12 +163,11 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             if (field == null) throw new RuntimeException("%s has no public field or method '%s'".formatted(this.object.getClass().getSimpleName(), key));
             return EvalUtils.CONFIGURATION.getEvaluationValueConverter().convertObject(field.access(this.object), EvalUtils.CONFIGURATION);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new CmdEvalException(e.getMessage());
+            throw new CmdEvalException(Objects.requireNonNullElse(e.getMessage(), "Failed to reflectively access member!"));
         }
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public Object put(String key, Object value) {
         throw new UnsupportedOperationException();
     }
@@ -187,20 +187,17 @@ public class ReflectiveMapStructure implements Map<String, Object> {
         throw new UnsupportedOperationException();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Set<String> keySet() {
         return Collections.emptySet();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Collection<Object> values() {
         return Collections.emptyList();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Set<Entry<String, Object>> entrySet() {
         return Collections.emptySet();
     }
@@ -225,7 +222,7 @@ public class ReflectiveMapStructure implements Map<String, Object> {
             this.invalid.add(key);
         }
 
-        public Accessor getAccessor(String key) {
+        public @Nullable Accessor getAccessor(String key) {
             return this.accessors == null ? null : this.accessors.get(key);
         }
 

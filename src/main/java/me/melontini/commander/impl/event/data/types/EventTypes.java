@@ -7,8 +7,10 @@ import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 @UtilityClass
@@ -18,14 +20,14 @@ public final class EventTypes {
     public static final Codec<EventType> CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, EVENTS);
 
     public static Identifier getId(EventType type) {
-        return EVENTS.inverse().get(type);
+        return Objects.requireNonNull(EVENTS.inverse().get(type), () -> "Unregistered EventType %s!".formatted(type));
     }
 
     public static EventType getType(Identifier identifier) {
-        return EVENTS.get(identifier);
+        return Objects.requireNonNull(EVENTS.get(identifier), "Unknown EventType %s!".formatted(identifier));
     }
 
-    public static Set<EventType> types() {
+    public static @UnmodifiableView Set<EventType> types() {
         return Collections.unmodifiableSet(EVENTS.values());
     }
 
