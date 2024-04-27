@@ -17,7 +17,7 @@ updates:
       - gradle-plugins
       - maven-central
     ignore:
-      - dependency-name: dark-matter:*
+      - dependency-name: me.melontini:dark-matter*
       - dependency-name: net.fabricmc.fabric-api:fabric-api
     directory: /
     schedule:
