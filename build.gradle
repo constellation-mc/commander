@@ -2,7 +2,7 @@ plugins {
     id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
-    id 'io.freefair.lombok' version '8.3'
+    id 'io.freefair.lombok' version '8.6'
     id 'com.github.spotbugs-base' version '6.0.12'
     id 'com.diffplug.spotless' version '6.25.0'
     id "me.modmuss50.mod-publish-plugin" version "0.5.1"
