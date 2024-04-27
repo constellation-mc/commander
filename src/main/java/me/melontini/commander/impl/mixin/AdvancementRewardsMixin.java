@@ -38,7 +38,7 @@ public class AdvancementRewardsMixin {
     @WrapOperation(at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"), method = "<clinit>")
     private static Codec<AdvancementRewards> commander$modifyCodec(Function<RecordCodecBuilder.Instance<AdvancementRewards>, ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>> builder, Operation<Codec<AdvancementRewards>> original) {
         MapCodec<AdvancementRewards> mapCodec = RecordCodecBuilder.mapCodec(builder);
-        Codec<List<Command.Conditioned>> commanderCodec = ExtraCodecs.list(Command.CODEC);
+        Codec<List<Command.Conditioned>> commanderCodec = ExtraCodecs.list(Command.CODEC.codec());
 
         Function<RecordCodecBuilder.Instance<AdvancementRewards>, ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>> wrapped = data -> data.group(
                 mapCodec.forGetter(Function.identity()),

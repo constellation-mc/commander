@@ -3,7 +3,6 @@ package me.melontini.commander.impl;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
-import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.api.expression.LootContextParameterRegistry;
 import me.melontini.commander.impl.builtin.BuiltInCommands;
 import me.melontini.commander.impl.builtin.BuiltInEvents;
@@ -40,8 +39,8 @@ import static net.minecraft.loot.context.LootContextParameters.*;
 public class Commander {
 
     public static final PrependingLogger LOGGER = PrependingLogger.get();
-    public static final LootNumberProviderType ARITHMETICA_PROVIDER = Registry.register(Registries.LOOT_NUMBER_PROVIDER_TYPE, id("arithmetica"), new LootNumberProviderType(Arithmetica.CODEC.xmap(ArithmeticaLootNumberProvider::new, ArithmeticaLootNumberProvider::value)));
-    public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExpressionLootCondition.CODEC));
+    public static final LootNumberProviderType ARITHMETICA_PROVIDER = Registry.register(Registries.LOOT_NUMBER_PROVIDER_TYPE, id("arithmetica"), new LootNumberProviderType(ArithmeticaLootNumberProvider.CODEC.codec()));
+    public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExpressionLootCondition.CODEC.codec()));
 
     public static final Path COMMANDER_PATH = FabricLoader.getInstance().getGameDir().resolve(".commander");
 

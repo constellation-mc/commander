@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 public record ConditionedCommand(Optional<LootCondition> condition, Command other) implements Command.Conditioned {
 
-    public static final Codec<? extends Command.Conditioned> CODEC = new MapCodec<ConditionedCommand>() {
+    public static final MapCodec<? extends Command.Conditioned> CODEC = new MapCodec<ConditionedCommand>() {
         @Override
         public <T> RecordBuilder<T> encode(ConditionedCommand input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
             var r = ((MapCodecCodec<Command>) CommandTypes.CODEC).codec().encode(input.other(), ops, prefix);
@@ -34,7 +34,7 @@ public record ConditionedCommand(Optional<LootCondition> condition, Command othe
         public <T> Stream<T> keys(DynamicOps<T> ops) {
             return Stream.of("condition").map(ops::createString);
         }
-    }.codec();
+    };
 
     @Override
     public boolean execute(EventContext context) {

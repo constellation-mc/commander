@@ -1,11 +1,11 @@
 plugins {
-    id 'fabric-loom' version '1.6-SNAPSHOT'
+    alias libs.plugins.fabric.loom
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
-    id 'io.freefair.lombok' version '8.3'
-    id 'com.github.spotbugs-base' version '6.0.12'
-    id 'com.diffplug.spotless' version '6.25.0'
-    id "me.modmuss50.mod-publish-plugin" version "0.5.1"
+    alias libs.plugins.shadow apply false
+    alias libs.plugins.lombok
+    alias libs.plugins.spotbugs.base
+    alias libs.plugins.spotless
+    alias libs.plugins.modmuss50.publish
 }
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
@@ -66,18 +66,21 @@ dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation libs.fabric.loader
 
     // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation libs.fabric.api
 
-    def dmModules = ["base", "mixin", "minecraft", "data"]
-    for (final def module in dmModules) {
-        modApi include("me.melontini:dark-matter-${module}:${project.dark_matter}")
+    def dm = libs.dark.matter
+    [dm.base, dm.mixin, dm.minecraft, dm.data].each {
+        modApi it
+        include it
     }
 
-    implementation shade("com.ezylang:EvalEx:${project.evalex_version}")
-    implementation shade("net.fabricmc:mapping-io:${project.mappingio_version}")
+    [libs.evalx, libs.mapping.io].each {
+        implementation it
+        shade it
+    }
 }
 
 tasks.register("spotbugs", SpotBugsTask) { task ->
@@ -92,13 +95,13 @@ tasks.register("spotbugs", SpotBugsTask) { task ->
         if (local) {
             html {
                 required = true
-                outputLocation = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+                outputLocation = file("${layout.buildDirectory.get().asFile}/reports/spotbugs/main/spotbugs.html")
                 stylesheet = 'fancy-hist.xsl'
             }
         } else {
             sarif {
                 required = true
-                outputLocation = file("$buildDir/reports/spotbugs/main/spotbugs.sarif")
+                outputLocation = file("${layout.buildDirectory.get().asFile}/reports/spotbugs/main/spotbugs.sarif")
             }
         }
     }
@@ -119,13 +122,13 @@ loom {
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
-    inputs.property "loader_version", project.loader_version
+    inputs.property "loader_version", libs.fabric.loader.get().version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
-                "loader_version": project.loader_version
+                "loader_version": libs.fabric.loader.get().version
     }
 }
 
