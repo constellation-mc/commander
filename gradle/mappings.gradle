@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath ("net.fabricmc:mapping-io:${project.mappingio_version}")
+        classpath (libs.mapping.io)
         classpath ('com.google.code.gson:gson:2.10.1')
     }
 }
