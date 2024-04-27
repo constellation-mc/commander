@@ -3,11 +3,6 @@ registries:
   fabric:
     url: "https://maven.fabricmc.net/"
     type: maven-repository
-  dark-matter:
-    url: "https://maven.pkg.github.com/constellation-mc/dark-matter"
-    username: melontini
-    password: ${{secrets.DEPENDABOT_TOKEN}}
-    type: maven-repository
   gradle-plugins:
     url: "https://plugins.gradle.org/m2/"
     type: maven-repository
@@ -19,9 +14,11 @@ updates:
   - package-ecosystem: gradle
     registries:
       - fabric
-      - dark-matter
       - gradle-plugins
       - maven-central
+    ignore:
+      - dependency-name: dark-matter
+      - dependency-name: net.fabricmc.fabric-api:fabric-api
     directory: /
     schedule:
       interval: weekly
