@@ -15,7 +15,11 @@ registries:
 
 updates:
   - package-ecosystem: gradle
-    registries: *
+    registries:
+      - fabric
+      - dark-matter
+      - gradle-plugins
+      - maven-central
     directory: /
     schedule:
       interval: daily
