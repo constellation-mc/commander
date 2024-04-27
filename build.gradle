@@ -167,18 +167,6 @@ sourcesJar {
     from delombok
 }
 
-tasks.register('printVersionName') {
-    doLast {
-        println "${project.mod_version} (${project.minecraft_version})"
-    }
-}
-
-tasks.register('printVersion') {
-    doLast {
-        println version
-    }
-}
-
 // configure the maven publication
 publishing {
     publications {
@@ -214,6 +202,14 @@ publishMods {
     modrinth {
         projectId = "86bUtxWv"
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.add("${project.minecraft_version}")
+
+        requires("fabric-api")
+        embeds("dark-matter")
+    }
+    curseforge {
+        projectId = "1009687"
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         minecraftVersions.add("${project.minecraft_version}")
 
         requires("fabric-api")
