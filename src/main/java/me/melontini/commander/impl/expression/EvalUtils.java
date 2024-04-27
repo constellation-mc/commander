@@ -157,11 +157,19 @@ public class EvalUtils {
 
         @Override
         public @Nullable EvaluationValue getData(String variable) {
-            var id = new Identifier(variable.replace("__idcl__", ":"));
+            var r = Identifier.validate(variable.replace("__idcl__", ":"));
+            if (r.error().isPresent()) {
+                throw new CmdEvalException("%s - %s".formatted(variable.replace("__idcl__", ":"), r.error().orElseThrow().message()));
+            }
+
+            var id = r.result().orElseThrow();
             var func = overrides.get(id);
             if (func != null) return CONFIGURATION.getEvaluationValueConverter().convertObject(func.apply(LOCAL.get()), CONFIGURATION);
 
-            var object = LOCAL.get().get(ExtractionTypes.getParameter(id));
+            var param = ExtractionTypes.getParameter(id);
+            if (param == null) throw new CmdEvalException("%s is not a registered loot context parameter!".formatted(id));
+
+            var object = LOCAL.get().get(param);
             if (object == null) return null;
             return CONFIGURATION.getEvaluationValueConverter().convertObject(object, CONFIGURATION);
         }
