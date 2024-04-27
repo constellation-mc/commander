@@ -5,6 +5,8 @@ registries:
     type: maven-repository
   dark-matter:
     url: "https://maven.pkg.github.com/constellation-mc/dark-matter"
+    username: melontini
+    password: ${{secrets.DEPENDABOT_TOKEN}}
     type: maven-repository
   gradle-plugins:
     url: "https://plugins.gradle.org/m2/"
@@ -22,4 +24,4 @@ updates:
       - maven-central
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
