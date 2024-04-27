@@ -1,6 +1,6 @@
 package me.melontini.commander.impl.builtin.commands.logic;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.melontini.commander.api.command.Command;
 import me.melontini.commander.api.command.CommandType;
@@ -12,8 +12,8 @@ import net.minecraft.util.collection.WeightedList;
 
 public record RandomCommand(WeightedList<Command.Conditioned> commands, Arithmetica rolls) implements Command {
 
-    public static final Codec<RandomCommand> CODEC = RecordCodecBuilder.create(data -> data.group(
-                ExtraCodecs.weightedList(Command.CODEC).fieldOf("commands").forGetter(RandomCommand::commands),
+    public static final MapCodec<RandomCommand> CODEC = RecordCodecBuilder.mapCodec(data -> data.group(
+                ExtraCodecs.weightedList(Command.CODEC.codec()).fieldOf("commands").forGetter(RandomCommand::commands),
                 ExtraCodecs.optional("rolls", Arithmetica.CODEC, Arithmetica.constant(1)).forGetter(RandomCommand::rolls)
         ).apply(data, RandomCommand::new));
 

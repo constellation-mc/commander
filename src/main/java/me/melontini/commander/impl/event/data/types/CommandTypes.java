@@ -9,6 +9,7 @@ import me.melontini.commander.api.command.CommandType;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.util.Identifier;
 
+import java.util.IdentityHashMap;
 import java.util.Objects;
 
 @UtilityClass
@@ -16,7 +17,8 @@ public final class CommandTypes {
 
     private static final BiMap<Identifier, CommandType> COMMANDS = HashBiMap.create();
     private static final Codec<CommandType> TYPE_CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, COMMANDS);
-    public static final Codec<Command> CODEC = TYPE_CODEC.dispatch("type", Command::type, CommandType::codec);
+    private static final IdentityHashMap<CommandType, Codec<? extends Command>> CACHE = new IdentityHashMap<>();
+    public static final Codec<Command> CODEC = TYPE_CODEC.dispatch("type", Command::type, type -> CACHE.computeIfAbsent(type, t -> t.codec().codec()));
 
     public static Identifier getId(CommandType type) {
         return Objects.requireNonNull(COMMANDS.inverse().get(type), () -> "Unregistered CommandType %s!".formatted(type));

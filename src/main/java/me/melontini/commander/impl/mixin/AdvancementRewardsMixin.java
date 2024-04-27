@@ -29,7 +29,7 @@ import java.util.List;
 @Mixin(AdvancementRewards.class)
 public class AdvancementRewardsMixin {
 
-    @Unique private static final Codec<List<Command.Conditioned>> COMMANDER_CODEC = ExtraCodecs.list(Command.CODEC);
+    @Unique private static final Codec<List<Command.Conditioned>> COMMANDER_CODEC = ExtraCodecs.list(Command.CODEC.codec());
 
     @Unique private List<Command.Conditioned> commands;
 
