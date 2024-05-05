@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
 
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -22,7 +23,7 @@ public final class MinecraftDownloader {
 
     @SneakyThrows
     static URL url(String s) {
-        return new URL(s);
+        return new URI(s).toURL();
     }
 
     @SneakyThrows

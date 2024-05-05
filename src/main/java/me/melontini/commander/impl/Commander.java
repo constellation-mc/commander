@@ -44,8 +44,8 @@ import static net.minecraft.loot.context.LootContextParameters.*;
 public class Commander {
 
     public static final PrependingLogger LOGGER = PrependingLogger.get();
-    public static final LootNumberProviderType ARITHMETICA_PROVIDER = Registry.register(Registries.LOOT_NUMBER_PROVIDER_TYPE, id("arithmetica"), new LootNumberProviderType(ArithmeticaLootNumberProvider.CODEC.codec()));
-    public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExpressionLootCondition.CODEC.codec()));
+    public static final LootNumberProviderType ARITHMETICA_PROVIDER = Registry.register(Registries.LOOT_NUMBER_PROVIDER_TYPE, id("arithmetica"), new LootNumberProviderType(ArithmeticaLootNumberProvider.CODEC));
+    public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExpressionLootCondition.CODEC));
 
     private static final Path BASE_PATH = FabricLoader.getInstance().getGameDir().resolve(".commander");
     public static final String MINECRAFT_VERSION = getVersion();
