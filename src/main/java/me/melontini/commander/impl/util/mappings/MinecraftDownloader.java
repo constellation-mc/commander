@@ -9,8 +9,10 @@ import me.melontini.commander.impl.Commander;
 
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.zip.DeflaterInputStream;
 
 @Log4j2
@@ -29,10 +31,11 @@ public final class MinecraftDownloader {
         if (Files.exists(mappings)) return;
         var url = url(getManifest().getAsJsonObject("downloads").getAsJsonObject("server_mappings").get("url").getAsString());
         try (var stream = url.openStream()) {
-            Files.createDirectories(mappings.getParent());
+            var parent = Objects.requireNonNull(mappings.getParent());
+            Files.createDirectories(parent);
 
-            log.info("Downloading {}...", mappings.getFileName().toString());
-            Files.writeString(mappings.getParent().resolve("LICENSE.txt"), """
+            log.info("Downloading {}...", Objects.requireNonNull(mappings.getFileName()).toString());
+            Files.writeString(parent.resolve("LICENSE.txt"), """
                      (c) 2020 Microsoft Corporation.
                      These mappings are provided "as-is" and you bear the risk of using them.
                      You may copy and use the mappings for development purposes, but you may not redistribute the mappings complete and unmodified.
@@ -57,7 +60,7 @@ public final class MinecraftDownloader {
 
     @SneakyThrows
     private static JsonObject downloadObject(URL url) {
-        try (var stream = url.openStream(); var reader = new InputStreamReader(stream)) {
+        try (var stream = url.openStream(); var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         }
     }

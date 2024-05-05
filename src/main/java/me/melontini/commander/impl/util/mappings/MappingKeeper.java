@@ -42,7 +42,7 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
         log.info("Loading official->mojmap mappings...");
 
         var tree = new MemoryMappingTree();
-        MappingReader.read(new InputStreamReader(new InflaterInputStream(Files.newInputStream(Commander.COMMANDER_PATH.resolve("mappings/server_mappings.bin")))), new MappingSourceNsSwitch(tree, "target"));
+        MappingReader.read(new InputStreamReader(new InflaterInputStream(Files.newInputStream(Commander.COMMANDER_PATH.resolve("mappings/server_mappings.bin"))), StandardCharsets.UTF_8), new MappingSourceNsSwitch(tree, "target"));
         tree.setSrcNamespace("official");
         tree.setDstNamespaces(List.of("mojang"));
         return tree;

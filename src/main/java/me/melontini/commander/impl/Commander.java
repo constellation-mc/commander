@@ -33,6 +33,7 @@ import net.minecraft.util.Util;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -108,7 +109,7 @@ public class Commander {
     }
 
     private static String getVersion() {
-        JsonObject o = JsonParser.parseReader(new InputStreamReader(MinecraftDownloader.class.getResourceAsStream("/version.json"))).getAsJsonObject();
+        JsonObject o = JsonParser.parseReader(new InputStreamReader(MinecraftDownloader.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8)).getAsJsonObject();
         return o.getAsJsonPrimitive("id").getAsString();
     }
 }
