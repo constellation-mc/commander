@@ -1,7 +1,7 @@
 package me.melontini.commander.impl.builtin.commands.action;
 
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.melontini.commander.api.command.Command;
 import me.melontini.commander.api.command.CommandType;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public record CommandCommand(Selector.Conditioned selector, InterFunction commands) implements Command {
 
-    public static final Codec<CommandCommand> CODEC = RecordCodecBuilder.create(data -> data.group(
+    public static final MapCodec<CommandCommand> CODEC = RecordCodecBuilder.mapCodec(data -> data.group(
             Selector.CODEC.fieldOf("selector").forGetter(CommandCommand::selector),
             ExtraCodecs.either(BrigadierMacro.CODEC.listOf(), Identifier.CODEC)
                     .<InterFunction>xmap(e -> e.map(MacroedFunction::new, FunctionFunction::new), InterFunction::origin)

@@ -2,7 +2,7 @@ package me.melontini.commander.api.expression;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import me.melontini.commander.impl.expression.EvalUtils;
+import com.mojang.serialization.DataResult;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.Contract;
@@ -18,7 +18,7 @@ import java.util.function.ToDoubleFunction;
  */
 public interface Arithmetica extends ToDoubleFunction<LootContext> {
 
-    Codec<Arithmetica> CODEC = ExtraCodecs.either(Codec.DOUBLE, Codec.STRING).comapFlatMap(EvalUtils::parseEither, Arithmetica::toSource);
+    Codec<Arithmetica> CODEC = ExtraCodecs.either(Codec.DOUBLE, Codec.STRING).comapFlatMap((either) -> either.map(b -> DataResult.success(constant(b)), s -> Expression.parse(s).map(Arithmetica::of)), Arithmetica::toSource);
 
     default long asLong(LootContext context) {
         return (long) this.applyAsDouble(context);
@@ -51,12 +51,16 @@ public interface Arithmetica extends ToDoubleFunction<LootContext> {
             public double applyAsDouble(LootContext context) {
                 return d;
             }
+
+            @Override
+            public String toString() {
+                return "Arithmetica{double=" + d + "}";
+            }
         };
     }
 
-    @Contract("_, _ -> new")
-    static @NotNull Arithmetica of(ToDoubleFunction<LootContext> function, String expression) {
-        Either<Double, String> either = Either.right(expression);
+    static @NotNull Arithmetica of(Expression expression) {
+        Either<Double, String> either = Either.right(expression.original());
         return new Arithmetica() {
             @Override
             public Either<Double, String> toSource() {
@@ -65,7 +69,12 @@ public interface Arithmetica extends ToDoubleFunction<LootContext> {
 
             @Override
             public double applyAsDouble(LootContext context) {
-                return function.applyAsDouble(context);
+                return expression.apply(context).getAsDecimal().doubleValue();
+            }
+
+            @Override
+            public String toString() {
+                return "Arithmetica{expression=" + expression + "}";
             }
         };
     }

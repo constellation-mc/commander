@@ -1,14 +1,14 @@
 package me.melontini.commander.api.command;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import me.melontini.commander.impl.event.data.types.CommandTypes;
 import net.minecraft.util.Identifier;
 
 public interface CommandType {
 
-    static CommandType register(Identifier identifier, Codec<? extends Command> codec) {
+    static CommandType register(Identifier identifier, MapCodec<? extends Command> codec) {
         return CommandTypes.register(identifier, () -> codec);
     }
 
-    Codec<? extends Command> codec();
+    MapCodec<? extends Command> codec();
 }

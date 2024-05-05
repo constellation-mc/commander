@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 public record SubscriptionImpl<E>(EventType type, @Nullable E parameters, List<Command.Conditioned> list) implements Subscription<E> {
 
-    private static final Codec<List<Command.Conditioned>> LIST_CODEC = ExtraCodecs.list(Command.CODEC);
+    private static final Codec<List<Command.Conditioned>> LIST_CODEC = ExtraCodecs.list(Command.CODEC.codec());
     public static final MapCodec<? extends Subscription<?>> BASE_CODEC = new MapCodec<SubscriptionImpl<?>>() {
         @Override
         public <T> RecordBuilder<T> encode(SubscriptionImpl<?> input, DynamicOps<T> ops, RecordBuilder<T> prefix) {

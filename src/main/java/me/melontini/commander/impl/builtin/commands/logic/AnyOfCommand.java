@@ -1,6 +1,6 @@
 package me.melontini.commander.impl.builtin.commands.logic;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.melontini.commander.api.command.Command;
 import me.melontini.commander.api.command.CommandType;
@@ -13,9 +13,9 @@ import java.util.Optional;
 
 public record AnyOfCommand(List<Command.Conditioned> commands, Optional<Command.Conditioned> then) implements Command {
 
-    public static final Codec<AnyOfCommand> CODEC = RecordCodecBuilder.create(data -> data.group(
-            ExtraCodecs.list(Command.CODEC).fieldOf("commands").forGetter(AnyOfCommand::commands),
-            ExtraCodecs.optional("then", Command.CODEC).forGetter(AnyOfCommand::then)
+    public static final MapCodec<AnyOfCommand> CODEC = RecordCodecBuilder.mapCodec(data -> data.group(
+            ExtraCodecs.list(Command.CODEC.codec()).fieldOf("commands").forGetter(AnyOfCommand::commands),
+            ExtraCodecs.optional("then", Command.CODEC.codec()).forGetter(AnyOfCommand::then)
     ).apply(data, AnyOfCommand::new));
 
     @Override

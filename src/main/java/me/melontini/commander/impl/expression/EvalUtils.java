@@ -13,10 +13,8 @@ import com.ezylang.evalex.functions.string.*;
 import com.ezylang.evalex.functions.trigonometric.*;
 import com.ezylang.evalex.parser.ParseException;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.util.functions.*;
 import net.minecraft.loot.context.LootContext;
@@ -131,10 +129,6 @@ public class EvalUtils {
         } finally {
             MapBasedDataAccessor.LOCAL.remove();
         }
-    }
-
-    public static DataResult<Arithmetica> parseEither(Either<Double, String> either) {
-        return either.map(d -> DataResult.success(Arithmetica.constant(d)), string -> parseExpression(string).map(exp -> Arithmetica.of(context -> evaluate(context, exp).getNumberValue().doubleValue(), string)));
     }
 
     public static DataResult<Expression> parseExpression(String expression) {

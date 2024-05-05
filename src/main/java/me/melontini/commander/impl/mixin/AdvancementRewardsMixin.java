@@ -1,7 +1,5 @@
 package me.melontini.commander.impl.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.kinds.App;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -21,6 +19,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Collections;
@@ -34,20 +33,18 @@ public class AdvancementRewardsMixin {
     @Unique private List<Command.Conditioned> commands;
 
     //https://gist.github.com/kvverti/dec17e824922e1974313b8beadc621c5
-    //I wonder if WrapOperation actually helps with anything here.
-    @WrapOperation(at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"), method = "<clinit>")
-    private static Codec<AdvancementRewards> commander$modifyCodec(Function<RecordCodecBuilder.Instance<AdvancementRewards>, ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>> builder, Operation<Codec<AdvancementRewards>> original) {
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"), index = 0, method = "<clinit>")
+    private static Function<RecordCodecBuilder.Instance<AdvancementRewards>, ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>> commander$modifyCodec(Function<RecordCodecBuilder.Instance<AdvancementRewards>, ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>> builder) {
         MapCodec<AdvancementRewards> mapCodec = RecordCodecBuilder.mapCodec(builder);
-        Codec<List<Command.Conditioned>> commanderCodec = ExtraCodecs.list(Command.CODEC);
+        Codec<List<Command.Conditioned>> commanderCodec = ExtraCodecs.list(Command.CODEC.codec());
 
-        Function<RecordCodecBuilder.Instance<AdvancementRewards>, ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>> wrapped = data -> data.group(
+        return data -> data.group(
                 mapCodec.forGetter(Function.identity()),
                 ExtraCodecs.optional("commander:commands", commanderCodec, Collections.emptyList()).forGetter(object -> ((AdvancementRewardsMixin)(Object)object).commands)
         ).apply(data, (advancementRewards, commands) -> {
             ((AdvancementRewardsMixin) (Object) advancementRewards).commands = commands;
             return advancementRewards;
         });
-        return original.call(wrapped);
     }
 
     @Inject(at = @At("TAIL"), method = "apply")
