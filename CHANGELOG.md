@@ -1,3 +1,6 @@
 ### What's New:
 
-* Slightly improved error messages returned by `cmd:arithmetica`.
+* Moved Command codecs to MapCodec.
+* Added BooleanExpression, similar to Arithmtica.
+* Added `runTriState` to EventExecutors.
+* Returned to downloading mappings at startup.
