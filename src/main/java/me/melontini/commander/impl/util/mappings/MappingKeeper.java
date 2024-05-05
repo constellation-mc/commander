@@ -13,8 +13,10 @@ import org.objectweb.asm.Type;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
+import java.util.zip.InflaterInputStream;
 
 @Log4j2
 public record MappingKeeper(MemoryMappingTree mojmapTarget) implements AmbiguousRemapper {
@@ -40,7 +42,7 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
         log.info("Loading official->mojmap mappings...");
 
         var tree = new MemoryMappingTree();
-        MappingReader.read(Commander.COMMANDER_PATH.resolve("mappings/client_mappings.txt"), new MappingSourceNsSwitch(tree, "target"));
+        MappingReader.read(new InputStreamReader(new InflaterInputStream(Files.newInputStream(Commander.COMMANDER_PATH.resolve("mappings/server_mappings.bin")))), new MappingSourceNsSwitch(tree, "target"));
         tree.setSrcNamespace("official");
         tree.setDstNamespaces(List.of("mojang"));
         return tree;

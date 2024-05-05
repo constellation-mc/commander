@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
-import lombok.experimental.ExtensionMethod;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
 
@@ -12,8 +11,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.zip.DeflaterInputStream;
 
-@ExtensionMethod(Files.class)
 @Log4j2
 public final class MinecraftDownloader {
 
@@ -26,20 +25,22 @@ public final class MinecraftDownloader {
 
     @SneakyThrows
     public static void downloadMappings() {
-        Path mappings = Commander.COMMANDER_PATH.resolve("mappings/client_mappings.txt");
-        if (mappings.exists()) return;
-        downloadIfNotExists(mappings, url(getManifest().getAsJsonObject("downloads")
-                .getAsJsonObject("client_mappings").get("url").getAsString()));
-    }
+        Path mappings = Commander.COMMANDER_PATH.resolve("mappings/server_mappings.bin");
+        if (Files.exists(mappings)) return;
+        var url = url(getManifest().getAsJsonObject("downloads").getAsJsonObject("server_mappings").get("url").getAsString());
+        try (var stream = url.openStream()) {
+            Files.createDirectories(mappings.getParent());
 
-    @SneakyThrows
-    public static void downloadIfNotExists(Path path, URL url) {
-        if (!path.exists()) {
-            try (var stream = url.openStream()) {
-                path.getParent().createDirectories();
-
-                log.info("Downloading {}...", path.getFileName().toString());
-                path.write(stream.readAllBytes());
+            log.info("Downloading {}...", mappings.getFileName().toString());
+            Files.writeString(mappings.getParent().resolve("LICENSE.txt"), """
+                     (c) 2020 Microsoft Corporation.
+                     These mappings are provided "as-is" and you bear the risk of using them.
+                     You may copy and use the mappings for development purposes, but you may not redistribute the mappings complete and unmodified.
+                     Microsoft makes no warranties, express or implied, with respect to the mappings provided here.
+                     Use and modification of this document or the source code (in any form) of Minecraft: Java Edition is governed by the Minecraft End User License Agreement available at https://account.mojang.com/documents/minecraft_eula.
+                    """);
+            try (var defStream = new DeflaterInputStream(stream)) {
+                Files.write(mappings, defStream.readAllBytes());
             }
         }
     }
@@ -56,6 +57,8 @@ public final class MinecraftDownloader {
 
     @SneakyThrows
     private static JsonObject downloadObject(URL url) {
-        return JsonParser.parseReader(new InputStreamReader(url.openStream())).getAsJsonObject();
+        try (var stream = url.openStream(); var reader = new InputStreamReader(stream)) {
+            return JsonParser.parseReader(reader).getAsJsonObject();
+        }
     }
 }

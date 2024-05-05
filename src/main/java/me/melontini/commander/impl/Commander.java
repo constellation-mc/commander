@@ -48,8 +48,9 @@ public class Commander {
     public static final LootNumberProviderType ARITHMETICA_PROVIDER = LootNumberProviderTypes.register("commander:arithmetica", ExtraCodecs.toJsonSerializer(ArithmeticaLootNumberProvider.CODEC.codec()));
     public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExtraCodecs.toJsonSerializer(ExpressionLootCondition.CODEC.codec())));
 
-    public static final Path COMMANDER_PATH = FabricLoader.getInstance().getGameDir().resolve(".commander");
+    private static final Path BASE_PATH = FabricLoader.getInstance().getGameDir().resolve(".commander");
     public static final String MINECRAFT_VERSION = getVersion();
+    public static final Path COMMANDER_PATH = BASE_PATH.resolve(MINECRAFT_VERSION);
 
     @Getter
     private AmbiguousRemapper mappingKeeper;
@@ -73,8 +74,8 @@ public class Commander {
         if (!Files.exists(COMMANDER_PATH)) {
             Exceptions.run(() -> Files.createDirectories(COMMANDER_PATH));
             try {
-                if (COMMANDER_PATH.getFileSystem().supportedFileAttributeViews().contains("dos"))
-                    Files.setAttribute(COMMANDER_PATH, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
+                if (BASE_PATH.getFileSystem().supportedFileAttributeViews().contains("dos"))
+                    Files.setAttribute(BASE_PATH, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
             } catch (IOException ignored) {
                 LOGGER.warn("Failed to hide the .commander folder");
             }
