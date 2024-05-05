@@ -8,6 +8,7 @@ import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.api.event.Subscription;
 import me.melontini.commander.impl.event.data.types.EventTypes;
 import me.melontini.dark_matter.api.base.util.MakeSure;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
@@ -71,5 +72,9 @@ public class EventExecutors {
 
     public static ActionResult runActionResult(EventType type, World world, Supplier<LootContext> supplier) {
         return runEnum(type, ActionResult.PASS, world, supplier);
+    }
+
+    public static TriState runTriState(EventType type, World world, Supplier<LootContext> supplier) {
+        return runEnum(type, TriState.DEFAULT, world, supplier);
     }
 }
