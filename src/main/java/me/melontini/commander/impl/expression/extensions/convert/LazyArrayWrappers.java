@@ -210,8 +210,7 @@ public class LazyArrayWrappers {
             return size() == 0;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public ListIterator<Object> listIterator(int index) {
             return new ArrayIterator(size(), index) {
                 @Override
@@ -226,20 +225,17 @@ public class LazyArrayWrappers {
             throw new IllegalStateException();
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Iterator<Object> iterator() {
             return listIterator();
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Object[] toArray() {
             throw new IllegalStateException();
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public <T> T[] toArray(@NotNull T[] a) {
             throw new IllegalStateException();
         }
@@ -309,14 +305,12 @@ public class LazyArrayWrappers {
             throw new IllegalStateException();
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public ListIterator<Object> listIterator() {
             return listIterator(0);
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public List<Object> subList(int fromIndex, int toIndex) {
             throw new IllegalStateException();
         }

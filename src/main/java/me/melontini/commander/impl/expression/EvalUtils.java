@@ -77,8 +77,8 @@ public class EvalUtils {
     public static DataResult<Expression> parseExpression(String expression) {
         try {
             Expression exp = new Expression(expression.replace(":", "__idcl__"), CONFIGURATION);
-            exp.validate();
             ((ExpressionAccessor) exp).commander$constants(new HashMap<>(CONFIGURATION.getDefaultConstants()));
+            exp.validate();
             return DataResult.success(exp);
         } catch (Throwable throwable) {
             return DataResult.error(throwable::getLocalizedMessage);
