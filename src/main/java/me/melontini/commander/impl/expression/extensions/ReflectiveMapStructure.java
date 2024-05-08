@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.expression;
+package me.melontini.commander.impl.expression.extensions;
 
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -8,8 +8,8 @@ import lombok.NonNull;
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
+import me.melontini.commander.impl.expression.CmdEvalException;
 import me.melontini.dark_matter.api.base.util.tuple.Tuple;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.CallSite;
@@ -24,10 +24,14 @@ import java.util.*;
 import java.util.function.Function;
 
 @Log4j2
-public class ReflectiveMapStructure implements Map<String, Object> {
+public class ReflectiveMapStructure extends ProxyMap {
 
     private static final Map<Class<?>, Struct> MAPPINGS = new Reference2ReferenceOpenHashMap<>();
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+
+    static {
+        CustomFields.init();
+    }
 
     private final Struct mappings;
     private final Object object;
@@ -35,6 +39,11 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     public ReflectiveMapStructure(Object object) {
         this.object = object;
         this.mappings = getAccessors(object.getClass());
+    }
+
+    static <C> void addField(Class<C> cls, String name, Function<C, Object> accessor) {
+        var struct = ReflectiveMapStructure.getAccessors(cls);
+        struct.addAccessor(name, c -> accessor.apply((C) c));
     }
 
     private static Struct getAccessors(Class<?> cls) {
@@ -76,16 +85,6 @@ public class ReflectiveMapStructure implements Map<String, Object> {
 
     public interface Accessor {
         Object access(Object object) throws IllegalAccessException, InvocationTargetException;
-    }
-
-    @Override
-    public int size() {
-        return 0;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return true;
     }
 
     @Override
@@ -152,54 +151,14 @@ public class ReflectiveMapStructure implements Map<String, Object> {
     }
 
     @Override
-    public boolean containsValue(Object value) {
-        return false;
-    }
-
-    @Override
     public Object get(Object key) {
         try {
             Accessor field = this.mappings.getAccessor((String) key);
             if (field == null) throw new RuntimeException("%s has no public field or method '%s'".formatted(this.object.getClass().getSimpleName(), key));
-            return EvalUtils.CONFIGURATION.getEvaluationValueConverter().convertObject(field.access(this.object), EvalUtils.CONFIGURATION);
+            return convert(field.access(this.object));
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new CmdEvalException(Objects.requireNonNullElse(e.getMessage(), "Failed to reflectively access member!"));
         }
-    }
-
-    @Nullable @Override
-    public Object put(String key, Object value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Object remove(Object key) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void putAll(@NotNull Map<? extends String, ?> m) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
-
-    @NotNull @Override
-    public Set<String> keySet() {
-        return Collections.emptySet();
-    }
-
-    @NotNull @Override
-    public Collection<Object> values() {
-        return Collections.emptyList();
-    }
-
-    @NotNull @Override
-    public Set<Entry<String, Object>> entrySet() {
-        return Collections.emptySet();
     }
 
     @Override

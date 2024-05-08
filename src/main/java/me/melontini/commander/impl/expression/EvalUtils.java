@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
+import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import me.melontini.commander.impl.util.functions.*;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.util.Identifier;
