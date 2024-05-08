@@ -4,7 +4,10 @@
   "package": "me.melontini.commander.impl.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AdvancementRewardsMixin"
+    "AdvancementRewardsMixin",
+    "evalex.ExpressionAccessor",
+    "evalex.ExpressionConfigurationAccessor",
+    "evalex.MapBasedFunctionDictionaryAccessor"
   ],
   "client": [
   ],
