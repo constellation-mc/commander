@@ -17,7 +17,6 @@ import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -41,9 +40,8 @@ public class ReflectiveMapStructure extends ProxyMap {
         this.mappings = getAccessors(object.getClass());
     }
 
-    static <C> void addField(Class<C> cls, String name, Function<C, Object> accessor) {
-        var struct = ReflectiveMapStructure.getAccessors(cls);
-        struct.addAccessor(name, c -> accessor.apply((C) c));
+    public static <C> void addField(Class<C> cls, String name, Function<C, Object> accessor) {
+        ReflectiveMapStructure.getAccessors(cls).addAccessor(name, (Function<Object, Object>) accessor);
     }
 
     private static Struct getAccessors(Class<?> cls) {
@@ -83,10 +81,6 @@ public class ReflectiveMapStructure extends ProxyMap {
         }
     }
 
-    public interface Accessor {
-        Object access(Object object) throws IllegalAccessException, InvocationTargetException;
-    }
-
     @Override
     public boolean containsKey(Object obj) {
         if (obj == null) return false;
@@ -109,7 +103,7 @@ public class ReflectiveMapStructure extends ProxyMap {
         return true;
     }
 
-    private static @Nullable Tuple<Class<?>, Accessor> findFieldOrMethod(Class<?> cls, String name) {
+    private static @Nullable Tuple<Class<?>, Function<Object, Object>> findFieldOrMethod(Class<?> cls, String name) {
         String mapped;
         Class<?> target = cls;
         do {
@@ -128,24 +122,27 @@ public class ReflectiveMapStructure extends ProxyMap {
         return findAccessor(cls, name);
     }
 
-    @Nullable private static Tuple<Class<?>, Accessor> findAccessor(@NonNull Class<?> cls, String mapped) {
+    @Nullable private static Tuple<Class<?>, Function<Object, Object>> findAccessor(@NonNull Class<?> cls, String mapped) {
         for (Method method : cls.getMethods()) {
             if (!method.getName().equals(mapped)) continue;
             if (Modifier.isStatic(method.getModifiers())) continue;
             if (method.getParameterCount() > 0) continue;
             if (method.getReturnType() == void.class) continue;
 
-            var ma = methodAccessor(method);
-            return Tuple.of(method.getDeclaringClass(), ma::apply);
+            return Tuple.of(method.getDeclaringClass(), methodAccessor(method));
         }
 
-        do {
-            for (Field field : cls.getFields()) {
-                if (!field.getName().equals(mapped)) continue;
-                if (Modifier.isStatic(field.getModifiers())) continue;
-                return Tuple.of(field.getDeclaringClass(), field::get);
-            }
-        } while ((cls = cls.getSuperclass()) != null);
+        for (Field field : cls.getFields()) {
+            if (!field.getName().equals(mapped)) continue;
+            if (Modifier.isStatic(field.getModifiers())) continue;
+            return Tuple.of(field.getDeclaringClass(), o -> {
+                try {
+                    return field.get(o);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
 
         return null;
     }
@@ -153,10 +150,10 @@ public class ReflectiveMapStructure extends ProxyMap {
     @Override
     public Object get(Object key) {
         try {
-            Accessor field = this.mappings.getAccessor((String) key);
+            Function<Object, Object> field = this.mappings.getAccessor((String) key);
             if (field == null) throw new RuntimeException("%s has no public field or method '%s'".formatted(this.object.getClass().getSimpleName(), key));
-            return convert(field.access(this.object));
-        } catch (IllegalAccessException | InvocationTargetException e) {
+            return convert(field.apply(this.object));
+        } catch (Exception e) {
             throw new CmdEvalException(Objects.requireNonNullElse(e.getMessage(), "Failed to reflectively access member!"));
         }
     }
@@ -167,7 +164,7 @@ public class ReflectiveMapStructure extends ProxyMap {
     }
 
     static final class Struct {
-        private Map<String, Accessor> accessors;
+        private Map<String, Function<Object, Object>> accessors;
         private Set<String> invalid;
         private Set<Struct> consumers;
 
@@ -181,12 +178,12 @@ public class ReflectiveMapStructure extends ProxyMap {
             this.invalid.add(key);
         }
 
-        public @Nullable Accessor getAccessor(String key) {
+        public @Nullable Function<Object, Object> getAccessor(String key) {
             return this.accessors == null ? null : this.accessors.get(key);
         }
 
         @Synchronized
-        public void addAccessor(String key, Accessor accessor) {
+        public void addAccessor(String key, Function<Object, Object> accessor) {
             if (this.accessors == null) this.accessors = new Object2ReferenceOpenHashMap<>();
             this.accessors.putIfAbsent(key, accessor);
 
