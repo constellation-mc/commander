@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 
-@Mixin(Expression.class)
+@Mixin(value = Expression.class, remap = false)
 public interface ExpressionAccessor {
 
     @Mutable

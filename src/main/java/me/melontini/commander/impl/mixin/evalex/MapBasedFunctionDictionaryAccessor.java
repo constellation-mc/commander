@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 
-@Mixin(MapBasedFunctionDictionary.class)
+@Mixin(value = MapBasedFunctionDictionary.class, remap = false)
 public interface MapBasedFunctionDictionaryAccessor {
 
     @Accessor("functions")
