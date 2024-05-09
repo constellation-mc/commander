@@ -28,4 +28,9 @@ public class StateStruct extends ProxyMap {
         }
         return EvaluationValue.nullValue();
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(state.getEntries());
+    }
 }
