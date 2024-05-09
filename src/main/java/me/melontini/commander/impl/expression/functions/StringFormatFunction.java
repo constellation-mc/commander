@@ -7,17 +7,14 @@ import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.Token;
 
-import java.math.BigDecimal;
+import java.util.Arrays;
 
-@FunctionParameter(name = "value")
-@FunctionParameter(name = "min")
-@FunctionParameter(name = "max")
-public class ClampFunction extends AbstractFunction {
+@FunctionParameter(name = "pattern")
+@FunctionParameter(name = "args", isVarArg = true)
+public class StringFormatFunction extends AbstractFunction {
     @Override
     public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
-        BigDecimal value = par[0].getNumberValue();
-        BigDecimal min = par[1].getNumberValue();
-        BigDecimal max = par[2].getNumberValue();
-        return EvaluationValue.numberValue(value.compareTo(min) < 0 ? min : value.min(max));
+        if (par.length == 1) return EvaluationValue.stringValue(String.format(par[0].getStringValue()));
+        return EvaluationValue.stringValue(String.format(par[0].getStringValue(), Arrays.stream(Arrays.copyOfRange(par, 1, par.length)).map(EvaluationValue::getValue).toArray()));
     }
 }

@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.expression.functions;
+package me.melontini.commander.impl.expression.functions.math;
 
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
@@ -9,15 +9,15 @@ import com.ezylang.evalex.parser.Token;
 
 import java.math.BigDecimal;
 
-@FunctionParameter(name = "delta")
-@FunctionParameter(name = "start")
-@FunctionParameter(name = "end")
-public class LerpFunction extends AbstractFunction {
+@FunctionParameter(name = "value")
+@FunctionParameter(name = "min")
+@FunctionParameter(name = "max")
+public class ClampFunction extends AbstractFunction {
     @Override
     public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
-        BigDecimal start = par[0].getNumberValue();
-        BigDecimal delta = par[1].getNumberValue();
-        BigDecimal end = par[2].getNumberValue();
-        return EvaluationValue.numberValue(start.add(delta.multiply(end.subtract(start))));
+        BigDecimal value = par[0].getNumberValue();
+        BigDecimal min = par[1].getNumberValue();
+        BigDecimal max = par[2].getNumberValue();
+        return EvaluationValue.numberValue(value.compareTo(min) < 0 ? min : value.min(max));
     }
 }
