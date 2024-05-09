@@ -27,8 +27,7 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
         return size() == 0;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public ListIterator<EvaluationValue> listIterator(int index) {
         return new ArrayIterator(size, index) {
             @Override
@@ -48,20 +47,17 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
         throw new IllegalStateException();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Iterator<EvaluationValue> iterator() {
         return listIterator();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Object[] toArray() {
         throw new IllegalStateException();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public <T> T[] toArray(@NotNull T[] a) {
         throw new IllegalStateException();
     }
@@ -131,14 +127,12 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
         throw new IllegalStateException();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public ListIterator<EvaluationValue> listIterator() {
         return listIterator(0);
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public List<EvaluationValue> subList(int fromIndex, int toIndex) {
         throw new IllegalStateException();
     }
