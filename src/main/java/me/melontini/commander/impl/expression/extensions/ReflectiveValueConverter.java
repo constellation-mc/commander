@@ -12,14 +12,14 @@ import java.util.List;
 public class ReflectiveValueConverter implements EvaluationValueConverterIfc {
 
     static List<ConverterIfc> converters = Arrays.asList(
-                    new NumberConverter(),
-                    new StringConverter(),
-                    new BooleanConverter(),
-                    new DateTimeConverter(),
-                    new DurationConverter(),
-                    new ExpressionNodeConverter(),
-                    new NbtConverter(),
-                    new LazyArrayConverter());
+            new NumberConverter(),
+            new StringConverter(),
+            new BooleanConverter(),
+            new ExpressionNodeConverter(),
+            new NbtConverter(),
+            new LazyArrayConverter(),
+            new DateTimeConverter(),
+            new DurationConverter());
 
     @Override
     public EvaluationValue convertObject(Object object, ExpressionConfiguration configuration) {

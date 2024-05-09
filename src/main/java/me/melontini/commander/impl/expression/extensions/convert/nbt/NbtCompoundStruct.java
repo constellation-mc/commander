@@ -23,4 +23,14 @@ public class NbtCompoundStruct extends ProxyMap {
         if (!(key instanceof String s)) return EvaluationValue.nullValue();
         return convert(compound.get(s));
     }
+
+    @Override
+    public int size() {
+        return compound.getSize();
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(compound);
+    }
 }

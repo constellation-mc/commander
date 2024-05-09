@@ -7,17 +7,19 @@ import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.Token;
 
-import java.math.BigDecimal;
+import static me.melontini.commander.impl.expression.EvalUtils.runLambda;
 
 @FunctionParameter(name = "value")
-@FunctionParameter(name = "min")
-@FunctionParameter(name = "max")
-public class ClampFunction extends AbstractFunction {
+@FunctionParameter(name = "predicate", isLazy = true)
+@FunctionParameter(name = "ifTrue", isLazy = true)
+@FunctionParameter(name = "ifFalse", isLazy = true)
+public class MatchesFunction extends AbstractFunction {
+
     @Override
     public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
-        BigDecimal value = par[0].getNumberValue();
-        BigDecimal min = par[1].getNumberValue();
-        BigDecimal max = par[2].getNumberValue();
-        return EvaluationValue.numberValue(value.compareTo(min) < 0 ? min : value.min(max));
+        EvaluationValue value = par[0];
+        boolean predicate = runLambda(expression, value, par[1].getExpressionNode()).getBooleanValue();
+
+        return runLambda(expression, value, par[predicate ? 2 : 3].getExpressionNode());
     }
 }
