@@ -20,7 +20,7 @@ EventType.builder()
     .build(new Identifier("modid", "custom_event"));
 ```
 
-Events can aceepts additional parameters using `extension()`. After specifying an extension you can return a custom type.
+Events can accept additional parameters using `extension()`. After specifying an extension you can return a custom type.
 
 ```java
 EventType.builder()
@@ -53,7 +53,7 @@ private static LootContext makeContext(ServerWorld world, Entity entity, Vec3d o
 
 If you did specify an extension, or are using an unsupported return type, you'll have to write custom resolution logic.
 
-To do that you'll simple have to create an `EventContext`. `EventContext` is used to pass execution parameters to commands. 
+To do that you'll simply have to create an `EventContext`. `EventContext` is used to pass execution parameters to commands. 
 
 ```java
 EventContext context = EventContext.builder(type)

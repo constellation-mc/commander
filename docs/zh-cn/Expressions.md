@@ -8,9 +8,13 @@
 
 本模组在 EvalEx 的基础上，添加了一些额外功能。
 
-- `random`  能在指定范围内生成随机数。接受 2 个值（最小，最大）。
-- `clamp` 将其他两个值约束在范围内。接受 3 个值（值，最小，最大）。
-- `lerp` 平滑地将初值过渡到末值。`初值 + 平滑系数 * (末值 - 初值)`。接受 3 个值（平滑系数，初值，末值）。
+| 函数  |  描述 |  参数 | 示例 |
+|---|---|---|---|
+| `random`  | 在指定范围内生成随机数。 | `min`, `max` | `random(0, 23)` |
+| `clamp`  | 将其他两个值约束在范围内。  | `value`, `min`, `max` | `clamp(12, 14, 16)` |
+| `lerp`  | 平滑地将初值过渡到末值。  | `delta`, `start`, `end` | `lerp(0.5, 10, 16)` |
+| `structContainsKey`  | 检查结构是否包含指定键值。  | `struct`, `key` | `structContainsKey(this_entity, "getHealth")` |
+| `hasContext`  | 检查是否有指定语境。  | `key` | `hasContext("killer_entity")` |
 
 ## 读取情境数据
 
