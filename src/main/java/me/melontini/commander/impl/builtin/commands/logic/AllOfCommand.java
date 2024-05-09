@@ -1,5 +1,6 @@
 package me.melontini.commander.impl.builtin.commands.logic;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.melontini.commander.api.command.Command;
@@ -11,23 +12,31 @@ import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import java.util.List;
 import java.util.Optional;
 
-public record AllOfCommand(List<Command.Conditioned> commands, Optional<Command.Conditioned> then) implements Command {
+public record AllOfCommand(List<Command.Conditioned> commands, Optional<Command.Conditioned> then, boolean shortCircuit) implements Command {
 
     public static final MapCodec<AllOfCommand> CODEC = RecordCodecBuilder.mapCodec(data -> data.group(
             ExtraCodecs.list(Command.CODEC.codec()).fieldOf("commands").forGetter(AllOfCommand::commands),
-            ExtraCodecs.optional("then", Command.CODEC.codec()).forGetter(AllOfCommand::then)
+            ExtraCodecs.optional("then", Command.CODEC.codec()).forGetter(AllOfCommand::then),
+            ExtraCodecs.optional("short_circuit", Codec.BOOL, false).forGetter(AllOfCommand::shortCircuit)
     ).apply(data, AllOfCommand::new));
 
     @Override
     public boolean execute(EventContext context) {
-        boolean b = true;
+        if (!shortCircuit) {
+            boolean b = true;
+            for (Conditioned command : commands()) {
+                b &= command.execute(context);
+            }
+            if (b) {
+                return then().map(cc -> cc.execute(context)).orElse(true);
+            }
+            return false;
+        }
+
         for (Conditioned command : commands()) {
-            b &= command.execute(context);
+            if (!command.execute(context)) return false;
         }
-        if (b) {
-            return then().map(conditionedCommand -> conditionedCommand.execute(context)).orElse(true);
-        }
-        return false;
+        return then().map(cc -> cc.execute(context)).orElse(true);
     }
 
     @Override
