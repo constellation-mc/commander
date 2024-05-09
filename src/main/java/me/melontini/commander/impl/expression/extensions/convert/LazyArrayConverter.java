@@ -18,23 +18,23 @@ public class LazyArrayConverter implements ConverterIfc {
 
     private EvaluationValue convertArray(Object array) {
         if (array instanceof int[] arr) {
-            return EvaluationValue.arrayValue(new LazyArrayWrappers.IntArray(arr));
+            return EvaluationValue.arrayValue(new LazyArrayWrapper(value -> arr[value], arr.length));
         } else if (array instanceof long[] arr) {
-            return EvaluationValue.arrayValue(new LazyArrayWrappers.LongArray(arr));
+            return EvaluationValue.arrayValue(new LazyArrayWrapper(value -> arr[value], arr.length));
         } else if (array instanceof double[] arr) {
-            return EvaluationValue.arrayValue(new LazyArrayWrappers.DoubleArray(arr));
+            return EvaluationValue.arrayValue(new LazyArrayWrapper(value -> arr[value], arr.length));
         } else if (array instanceof float[] arr) {
-            return EvaluationValue.arrayValue(new LazyArrayWrappers.FloatArray(arr));
+            return EvaluationValue.arrayValue(new LazyArrayWrapper(value -> arr[value], arr.length));
         } else if (array instanceof short[] arr) {
-            return EvaluationValue.arrayValue(new LazyArrayWrappers.ShortArray(arr));
+            return EvaluationValue.arrayValue(new LazyArrayWrapper(value -> arr[value], arr.length));
         } else if (array instanceof char[] arr) {
-            return EvaluationValue.arrayValue(new LazyArrayWrappers.CharArray(arr));
+            return EvaluationValue.arrayValue(new LazyArrayWrapper(value -> arr[value], arr.length));
         } else if (array instanceof byte[] arr) {
-            return EvaluationValue.arrayValue(new LazyArrayWrappers.ByteArray(arr));
+            return EvaluationValue.arrayValue(new LazyArrayWrapper(value -> arr[value], arr.length));
         } else if (array instanceof boolean[] arr) {
-            return EvaluationValue.arrayValue(new LazyArrayWrappers.BooleanArray(arr));
+            return EvaluationValue.arrayValue(new LazyArrayWrapper(value -> arr[value], arr.length));
         } else {
-            return EvaluationValue.arrayValue(new LazyArrayWrappers.ObjectArray((Object[]) array));
+            return EvaluationValue.arrayValue(new LazyArrayWrapper(value -> ((Object[]) array)[value], ((Object[]) array).length));
         }
     }
 

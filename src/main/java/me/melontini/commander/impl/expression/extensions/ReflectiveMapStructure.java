@@ -1,5 +1,6 @@
 package me.melontini.commander.impl.expression.extensions;
 
+import com.ezylang.evalex.data.EvaluationValue;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -148,7 +149,7 @@ public class ReflectiveMapStructure extends ProxyMap {
     }
 
     @Override
-    public Object get(Object key) {
+    public EvaluationValue get(Object key) {
         try {
             Function<Object, Object> field = this.mappings.getAccessor((String) key);
             if (field == null) throw new RuntimeException("%s has no public field or method '%s'".formatted(this.object.getClass().getSimpleName(), key));

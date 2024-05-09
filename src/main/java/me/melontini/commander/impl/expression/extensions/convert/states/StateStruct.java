@@ -22,7 +22,7 @@ public class StateStruct extends ProxyMap {
     }
 
     @Override
-    public Object get(Object key) {
+    public EvaluationValue get(Object key) {
         for (Entry<Property<?>, Comparable<?>> e : state.getEntries().entrySet()) {
             if (e.getKey().getName().equals(key)) return convert(e.getValue());
         }
