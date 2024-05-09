@@ -42,7 +42,7 @@ All functions construct new arrays and do not mutate the original array.
 | Function  |  Description |  Arguments | Example |
 |---|---|---|---|
 | `structContainsKey` | Checks if a struct contains some key. | `struct`, `key...` | `structContainsKey(block_state.properties, 'candles')` |
-| `hasContext` | Checks if a expression parameter is available  | `key...` | `hasContext('tool')` |
+| `hasContext` | Checks if an expression parameter is available  | `key...` | `hasContext('tool')` |
 | `length` | Returns the length of the specified object or 0.  | `value` | `length('Hello World!')` |
 | `strFormat` | Formats a string according to the pattern.  | `pattern`, `args...` | `strFormat('Hello %s World!', 23)` |
 | `ifMatches` | Simillar to built-in `if`, but with Lambdas.  | `value`, `predicate(λ)`, `ifTrue(λ)`, `ifFalse(λ)` | `ifMatches(arrayFind(arrayOf(0,1,2), it == 1), length(it) > 0, it[0], 0)` |
