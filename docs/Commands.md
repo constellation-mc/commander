@@ -80,7 +80,9 @@ The only field required by this command is `value` with an appropriate return va
 ### `commander:all_of`, `commander:any_of`, `commander:defaulted`
 All three of these commands have a similar function. They accept a list of commands and if the condition is true, they execute the command specified in the optional `then` block.
 
-Note: even if the condition is true early, the command will still execute all commands!
+`all_of` requires all commands to execute successfully, `any_of` requires one command to execute successfully, and `defaulted` requires one command to fail.
+
+Note: even if the condition is true early, the command will still execute all commands! To chanage this, you can set `short_circuit` to true, in which case commands will be aborted immediately if the condition fails.
 
 ::: details Example
 ```json
