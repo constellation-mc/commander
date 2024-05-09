@@ -17,7 +17,7 @@ public record ExpressionImpl(Expression expression) implements me.melontini.comm
 
     @Override
     public String original() {
-        return expression().getExpressionString().replace("__idcl__", ":");
+        return expression().getExpressionString();
     }
 
     public record ResultImpl(EvaluationValue value) implements me.melontini.commander.api.expression.Expression.Result {

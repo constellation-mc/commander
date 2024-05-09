@@ -68,7 +68,7 @@ public class EvalUtils {
             LootContextDataAccessor.LOCAL.set(context);
             return exp.evaluate();
         } catch (EvaluationException | ParseException e) {
-            throw new CmdEvalException(Objects.requireNonNullElseGet(e.getMessage(), () -> "Failed to evaluate expression %s".formatted(exp.getExpressionString().replace("__idcl__", ":"))), e);
+            throw new CmdEvalException(Objects.requireNonNullElseGet(e.getMessage(), () -> "Failed to evaluate expression %s".formatted(exp.getExpressionString())), e);
         } finally {
             LootContextDataAccessor.LOCAL.remove();
         }
@@ -76,7 +76,7 @@ public class EvalUtils {
 
     public static DataResult<Expression> parseExpression(String expression) {
         try {
-            Expression exp = new Expression(expression.replace(":", "__idcl__"), CONFIGURATION);
+            Expression exp = new Expression(expression, CONFIGURATION);
             ((ExpressionAccessor) exp).commander$constants(new HashMap<>(CONFIGURATION.getDefaultConstants()));
             exp.validate();
             return DataResult.success(exp);
@@ -92,12 +92,16 @@ public class EvalUtils {
                 new Identifier("luck"), LootContext::getLuck
         );
         public static final ThreadLocal<LootContext> LOCAL = new ThreadLocal<>();
+        private final Map<String, EvaluationValue> parameters = new HashMap<>();
 
         @Override
         public @Nullable EvaluationValue getData(String variable) {
-            var r = Identifier.validate(variable.replace("__idcl__", ":"));
+            var localParam = parameters.get(variable);
+            if (localParam != null) return localParam;
+
+            var r = Identifier.validate(variable);
             if (r.error().isPresent()) {
-                throw new CmdEvalException("%s - %s".formatted(variable.replace("__idcl__", ":"), r.error().orElseThrow().message()));
+                throw new CmdEvalException("%s - %s".formatted(variable, r.error().orElseThrow().message()));
             }
 
             var id = r.result().orElseThrow();
@@ -114,7 +118,7 @@ public class EvalUtils {
 
         @Override
         public void setData(String variable, EvaluationValue value) {
-            throw new IllegalStateException(variable);
+            parameters.put(variable, value);
         }
     }
 
