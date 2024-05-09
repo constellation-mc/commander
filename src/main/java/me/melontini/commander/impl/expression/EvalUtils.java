@@ -36,7 +36,9 @@ public class EvalUtils {
     static {
         var builder = ExpressionConfiguration.builder()
                 .dataAccessorSupplier(LootContextDataAccessor::new)
-                .evaluationValueConverter(new ReflectiveValueConverter());
+                .evaluationValueConverter(new ReflectiveValueConverter())
+                .allowOverwriteConstants(false)
+                .singleQuoteStringLiteralsAllowed(true);
 
         var fd = ExpressionConfiguration.defaultConfiguration().getFunctionDictionary();
         Map<String, FunctionIfc> functions = new HashMap<>(((MapBasedFunctionDictionaryAccessor) fd)
