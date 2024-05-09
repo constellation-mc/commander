@@ -7,14 +7,17 @@ import com.ezylang.evalex.config.FunctionDictionaryIfc;
 import com.ezylang.evalex.data.DataAccessorIfc;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.functions.FunctionIfc;
+import com.ezylang.evalex.parser.ASTNode;
 import com.ezylang.evalex.parser.ParseException;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import lombok.SneakyThrows;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import me.melontini.commander.impl.expression.functions.*;
+import me.melontini.commander.impl.expression.functions.arrays.*;
 import me.melontini.commander.impl.mixin.evalex.ExpressionAccessor;
 import me.melontini.commander.impl.mixin.evalex.ExpressionConfigurationAccessor;
 import me.melontini.commander.impl.mixin.evalex.MapBasedFunctionDictionaryAccessor;
@@ -47,6 +50,15 @@ public class EvalUtils {
         functions.put("random", new RangedRandomFunction());
         functions.put("lerp", new LerpFunction());
         functions.put("clamp", new ClampFunction());
+        functions.put("ifMatches", new MatchesFunction());
+        functions.put("length", new LengthFunction());
+
+        functions.put("arrayOf", new ArrayOf());
+        functions.put("arrayMap", new ArrayMap());
+        functions.put("arrayFind", new ArrayFind());
+        functions.put("arrayAnyMatch", new ArrayAnyMatch());
+        functions.put("arrayNoneMatch", new ArrayNoneMatch());
+        functions.put("arrayAllMatch", new ArrayNoneMatch());
 
         functions.put("structContainsKey", new StructContainsKeyFunction());
         functions.put("hasContext", new HasContextFunction());
@@ -63,6 +75,15 @@ public class EvalUtils {
                 "DT_FORMAT_LOCAL_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS]"),
                 "DT_FORMAT_LOCAL_DATE", EvaluationValue.stringValue("yyyy-MM-dd")
         ));
+    }
+
+    @SneakyThrows
+    public static EvaluationValue runLambda(Expression expression, EvaluationValue value, ASTNode predicate) {
+        try {
+            return expression.with("it", value).evaluateSubtree(predicate);
+        } finally {
+            expression.getDataAccessor().setData("it", null);
+        }
     }
 
     public static EvaluationValue evaluate(LootContext context, Expression exp) {

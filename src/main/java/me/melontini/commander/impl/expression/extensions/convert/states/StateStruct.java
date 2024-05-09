@@ -30,6 +30,11 @@ public class StateStruct extends ProxyMap {
     }
 
     @Override
+    public int size() {
+        return state.getEntries().size();
+    }
+
+    @Override
     public String toString() {
         return String.valueOf(state.getEntries());
     }

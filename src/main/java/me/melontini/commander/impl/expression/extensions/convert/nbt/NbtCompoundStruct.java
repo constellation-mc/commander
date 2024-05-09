@@ -25,6 +25,11 @@ public class NbtCompoundStruct extends ProxyMap {
     }
 
     @Override
+    public int size() {
+        return compound.getSize();
+    }
+
+    @Override
     public String toString() {
         return String.valueOf(compound);
     }
