@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.util.functions;
+package me.melontini.commander.impl.expression.functions;
 
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
@@ -12,11 +12,7 @@ import com.ezylang.evalex.parser.Token;
 public class StructContainsKeyFunction extends AbstractFunction {
     @Override
     public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
-        EvaluationValue value = par[0];
-        if (value.isStructureValue()) {
-            String key = par[1].getStringValue();
-            return expression.convertValue(value.getStructureValue().containsKey(key));
-        }
-        throw EvaluationException.ofUnsupportedDataTypeInOperation(functionToken);
+        String key = par[1].getStringValue();
+        return expression.convertValue(par[0].getStructureValue().containsKey(key));
     }
 }

@@ -34,7 +34,10 @@ public class ServerLifecycle {
 
     public static void init() {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> runVoid(SERVER_STARTED, server.getOverworld(), () -> forWorld(server.getOverworld())));
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> runVoid(SERVER_STOPPING, server.getOverworld(), () -> forWorld(server.getOverworld())));
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            if (server.getOverworld() != null) //If the server crashes at a specific moment, this event may be triggered, but the worlds are not yet loaded.
+                runVoid(SERVER_STOPPING, server.getOverworld(), () -> forWorld(server.getOverworld()));
+        });
 
         ServerWorldEvents.LOAD.register((server, world) -> runVoid(WORLD_LOAD, world, () -> forWorld(world)));
         ServerWorldEvents.UNLOAD.register((server, world) -> runVoid(WORLD_UNLOAD, world, () -> forWorld(world)));

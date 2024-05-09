@@ -8,4 +8,10 @@
     <Match>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2, PA_PUBLIC_PRIMITIVE_ATTRIBUTE, BC_UNCONFIRMED_CAST" />
     </Match>
+
+    <Match>
+        <Class name="me.melontini.commander.impl.expression.EvalUtils" />
+        <Method name="parseExpression" />
+        <Bug pattern="BC_IMPOSSIBLE_CAST" />
+    </Match>
 </FindBugsFilter>
