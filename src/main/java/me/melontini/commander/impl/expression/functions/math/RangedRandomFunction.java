@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.expression.functions;
+package me.melontini.commander.impl.expression.functions.math;
 
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
