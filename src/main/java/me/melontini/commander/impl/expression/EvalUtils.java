@@ -18,6 +18,7 @@ import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import me.melontini.commander.impl.expression.functions.*;
 import me.melontini.commander.impl.expression.functions.arrays.*;
+import me.melontini.commander.impl.mixin.evalex.EvaluationValueAccessor;
 import me.melontini.commander.impl.mixin.evalex.ExpressionAccessor;
 import me.melontini.commander.impl.mixin.evalex.ExpressionConfigurationAccessor;
 import me.melontini.commander.impl.mixin.evalex.MapBasedFunctionDictionaryAccessor;
@@ -35,6 +36,9 @@ import java.util.stream.Collectors;
 public class EvalUtils {
 
     public static final ExpressionConfiguration CONFIGURATION;
+    public static final EvaluationValue TRUE = EvaluationValueAccessor.commander$init(true, EvaluationValue.DataType.BOOLEAN);
+    public static final EvaluationValue FALSE = EvaluationValueAccessor.commander$init(false, EvaluationValue.DataType.BOOLEAN);
+    public static final EvaluationValue NULL = EvaluationValueAccessor.commander$init(null, EvaluationValue.DataType.NULL);
 
     static {
         var builder = ExpressionConfiguration.builder()
@@ -58,7 +62,7 @@ public class EvalUtils {
         functions.put("arrayFind", new ArrayFind());
         functions.put("arrayAnyMatch", new ArrayAnyMatch());
         functions.put("arrayNoneMatch", new ArrayNoneMatch());
-        functions.put("arrayAllMatch", new ArrayNoneMatch());
+        functions.put("arrayAllMatch", new ArrayAllMatch());
 
         functions.put("structContainsKey", new StructContainsKeyFunction());
         functions.put("hasContext", new HasContextFunction());
@@ -66,11 +70,11 @@ public class EvalUtils {
 
         CONFIGURATION = builder.build();
         ((ExpressionConfigurationAccessor) CONFIGURATION).commander$defaultConstants(ImmutableMap.of(
-                "true", EvaluationValue.booleanValue(true),
-                "false", EvaluationValue.booleanValue(false),
+                "true", TRUE,
+                "false", FALSE,
                 "PI", EvaluationValue.numberValue(new BigDecimal("3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679")),
                 "E", EvaluationValue.numberValue(new BigDecimal("2.71828182845904523536028747135266249775724709369995957496696762772407663")),
-                "null", EvaluationValue.nullValue(),
+                "null", NULL,
                 "DT_FORMAT_ISO_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]['['VV']']"),
                 "DT_FORMAT_LOCAL_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS]"),
                 "DT_FORMAT_LOCAL_DATE", EvaluationValue.stringValue("yyyy-MM-dd")

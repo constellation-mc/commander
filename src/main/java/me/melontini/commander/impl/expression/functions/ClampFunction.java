@@ -18,6 +18,6 @@ public class ClampFunction extends AbstractFunction {
         BigDecimal value = par[0].getNumberValue();
         BigDecimal min = par[1].getNumberValue();
         BigDecimal max = par[2].getNumberValue();
-        return expression.convertValue(value.compareTo(min) < 0 ? min : value.min(max));
+        return EvaluationValue.numberValue(value.compareTo(min) < 0 ? min : value.min(max));
     }
 }

@@ -18,6 +18,6 @@ public class LerpFunction extends AbstractFunction {
         BigDecimal start = par[0].getNumberValue();
         BigDecimal delta = par[1].getNumberValue();
         BigDecimal end = par[2].getNumberValue();
-        return expression.convertValue(start.add(delta.multiply(end.subtract(start))));
+        return EvaluationValue.numberValue(start.add(delta.multiply(end.subtract(start))));
     }
 }

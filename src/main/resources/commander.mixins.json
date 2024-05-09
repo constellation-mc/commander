@@ -5,8 +5,11 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AdvancementRewardsMixin",
+    "evalex.EvaluationValueAccessor",
+    "evalex.EvaluationValueMixin",
     "evalex.ExpressionAccessor",
     "evalex.ExpressionConfigurationAccessor",
+    "evalex.ExpressionMixin",
     "evalex.MapBasedFunctionDictionaryAccessor",
     "evalex.TokenizerMixin"
   ],
