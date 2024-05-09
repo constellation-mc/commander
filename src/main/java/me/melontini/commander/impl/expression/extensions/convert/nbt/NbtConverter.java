@@ -3,19 +3,20 @@ package me.melontini.commander.impl.expression.extensions.convert.nbt;
 import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.data.conversion.ConverterIfc;
+import com.ezylang.evalex.data.conversion.NumberConverter;
 import com.google.common.collect.Lists;
 import me.melontini.commander.impl.expression.extensions.ProxyMap;
 import net.minecraft.nbt.*;
 
-import java.math.BigDecimal;
-
 public class NbtConverter implements ConverterIfc {
+
+    private final NumberConverter converter = new NumberConverter();
 
     @Override
     public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {
 
         if (object instanceof AbstractNbtNumber n) {
-            return EvaluationValue.numberValue(BigDecimal.valueOf(n.doubleValue()));
+            return converter.convert(n.numberValue(), configuration);
         } else if (object instanceof NbtString n) {
             return EvaluationValue.stringValue(n.asString());
         } else if (object instanceof AbstractNbtList<?> n) {
