@@ -24,7 +24,8 @@ export const en = defineConfig({
                 text: 'Develop',
                 items: [
                     { text: 'Events', link: '/develop/Events'},
-                    { text: 'Commands', link: '/develop/Commands'}
+                    { text: 'Commands', link: '/develop/Commands'},
+                    { text: 'Expressions', link: '/develop/Expressions' }
                 ]
             },
             {
