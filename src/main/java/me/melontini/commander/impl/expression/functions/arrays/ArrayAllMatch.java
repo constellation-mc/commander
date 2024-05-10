@@ -22,6 +22,6 @@ public class ArrayAllMatch extends AbstractFunction {
         List<EvaluationValue> array = par[0].getArrayValue();
         ASTNode predicate = par[1].getExpressionNode();
 
-        return array.stream().anyMatch(value -> runLambda(expression, value, predicate).getBooleanValue())  ? EvalUtils.TRUE : EvalUtils.FALSE;
+        return array.stream().allMatch(value -> runLambda(expression, value, predicate).getBooleanValue()) ? EvalUtils.TRUE : EvalUtils.FALSE;
     }
 }
