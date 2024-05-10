@@ -12,9 +12,10 @@ import com.ezylang.evalex.parser.ParseException;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.SneakyThrows;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
+import me.melontini.commander.impl.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import me.melontini.commander.impl.expression.functions.*;
 import me.melontini.commander.impl.expression.functions.arrays.*;
@@ -30,10 +31,10 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class EvalUtils {
@@ -51,7 +52,7 @@ public class EvalUtils {
                 .singleQuoteStringLiteralsAllowed(true);
 
         var fd = ExpressionConfiguration.defaultConfiguration().getFunctionDictionary();
-        Map<String, FunctionIfc> functions = new HashMap<>(((MapBasedFunctionDictionaryAccessor) fd)
+        Map<String, FunctionIfc> functions = new Object2ReferenceOpenHashMap<>(((MapBasedFunctionDictionaryAccessor) fd)
                 .commander$getFunctions().entrySet().stream()
                 .collect(Collectors.toMap(e -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, e.getKey()), Map.Entry::getValue)));
         functions.put("random", new RangedRandomFunction());
@@ -109,7 +110,7 @@ public class EvalUtils {
     public static DataResult<Expression> parseExpression(String expression) {
         try {
             Expression exp = new Expression(expression, CONFIGURATION);
-            ((ExpressionAccessor) exp).commander$constants(new HashMap<>(CONFIGURATION.getDefaultConstants()));
+            ((ExpressionAccessor) exp).commander$constants(new Object2ReferenceOpenHashMap<>(CONFIGURATION.getDefaultConstants()));
             exp.validate();
             return DataResult.success(exp);
         } catch (Throwable throwable) {
@@ -119,44 +120,60 @@ public class EvalUtils {
 
     public static class LootContextDataAccessor implements DataAccessorIfc {
 
-        private static final Map<Identifier, Function<LootContext, Object>> overrides = ImmutableMap.of(
+        private static final Map<Identifier, Function<LootContext, Object>> overrides = new Object2ReferenceOpenHashMap<>(Map.of(
                 new Identifier("level"), LootContext::getWorld,
                 new Identifier("luck"), LootContext::getLuck
-        );
+        ));
         public static final ThreadLocal<LootContext> LOCAL = new ThreadLocal<>();
-        private final Map<String, EvaluationValue> parameters = new HashMap<>();
+        private final Map<String, EvaluationValue> parameters = new Object2ReferenceOpenHashMap<>();
+        //In most cases the expression is reused, so caching this helps us avoid some big overhead.
+        private final Map<String, Supplier<EvaluationValue>> varCache = new Object2ReferenceOpenHashMap<>();
 
         @Override
         public @Nullable EvaluationValue getData(String variable) {
-            var localParam = parameters.get(variable);
-            if (localParam != null) return localParam;
+            var supplier = varCache.get(variable);
+            if (supplier != null) return supplier.get(); //Parameters are cached by setData, so this is fine.
 
             var r = Identifier.validate(variable);
             if (r.error().isPresent()) {
-                throw new CmdEvalException("%s - %s".formatted(variable, r.error().orElseThrow().message()));
+                throw new CmdEvalException("%s - no such variable or %s".formatted(variable, r.error().orElseThrow().message()));
             }
 
             var id = r.result().orElseThrow();
             var func = overrides.get(id);
-            if (func != null) return CONFIGURATION.getEvaluationValueConverter().convertObject(func.apply(LOCAL.get()), CONFIGURATION);
+            if (func != null) {
+                supplier = () -> ProxyMap.convert(func.apply(LOCAL.get()));
+                varCache.put(variable, supplier);
+                return supplier.get();
+            }
 
             var param = ExtractionTypes.getParameter(id);
-            if (param == null) throw new CmdEvalException("%s is not a registered loot context parameter!".formatted(id));
-
-            var object = LOCAL.get().get(param);
-            if (object == null) return null;
-            return CONFIGURATION.getEvaluationValueConverter().convertObject(object, CONFIGURATION);
+            if (param == null)
+                throw new CmdEvalException("%s is not a registered loot context parameter, variable or override!".formatted(id));
+            supplier = () -> {
+                var object = LOCAL.get().get(param);
+                if (object == null) return null;
+                return ProxyMap.convert(object);
+            };
+            varCache.put(variable, supplier);
+            return supplier.get();
         }
 
         @Override
         public void setData(String variable, EvaluationValue value) {
             parameters.put(variable, value);
+
+            if (value == null) {
+                varCache.remove(variable);
+            } else {
+                varCache.put(variable, () -> parameters.get(variable)); //We're already here, so might as well cache.
+            }
         }
     }
 
     public static class SimpleFunctionDictionary implements FunctionDictionaryIfc {
 
-        private final Map<String, FunctionIfc> functions = new Object2ObjectOpenHashMap<>();
+        private final Map<String, FunctionIfc> functions = new Object2ReferenceOpenHashMap<>();
 
         public static FunctionDictionaryIfc ofFunctions(Map<String, FunctionIfc> functions) {
             FunctionDictionaryIfc dictionary = new SimpleFunctionDictionary();

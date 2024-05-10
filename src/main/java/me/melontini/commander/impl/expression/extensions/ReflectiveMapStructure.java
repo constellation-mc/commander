@@ -105,10 +105,11 @@ public class ReflectiveMapStructure extends ProxyMap {
     }
 
     private static @Nullable Tuple<Class<?>, Function<Object, Object>> findFieldOrMethod(Class<?> cls, String name) {
+        var keeper = Commander.get().mappingKeeper();
         String mapped;
         Class<?> target = cls;
         do {
-            if ((mapped = Commander.get().mappingKeeper().getFieldOrMethod(target, name)) != null) return findAccessor(target, mapped);
+            if ((mapped = keeper.getFieldOrMethod(target, name)) != null) return findAccessor(target, mapped);
             var targetItfs = target.getInterfaces();
             if (targetItfs.length == 0) continue;
 
@@ -116,7 +117,7 @@ public class ReflectiveMapStructure extends ProxyMap {
             while (!interfaces.isEmpty()) {
                 var itf = interfaces.poll();
 
-                if ((mapped = Commander.get().mappingKeeper().getFieldOrMethod(itf, name)) != null) return findAccessor(itf, mapped);
+                if ((mapped = keeper.getFieldOrMethod(itf, name)) != null) return findAccessor(itf, mapped);
                 if ((targetItfs = itf.getInterfaces()).length > 0) interfaces.addAll(List.of(targetItfs));
             }
         } while ((target = target.getSuperclass()) != null);
