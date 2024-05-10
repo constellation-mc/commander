@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ReflectiveValueConverter implements EvaluationValueConverterIfc {
 
-    static List<ConverterIfc> converters = Arrays.asList(
+    private static final List<ConverterIfc> converters = Arrays.asList(
             new NumberConverter(),
             new StringConverter(),
             new BooleanConverter(),
