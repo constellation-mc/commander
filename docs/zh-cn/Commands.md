@@ -80,7 +80,9 @@ $(bool){{0}} 0 -> false
 ### `commander:all_of`, `commander:any_of`, `commander:defaulted`
 这三种类型的功能相似。如果 condition（条件）返回 true，就执行在可选的 `then` 代码块中的命令。
 
-注意：就算条件在很前面就返回 true 了，还是会执行全部命令！
+`all_of` 要求所有命令成功执行，`any_of` 要求其中任一命令成功执行，`defaulted` 要求其中任一命令执行失败。
+
+注意，就算条件在很前面就返回 true 了，还是会执行全部命令！但是，在启用 `short_circuit` 后，条件不满足时，将立即退出执行。
 
 ::: details 示例
 ```json
