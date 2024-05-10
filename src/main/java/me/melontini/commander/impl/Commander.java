@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Cleanup;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.api.expression.LootContextParameterRegistry;
@@ -132,6 +133,7 @@ public class Commander {
                 BLOCK_STATE, BLOCK_ENTITY);
     }
 
+    @SneakyThrows(IOException.class)
     private static String getVersion() {
         @Cleanup var stream = new InputStreamReader(MinecraftDownloader.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8);
         JsonObject o = JsonParser.parseReader(stream).getAsJsonObject();
