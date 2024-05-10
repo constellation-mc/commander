@@ -4,7 +4,7 @@ In general, you should prefer to implement Brigadier `/` commands, but there are
 
 ## Creating commands
 
-Creating new commands is easy, you'll have to implement the `Command` interface, create a [Codec](https://forge.gemwire.uk/wiki/Codecs) to serialize/deserialize the command and register the codec with `CommandTypes.register()`.
+Creating new commands is easy, you'll have to implement the `Command` interface, create a [MapCodec](https://forge.gemwire.uk/wiki/Codecs) to serialize/deserialize the command and register the codec with `CommandTypes.register()`.
 
 Let's create a simple command which will print a string to standard output.
 
@@ -27,7 +27,7 @@ public record DummyCommand(String text) implements Command {
 Now create a [Codec](https://forge.gemwire.uk/wiki/Codecs) for your command.
 
 ```java
-public static final Codec<DummyCommand> CODEC = Codec.STRING.fieldOf("text").xmap(DummyCommand::new, DummyCommand::text).codec();
+public static final MapCodec<DummyCommand> CODEC = Codec.STRING.fieldOf("text").xmap(DummyCommand::new, DummyCommand::text);
 ```
 
 With that done, we'll have to register the command to get our `CommandType`.
