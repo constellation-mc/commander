@@ -1,5 +1,6 @@
 package me.melontini.commander.impl.util.mappings;
 
+import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
@@ -42,7 +43,8 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
         log.info("Loading official->mojmap mappings...");
 
         var tree = new MemoryMappingTree();
-        MappingReader.read(new InputStreamReader(new InflaterInputStream(Files.newInputStream(Commander.COMMANDER_PATH.resolve("mappings/server_mappings.bin"))), StandardCharsets.UTF_8), new MappingSourceNsSwitch(tree, "target"));
+        @Cleanup var reader = new InputStreamReader(new InflaterInputStream(Files.newInputStream(Commander.COMMANDER_PATH.resolve("mappings/server_mappings.bin"))), StandardCharsets.UTF_8);
+        MappingReader.read(reader, new MappingSourceNsSwitch(tree, "target"));
         tree.setSrcNamespace("official");
         tree.setDstNamespaces(List.of("mojang"));
         return tree;
@@ -53,7 +55,8 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
         log.info("Loading official->{} mappings...", NAMESPACE);
 
         var tree = new MemoryMappingTree();
-        MappingReader.read(new InputStreamReader(Objects.requireNonNull(MappingKeeper.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny"), "mappings/mappings.tiny is not available?"), StandardCharsets.UTF_8), tree);
+        @Cleanup var reader = new InputStreamReader(Objects.requireNonNull(MappingKeeper.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny"), "mappings/mappings.tiny is not available?"), StandardCharsets.UTF_8);
+        MappingReader.read(reader, tree);
         return tree;
     }
 

@@ -2,6 +2,7 @@ package me.melontini.commander.impl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.Cleanup;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -34,9 +35,8 @@ import net.minecraft.util.Util;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.loot.context.LootContextParameters.*;
@@ -49,7 +49,7 @@ public class Commander {
     public static final LootNumberProviderType ARITHMETICA_PROVIDER = LootNumberProviderTypes.register("commander:arithmetica", ExtraCodecs.toJsonSerializer(ArithmeticaLootNumberProvider.CODEC.codec()));
     public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExtraCodecs.toJsonSerializer(ExpressionLootCondition.CODEC.codec())));
 
-    private static final Path BASE_PATH = FabricLoader.getInstance().getGameDir().resolve(".commander");
+    private static final Path BASE_PATH = Path.of(System.getProperty("user.home")).resolve(".commander");
     public static final String MINECRAFT_VERSION = getVersion();
     public static final Path COMMANDER_PATH = BASE_PATH.resolve(MINECRAFT_VERSION);
 
@@ -72,6 +72,30 @@ public class Commander {
     }
 
     public void onInitialize() {
+        try {
+            var oldPath = FabricLoader.getInstance().getGameDir().resolve(".commander");
+            if (Files.exists(oldPath)) {
+                if (!Files.exists(BASE_PATH)) Files.move(oldPath, BASE_PATH);
+                else {
+                    Files.walkFileTree(oldPath, new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            Files.delete(file);
+                            return super.visitFile(file, attrs);
+                        }
+
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                            Files.delete(dir);
+                            return super.postVisitDirectory(dir, exc);
+                        }
+                    });
+                }
+            }
+        } catch (IOException e) {
+            log.error("Failed to move old .commander folder!", e);
+        }
+
         if (!Files.exists(COMMANDER_PATH)) {
             Exceptions.run(() -> Files.createDirectories(COMMANDER_PATH));
             try {
@@ -109,7 +133,8 @@ public class Commander {
     }
 
     private static String getVersion() {
-        JsonObject o = JsonParser.parseReader(new InputStreamReader(MinecraftDownloader.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8)).getAsJsonObject();
+        @Cleanup var stream = new InputStreamReader(MinecraftDownloader.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8);
+        JsonObject o = JsonParser.parseReader(stream).getAsJsonObject();
         return o.getAsJsonPrimitive("id").getAsString();
     }
 }
