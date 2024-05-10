@@ -49,7 +49,7 @@ public final class MinecraftDownloader {
                     Use and modification of this document or the source code (in any form) of Minecraft: Java Edition is governed by the Minecraft End User License Agreement available at https://account.mojang.com/documents/minecraft_eula.
                     """);
 
-        @Cleanup var reader = new InputStreamReader(url.openStream());
+        @Cleanup var reader = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
         @Cleanup var outputStream = Files.newOutputStream(mappings);
 
         MemoryMappingTree tree = new MemoryMappingTree();
