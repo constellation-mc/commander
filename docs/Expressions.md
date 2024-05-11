@@ -90,6 +90,20 @@ Example: `block_state.properties.candles`
 
 :::
 
+::: details `attributes` (Living Entities)
+
+Allows you to access entity attributes. The key is an identifier, so both `generic.luck` and `minecraft:generic.luck` are acceptible.
+
+Example: `this_entity.attributes.'generic.luck'`
+
+:::
+
+::: details `storage` (Levels, Chunks, Entities, Block Entities)
+
+Allows you to access persistent data storage. The data is modified and written by [`/cmd:data`](/BrigadierCommands#cmd-data), [`commander:store_nbt_data`](/Commands#commander-store-expression-data-and-commander-store-nbt-data) or [`commander:store_expression_data`](/Commands#commander-store-expression-data-and-commander-store-nbt-data)
+
+:::
+
 ### P.S.
 
 If you have to do a lot of expensive operations in expressions in tick events, you should delay the execution, if possible, by checking `level.getDayTime % 20 == 0`, this will make sure that the expression is executed every second and not 20 times per second. `% 40` is every 2 seconds and `% 10` is every 1/2 second.
