@@ -29,6 +29,12 @@ Later on this data can be used in expressions like so:
 
 `level.storage.my_cool_data * 0.7` or `this_entity.storage.even_cooler_data == 'freak''`.
 
+Along with the JSON command this update introduces a the `cmd:data` brigadier command. This command allows you to read and write data just like the JSON command.
+
+The syntax goes like this:
+
+`cmd:data` -> operation (`read`/`write`) -> target -> selector (`@s`/`~ ~ ~`) -> key (-> data (for `write`))
+
 Other Changes:
 
 * Moved mappings cache to `~/.commander`.
