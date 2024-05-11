@@ -2,7 +2,9 @@ package me.melontini.commander.impl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.Cleanup;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.api.expression.LootContextParameterRegistry;
@@ -11,6 +13,7 @@ import me.melontini.commander.impl.builtin.BuiltInEvents;
 import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.expression.EvalUtils;
+import me.melontini.commander.impl.util.NbtCodecs;
 import me.melontini.commander.impl.util.loot.ArithmeticaLootNumberProvider;
 import me.melontini.commander.impl.util.loot.ExpressionLootCondition;
 import me.melontini.commander.impl.util.mappings.AmbiguousRemapper;
@@ -20,10 +23,13 @@ import me.melontini.dark_matter.api.base.util.Exceptions;
 import me.melontini.dark_matter.api.base.util.MakeSure;
 import me.melontini.dark_matter.api.base.util.PrependingLogger;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.loot.condition.LootConditionType;
 import net.minecraft.loot.provider.number.LootNumberProviderType;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -32,9 +38,8 @@ import net.minecraft.util.Util;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.loot.context.LootContextParameters.*;
@@ -47,9 +52,12 @@ public class Commander {
     public static final LootNumberProviderType ARITHMETICA_PROVIDER = Registry.register(Registries.LOOT_NUMBER_PROVIDER_TYPE, id("arithmetica"), new LootNumberProviderType(ArithmeticaLootNumberProvider.CODEC.codec()));
     public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExpressionLootCondition.CODEC.codec()));
 
-    private static final Path BASE_PATH = FabricLoader.getInstance().getGameDir().resolve(".commander");
+    private static final Path BASE_PATH = Path.of(System.getProperty("user.home")).resolve(".commander");
     public static final String MINECRAFT_VERSION = getVersion();
     public static final Path COMMANDER_PATH = BASE_PATH.resolve(MINECRAFT_VERSION);
+
+    public static final AttachmentType<NbtCompound> DATA_ATTACHMENT = AttachmentRegistry.<NbtCompound>builder()
+            .initializer(NbtCompound::new).persistent(NbtCodecs.COMPOUND_CODEC).buildAndRegister(id("persistent"));
 
     @Getter
     private AmbiguousRemapper mappingKeeper;
@@ -70,6 +78,30 @@ public class Commander {
     }
 
     public void onInitialize() {
+        try {
+            var oldPath = FabricLoader.getInstance().getGameDir().resolve(".commander");
+            if (Files.exists(oldPath)) {
+                if (!Files.exists(BASE_PATH)) Files.move(oldPath, BASE_PATH);
+                else {
+                    Files.walkFileTree(oldPath, new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            Files.delete(file);
+                            return super.visitFile(file, attrs);
+                        }
+
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                            Files.delete(dir);
+                            return super.postVisitDirectory(dir, exc);
+                        }
+                    });
+                }
+            }
+        } catch (IOException e) {
+            log.error("Failed to move old .commander folder!", e);
+        }
+
         if (!Files.exists(COMMANDER_PATH)) {
             Exceptions.run(() -> Files.createDirectories(COMMANDER_PATH));
             try {
@@ -106,8 +138,10 @@ public class Commander {
                 BLOCK_STATE, BLOCK_ENTITY);
     }
 
+    @SneakyThrows(IOException.class)
     private static String getVersion() {
-        JsonObject o = JsonParser.parseReader(new InputStreamReader(MinecraftDownloader.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8)).getAsJsonObject();
+        @Cleanup var stream = new InputStreamReader(MinecraftDownloader.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8);
+        JsonObject o = JsonParser.parseReader(stream).getAsJsonObject();
         return o.getAsJsonPrimitive("id").getAsString();
     }
 }
