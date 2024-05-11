@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
+import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
 import net.fabricmc.mappingio.MappingReader;
@@ -22,7 +23,8 @@ import java.util.Objects;
 import java.util.zip.DeflaterOutputStream;
 
 @Log4j2
-public final class MinecraftDownloader {
+@UtilityClass
+public class MinecraftDownloader {
 
     private static final URL MANIFEST = url("https://launchermeta.mojang.com/mc/game/version_manifest_v2.json");
 

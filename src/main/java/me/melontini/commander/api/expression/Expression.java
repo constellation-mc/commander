@@ -33,5 +33,11 @@ public interface Expression extends Function<LootContext, Expression.Result> {
         String getAsString();
         Instant getAsInstant();
         Duration getAsDuration();
+
+        boolean isDecimal();
+        boolean isBoolean();
+        boolean isString();
+        boolean isInstant();
+        boolean isDuration();
     }
 }

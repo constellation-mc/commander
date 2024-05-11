@@ -46,5 +46,30 @@ public record ExpressionImpl(Expression expression) implements me.melontini.comm
         public Duration getAsDuration() {
             return value().getDurationValue();
         }
+
+        @Override
+        public boolean isDecimal() {
+            return value().isNumberValue();
+        }
+
+        @Override
+        public boolean isBoolean() {
+            return value().isBooleanValue();
+        }
+
+        @Override
+        public boolean isString() {
+            return value().isStringValue();
+        }
+
+        @Override
+        public boolean isInstant() {
+            return value().isDateTimeValue();
+        }
+
+        @Override
+        public boolean isDuration() {
+            return value().isDurationValue();
+        }
     }
 }

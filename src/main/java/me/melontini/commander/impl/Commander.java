@@ -13,6 +13,7 @@ import me.melontini.commander.impl.builtin.BuiltInEvents;
 import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.expression.EvalUtils;
+import me.melontini.commander.impl.util.NbtCodecs;
 import me.melontini.commander.impl.util.loot.ArithmeticaLootNumberProvider;
 import me.melontini.commander.impl.util.loot.ExpressionLootCondition;
 import me.melontini.commander.impl.util.mappings.AmbiguousRemapper;
@@ -23,11 +24,14 @@ import me.melontini.dark_matter.api.base.util.MakeSure;
 import me.melontini.dark_matter.api.base.util.PrependingLogger;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.loot.condition.LootConditionType;
 import net.minecraft.loot.provider.number.LootNumberProviderType;
 import net.minecraft.loot.provider.number.LootNumberProviderTypes;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -53,6 +57,9 @@ public class Commander {
     private static final Path BASE_PATH = Path.of(System.getProperty("user.home")).resolve(".commander");
     public static final String MINECRAFT_VERSION = getVersion();
     public static final Path COMMANDER_PATH = BASE_PATH.resolve(MINECRAFT_VERSION);
+
+    public static final AttachmentType<NbtCompound> DATA_ATTACHMENT = AttachmentRegistry.<NbtCompound>builder()
+            .initializer(NbtCompound::new).persistent(NbtCodecs.COMPOUND_CODEC).buildAndRegister(id("persistent"));
 
     @Getter
     private AmbiguousRemapper mappingKeeper;
