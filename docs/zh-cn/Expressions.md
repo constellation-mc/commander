@@ -8,32 +8,32 @@
 
 本模组在 EvalEx 的基础上，添加了一些额外功能。
 
-A "Lambda" here means a regular expression, but with the `it` parameter. Example: `arrayFind(arrayOf(0, 1, 2), it == 1)`. Lambda parameters are marked with `λ`.
+这里的“匿名函数”指带有 `it` 参数的一般表达式。比如：`arrayFind(arrayOf(0, 1, 2), it == 1)`。匿名函数的参数都有 `λ` 作为标记。
 
-Variable Arguments (VarArgs) are marked with `...`. (This means you can specify as many arguments as you need)
+可变参数（VarArgs）都有 `...` 标记（你可以无限指定参数）
 
 ::: details 计算相关
 
 | 函数  |  描述 |  参数 | 示例 |
 |---|---|---|---|
-| `random` | Generates a random number in range. | `min`, `max` | `random(0, 23)` |
-| `clamp` | Clamps the value between two other arguments.  | `value`, `min`, `max` | `clamp(12, 14, 16)` |
-| `lerp` | Smoothly progresses the value to the target.  | `delta`, `start`, `end` | `lerp(0.5, 10, 16)` |
+| `random` | 在指定范围内生成随机数。 | `min`, `max` | `random(0, 23)` |
+| `clamp` | 将其他两个值约束在范围内。  | `value`, `min`, `max` | `clamp(12, 14, 16)` |
+| `lerp` | 平滑地将初值过渡到末值。  | `delta`, `start`, `end` | `lerp(0.5, 10, 16)` |
 
 :::
 
 ::: details 数组
 
-All functions construct new arrays and do not mutate the original array.
+所有的函数都会构建新的数组，不对原本的造成影响。
 
 | 函数  |  描述 |  参数 | 示例 |
 |---|---|---|---|
-| `arrayOf` | Construct an array from the specified objects. | `args...` | `arrayOf(0, 23)` |
-| `arrayMap` | Mutates all objects in this array. | `array`, `function(λ)` | `arrayMap(arrayOf(0,1,2), sqrt(it))` |
-| `arrayFind` | Filters all objects not matching the predicate. | `array`, `predicate(λ)` | `arrayFind(arrayOf(0,1,2), it == 1)` |
-| `arrayAnyMatch` | Checks if any of the objects in this array match the predicate. | `array`, `predicate(λ)` | `arrayAnyMatch(arrayOf(0,1,2), it == 1)` |
-| `arrayNoneMatch` | Checks if none of the objects in this array match the predicate. | `array`, `predicate(λ)` | `arrayNoneMatch(arrayOf(0,1,2), it == 1)` |
-| `arrayAllMatch` | Checks if all objects in this array match the predicate. | `array`, `predicate(λ)` | `arrayAllMatch(arrayOf(0,1,2), it == 1)` |
+| `arrayOf` | 指定对象构建数组。 | `args...` | `arrayOf(0, 23)` |
+| `arrayMap` | 对数组中的所有对象应用更改。 | `array`, `function(λ)` | `arrayMap(arrayOf(0,1,2), sqrt(it))` |
+| `arrayFind` | 过滤掉所有不符合条件的对象。 | `array`, `predicate(λ)` | `arrayFind(arrayOf(0,1,2), it == 1)` |
+| `arrayAnyMatch` | 检查是否数组中存在符合条件的对象。 | `array`, `predicate(λ)` | `arrayAnyMatch(arrayOf(0,1,2), it == 1)` |
+| `arrayNoneMatch` | 检查是否数组中完全没有符合条件的对象。 | `array`, `predicate(λ)` | `arrayNoneMatch(arrayOf(0,1,2), it == 1)` |
+| `arrayAllMatch` | 检查是否数组中的全部对象符合条件。 | `array`, `predicate(λ)` | `arrayAllMatch(arrayOf(0,1,2), it == 1)` |
 
 :::
 
@@ -41,11 +41,11 @@ All functions construct new arrays and do not mutate the original array.
 
 | 函数  |  描述 |  参数 | 示例 |
 |---|---|---|---|
-| `structContainsKey` | Checks if a struct contains some key. | `struct`, `key...` | `structContainsKey(block_state.properties, 'candles')` |
-| `hasContext` | Checks if a expression parameter is available  | `key...` | `hasContext('tool')` |
-| `length` | Returns the length of the specified object or 0.  | `value` | `length('Hello World!')` |
-| `strFormat` | Formats a string according to the pattern.  | `pattern`, `args...` | `strFormat('Hello %s World!', 23)` |
-| `ifMatches` | Simillar to built-in `if`, but with Lambdas.  | `value`, `predicate(λ)`, `ifTrue(λ)`, `ifFalse(λ)` | `ifMatches(arrayFind(arrayOf(0,1,2), it == 1), length(it) > 0, it[0], 0)` |
+| `structContainsKey` | 检查是否结构中包含指定键值。 | `struct`, `key...` | `structContainsKey(block_state.properties, 'candles')` |
+| `hasContext` | 检查是否表达式的参数可用。  | `key...` | `hasContext('tool')` |
+| `length` | 返回指定对象的长度或 0。  | `value` | `length('Hello World!')` |
+| `strFormat` | 将字符串转化为指定格式。  | `pattern`, `args...` | `strFormat('Hello %s World!', 23)` |
+| `ifMatches` | 类似于内置的 `if`，但介入匿名函数。  | `value`, `predicate(λ)`, `ifTrue(λ)`, `ifFalse(λ)` | `ifMatches(arrayFind(arrayOf(0,1,2), it == 1), length(it) > 0, it[0], 0)` |
 
 :::
 
@@ -70,45 +70,45 @@ origin.reverse.y
 minecraft:level.getDayTime
 ```
 
-### Commander Extensions:
+### 命令官拓展：
 
-Commander adds special fields to objects to extend expression capabilities.
+为拓展用途，本模组为对象新增了一些特别的字段。
 
-::: details `nbt` (Stacks, Entities, Block Entities)
+::: details `nbt` （物品，实体，方块实体）
 
-Added to item stacks, entities, and block entities. Allows you to read the NBT of an object. While this can be convenient, NBT access is not fast, and when used in frequently invoked places (like tick events), can bring the game to a halt.
+可用于物品，实体和方块实体。你能够用它读取对象的 NBT 数据。尽管便捷，这个检查的性能不尽人意，频繁调用（比如每刻）可能会导致游戏卡顿。
 
-Example: `this_entity.nbt.Air`
+示例：`this_entity.nbt.Air`
 
 :::
 
-::: details `properties` (Block States)
+::: details `properties`（方块状态）
 
-Added to states, like block states.
+可用于状态，比如方块状态。
 
-Example: `block_state.properties.candles`
+示例：`block_state.properties.candles`
 
 :::
 
 ### P.S.
 
-If you have to do a lot of expensive operations in expressions in tick events, you should delay the execution, if possible, by checking `level.getDayTime % 20 == 0`, this will make sure that the expression is executed every second and not 20 times per second. `% 40` is every 2 seconds and `% 10` is every 1/2 second.
+如果你不得不在表达式中进行复杂的检查，你可以考虑延迟执行它，如果可以，你还可以通过 `level.getDayTime % 20 == 0` 为表达式添加 1 秒的“冷却”。同理，`% 40` 对应 2 秒，`% 10` 对应 0.5 秒。
 
 表达式使用的是 Mojang 的映射（首次载入时下载），这意味着几乎所有公共的字段和 get 类型的方法都可以在表达式里使用。如果本模组无法设置映射，你可能需要依赖于平台的名称（比如 Fabric 的中间映射）。
 
-::: details Random examples
+::: details 一些例子
 
-Default minecart speed is computed using this formula:
+这是原版矿车速度的计算公式：
 
 `if(this_entity.isInWater, 4, 8) / 20`, and furnace: `if(this_entity.isInWater, 3, 4) / 20`
 
 ***
 
-This ridicilous expression can print the current level time in human time. https://bukkit.org/threads/how-can-i-convert-minecraft-long-time-to-real-hours-and-minutes.122912/
+这个表达式能够将游戏时间转化为现实时间。https://bukkit.org/threads/how-can-i-convert-minecraft-long-time-to-real-hours-and-minutes.122912/
 
 `strFormat('%02.0f:%02.0f', floor((level.getDayTime / 1000 + 8) % 24), floor(60 * (level.getDayTime % 1000) / 1000))`
 
-So the output can be: `00:00`, or `13:45`, etc.
+所以它的结果会是：`00:00`，或 `13:45` 这样的。
 
 :::
 
