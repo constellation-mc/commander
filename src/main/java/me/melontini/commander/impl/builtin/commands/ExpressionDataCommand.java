@@ -31,8 +31,8 @@ public record ExpressionDataCommand(StoreDataCommand.Target target, Selector.Con
     public NbtElement asElement(EventContext context) {
         var r = expression.apply(context.lootContext());
 
-        if (r.isDecimal()) return NbtDouble.of(r.getAsDecimal().doubleValue());
-        if (r.isString()) return NbtString.of(r.getAsString());
+        if (r.isDecimalValue()) return NbtDouble.of(r.getAsDecimal().doubleValue());
+        if (r.isStringValue()) return NbtString.of(r.getAsString());
 
         throw new IllegalStateException("Persistent data must be a number or a string!");
     }

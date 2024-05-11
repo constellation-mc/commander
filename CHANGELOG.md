@@ -36,4 +36,4 @@ Other Changes:
 
 Dev Changes:
 
-* Added `is(Type)` to expression result.
+* Added `is(Type)Value` to expression result.

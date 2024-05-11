@@ -3,7 +3,6 @@ package me.melontini.commander.api.expression;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.impl.expression.EvalUtils;
-import me.melontini.commander.impl.expression.ExpressionImpl;
 import net.minecraft.loot.context.LootContext;
 
 import java.math.BigDecimal;
@@ -16,7 +15,7 @@ public interface Expression extends Function<LootContext, Expression.Result> {
     Codec<Expression> CODEC = Codec.STRING.comapFlatMap(Expression::parse, Expression::original);
 
     static DataResult<Expression> parse(String expression) {
-        return EvalUtils.parseExpression(expression).map(ExpressionImpl::new);
+        return (DataResult<Expression>) (Object) EvalUtils.parseExpression(expression);
     }
 
     @Override
@@ -34,10 +33,10 @@ public interface Expression extends Function<LootContext, Expression.Result> {
         Instant getAsInstant();
         Duration getAsDuration();
 
-        boolean isDecimal();
-        boolean isBoolean();
-        boolean isString();
-        boolean isInstant();
-        boolean isDuration();
+        boolean isDecimalValue();
+        boolean isBooleanValue();
+        boolean isStringValue();
+        boolean isInstantValue();
+        boolean isDurationValue();
     }
 }
