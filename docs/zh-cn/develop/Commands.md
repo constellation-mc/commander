@@ -52,7 +52,7 @@ public CommandType type() {
 ```java
 context.lootContext().getWorld(); //返回服务端世界
 
-context.lootContext().get(LootContextParameters.TOOL); //如果不存在，返回参数或空值。
+context.lootContext().get(LootContextParameters.TOOL); //如果不存在，返回形式参数或空值。
 
-context.lootContext().requireParameter(LootContextParameters.TOOL); //如果不存在，返回参数或抛出异常。
+context.lootContext().requireParameter(LootContextParameters.TOOL); //如果不存在，返回形式参数或抛出异常。
 ```
