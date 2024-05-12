@@ -18,6 +18,7 @@ export const en = defineConfig({
                     { text: 'Events', link: '/Events' },
                     { text: 'Commands', link: '/Commands' },
                     { text: 'Expressions', link: '/Expressions' },
+                    { text: 'Brigadier Commands', link: '/BrigadierCommands' },
                 ]
             },
             {
