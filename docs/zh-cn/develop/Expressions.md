@@ -1,12 +1,12 @@
-# Expressions
+# 表达式
 
-As explained in [Expressions](/Expressions), Commander introduces an extensive expression system. This system is exposed as part of the API. On this page we will go over usage examples and a possible way to make expressions an optional integration.
+正如在[表达式](/zh-cn/Expressions)，章节所介绍的那样，命令官模组引入了一个具有高度可拓展性的表达式系统。这个系统可以通过接口从外部调用。在这个页面中，我们将一起创建示例，并探索使表达式成为可选集成的方式。
 
-## Using expressions directly
+## 直接使用表达式
 
-The built-in `Expression` class provides a string -> expression codec and a `parse` method. An expression is a `LootContext -> Expression.Result` function. `Expression.Result` represents a result value that can be converted to `BigDecimal`, `boolean`, `String`, `Instant`and `Duration`.
+内置的 `Expression` 类提供了将字符串转化为表达式的编码器，以及 `parse` 方法。一个表达式相当于 `LootContext -> Expression.Result` 的函数。`Expression.Result` 代表可以被转化为 `BigDecimal`（高精度小数），`boolean`（布尔型），`String`（字符串），`Instant`（时间戳）和 `Duration`（持续时间）的返回值。
 
-To apply any of the expression functions you must have an instance of `LootContext`.
+在应用表达表达式函数前，你必须提供 `LootContext` 的实例。
 
 ```java
 public static final Expression EXP = Expression.parse("strFormat('%02.0f:%02.0f', floor((level.getDayTime / 1000 + 8) % 24), floor(60 * (level.getDayTime % 1000) / 1000))").result().orElseThrow();
@@ -16,21 +16,21 @@ public String worldTimeInHumanTime(LootContext context) {
 }
 ```
 
-## Special functions
+## 特殊函数
 
-Commander comes with `Arithmetica` and `BooleanExpression` which are `double` and `boolean` functions that can be encoded either as a constant or as an expression. It's worth noting that `"true"` will be decoded as an expression, but `true` will not.
+命令官模组附带了 `Arithmetica` 和 `BooleanExpression`。作为 `double` 和 `boolean` 函数，它们可以被编码为常量或表达式。值得注意的是，`"true"` 会被当成表达式解码，而 `true` 不会。
 
 ```json
-2.2, "random(0, 3)" //Arithmetica
+2.2, "random(0, 3)" //Arithmetica（算术）
 
-true, "level.isDay" //BooleanExpression
+true, "level.isDay" //BooleanExpression（布尔型表达式）
 ```
 
-## Expressions as optional integration.
+## 让表达式作为可选集成。
 
-When implementing support for Commander, you may want to make this integration optional. The easiest way to do this is to create a common interface that is then delegated to one of the implementations. This is how expressions are set-up in Andromeda's new config system.
+在实现对命令官模组的支持时，你可能希望让这种集成是非强制的。最简单的方法是，创建一个通用接口，然后委托给其中一个实现。实际上，这就是表达式在群星模组的新配置系统的配置方式。
 
-Let's start by defining a simple boolean intermediary interface. I recommend using a supplier as the parameter, so you don't construct a `LootContext` for constant values.
+让我们从定义一个简单的布尔型中介接口开始、我建议使用 supplier 作为形式参数，因为这样就不用为常量构建 `LootContext` 了。
 
 ```java
 public interface BooleanIntermediary {
@@ -38,8 +38,7 @@ public interface BooleanIntermediary {
 }
 ```
 
-Now let's implement the constant delegate.
-
+接下来，让我们实现常量委托。
 ```java
 public record ConstantBooleanIntermediary(boolean value) implements BooleanIntermediary {
 
@@ -50,7 +49,7 @@ public record ConstantBooleanIntermediary(boolean value) implements BooleanInter
 }
 ```
 
-And our commander delegate.
+以及命令官委托。
 
 ```java
 public final class CommanderBooleanIntermediary implements BooleanIntermediary {
@@ -74,7 +73,7 @@ public final class CommanderBooleanIntermediary implements BooleanIntermediary {
 }
 ```
 
-With our delegates set-up we have to dynamically pick one or the other. Let's return to our intermediary interface and create a factory for constant values. Here I'm using `Support` from Dark Matter, but you can just copy this method:
+委托做好后，接下来，我们需要动态地选择其中一个。让我们回到中介接口，为常量值创建一个 factory（工厂）。在这里，我用的是 Dark Matter 的 `Support`，你也可以直接复制这个方法：
 
 ```java
 public static <T, F extends T, S extends T> T support(String mod, Supplier<F> expected, Supplier<S> fallback) {
@@ -82,7 +81,7 @@ public static <T, F extends T, S extends T> T support(String mod, Supplier<F> ex
 }
 ```
 
-The method will check if Commander is installed and will pick the correct factory.
+这个方法将检查是否命令官模组已被安装，并选择正确的工厂。
 
 ```java
 public interface BooleanIntermediary {
@@ -97,7 +96,7 @@ public interface BooleanIntermediary {
 }
 ```
 
-Now we can define expressions in our config!
+很棒，现在我们可以在配置文件中定义表达式了！
 
 ```java
 public class Config {
@@ -105,7 +104,7 @@ public class Config {
 }
 ```
 
-But wait, what about encoding/decoding? Let's actually get to that. Here we can create a codec for our delegates and use `support` to pick the correct one.
+等等，编码和解码该怎么办？这正是我们接下来要了解的。在这里，我们可以为我们的委托创建一个编解码器，并使用 `support` 来进行正确选择。
 
 ```java
 public record ConstantBooleanIntermediary(boolean value) implements BooleanIntermediary {
@@ -119,25 +118,24 @@ public final class CommanderBooleanIntermediary implements BooleanIntermediary {
 }
 ```
 
-Now we can use our codecs.
+现在可以使用我们的编解码器了。
 
 ```java
 Codec<BooleanIntermediary> codec = (Codec<BooleanIntermediary>) Support.fallback("commander", () -> CommanderBooleanIntermediary.CODEC, () -> ConstantBooleanIntermediary.CODEC);
 ```
 
-### Using intermediaries in configs.
+### 在配置文件中使用中介。
 
-::: info Note
+::: info 提示
 
-This section only applies if you use Gson to read/write your configs. 
+本节只在你使用 Gson 来读写配置文件时有用。
 
-If you use a third-party library and the library doesn't allow you to pass a custom Gson instance, you could modify it using mixins.
+如果你使用了第三方库，且该库不支持传递自定义 Gson 示例，你可以通过 mixin 来修改它。
 :::
-In Gson you can provide custom JsonSerializers/JsonDeserializers, which allows us to encode the intermediary using Codecs.
-Let's create our `CodecSerializer` class.
+在 Gson 中，你可以通过提供自定义 JsonSerializers（Json 序列化器）或 JsonDeserializers（Json 反序列化器），使用编解码器来对中介进行编码。
+接下来将创建我们的 `CodecSerializer` 类。
 
-::: details Code
-
+::: details 编解码器
 ```java
 public record CodecSerializer<C>(Codec<C> codec) implements JsonSerializer<C>, JsonDeserializer<C> {
 
@@ -163,10 +161,10 @@ public record CodecSerializer<C>(Codec<C> codec) implements JsonSerializer<C>, J
 
 :::
 
-And now we can register a type hierarchy adapter with our GsonBuilder.
+现在可以通过我们的 GsonBuilder 来注册类型层次适配器了。
 
 ```java
 builder.registerTypeHierarchyAdapter(BooleanIntermediary.class, CodecSerializer.of(codec));
 ```
 
-And we're done!
+大功告成！
