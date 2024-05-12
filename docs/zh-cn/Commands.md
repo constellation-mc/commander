@@ -150,3 +150,43 @@ $(bool){{0}} 0 -> false
 }
 ```
 :::
+:::
+
+### `commander:store_expression_data` and `commander:store_nbt_data`
+
+These commands allows you to write data to a Commander data storage. This is a JSON variant of the [`/cmd:data`](/BrigadierCommands#cmd-data) command.
+
+Both commands require the following arguments:
+
+| Argument  |  Description |
+|---|---|
+| `target` | The target that you want to write data to. Can be `level`, `chunk`, `entity`, `block_entity`. |
+| `selector` | A regular selector which selects the target of specified type.  |
+| `key` | The identifying key of the data you want to store |
+
+The `nbt` command requires a static number or a string. (`element` field)
+
+The `expression` command requires an expression which returns a number or a string. (`expression` field)
+
+::: details Example
+```json
+{
+  "type": "commander:store_expression_data",
+  "target": "level",
+  "selector": "origin",
+  "key": "cmd_my_cool_data",
+  "expression": "random(0, 2)"
+}
+```
+
+<br/>
+
+```json
+{
+  "type": "commander:store_nbt_data",
+  "target": "entity",
+  "selector": "this_entity",
+  "key": "cmd_my_cool_data",
+  "element": 45
+}
+```
