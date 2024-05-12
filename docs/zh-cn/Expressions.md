@@ -90,17 +90,17 @@ minecraft:level.getDayTime
 
 :::
 
-::: details `attributes` (Living Entities)
+::: details `attributes`（活体）
 
-Allows you to access entity attributes. The key is an identifier, so both `generic.luck` and `minecraft:generic.luck` are acceptible.
+你可以用它获取活体的数据。这个键值是标识符，所以可以写 `generic.luck`，也可以写 `minecraft:generic.luck`。
 
-Example: `this_entity.attributes.'generic.luck'`
+示例：`this_entity.attributes.'generic.luck'`
 
 :::
 
-::: details `storage` (Levels, Chunks, Entities, Block Entities)
+::: details `storage`（存档，区块，实体，方块实体）
 
-Allows you to access persistent data storage. The data is modified and written by [`/cmd:data`](/BrigadierCommands#cmd-data), [`commander:store_nbt_data`](/Commands#commander-store-expression-data-and-commander-store-nbt-data) or [`commander:store_expression_data`](/Commands#commander-store-expression-data-and-commander-store-nbt-data)
+你可以用它获取持久型数据。这一数据可以通过 [`/cmd:data`](/zh-cn/BrigadierCommands#cmd-data)，[`commander:store_nbt_data`](/zh-cn/Commands#commander-store-expression-data-and-commander-store-nbt-data) 或 [`commander:store_expression_data`](/zh-cn/Commands#commander-store-expression-data-and-commander-store-nbt-data) 来读取或修改。
 
 :::
 
