@@ -20,7 +20,7 @@ EventType.builder()
     .build(new Identifier("modid", "custom_event"));
 ```
 
-通过使用 `extension()`，事件可以接受额外的参数。在指定扩展后，你可以返回自定义类型。
+通过使用 `extension()`，事件可以接受额外的形式参数。在指定扩展后，你可以返回自定义类型。
 
 ```java
 EventType.builder()
@@ -53,7 +53,7 @@ private static LootContext makeContext(ServerWorld world, Entity entity, Vec3d o
 
 如果你指定了扩展，或者使用了不受支持的返回类型，就需要编写自定义的解析逻辑。
 
-为了编写这一逻辑，你需要创建 `EventContext`。`EventContext` 用于把执行参数传递给命令。
+为了编写这一逻辑，你需要创建 `EventContext`。`EventContext` 用于把执行形式参数传递给命令。
 
 ```java
 EventContext context = EventContext.builder(type)
