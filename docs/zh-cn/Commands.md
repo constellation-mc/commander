@@ -6,7 +6,7 @@
 
 `condition` 字段可以应用于所有类型的命令，它能够在当下事件的情境中执行。这一字段使用了原版的条件系统，这个工具 [misode.github.io](https://misode.github.io/predicate/) 可以帮你快速创建条件。
 
-部分种类的命令有额外参数。
+部分种类的命令有额外形式参数。
 
 尽管本模组尽量避免在事件外使用命令，其他的项目还是可能把命令整合到其他情境中。这就不在支持范围内了。
 
@@ -80,7 +80,9 @@ $(bool){{0}} 0 -> false
 ### `commander:all_of`, `commander:any_of`, `commander:defaulted`
 这三种类型的功能相似。如果 condition（条件）返回 true，就执行在可选的 `then` 代码块中的命令。
 
-注意：就算条件在很前面就返回 true 了，还是会执行全部命令！
+`all_of` 要求所有命令成功执行，`any_of` 要求其中任一命令成功执行，`defaulted` 要求其中任一命令执行失败。
+
+注意，就算条件在很前面就返回 true 了，还是会执行全部命令！但是，在启用 `short_circuit` 后，条件不满足时，将立即退出执行。
 
 ::: details 示例
 ```json
@@ -148,3 +150,43 @@ $(bool){{0}} 0 -> false
 }
 ```
 :::
+:::
+
+### `commander:store_expression_data` 和 `commander:store_nbt_data`
+
+你可以通过它们将数据写入本模组的数据存储中。它们是 JSON 版本的 [`/cmd:data`](/zh-cn/BrigadierCommands#cmd-data) 命令。
+
+这两个命令都需要以下实际参数：
+
+| 实际参数  |  描述 |
+|---|---|
+| `target` | 写入数据的目标。可以是 `level`（存档），`chunk`（区块），`entity`（实体），`block_entity`（方块实体）。 |
+| `selector` | 用来选择指定种类的常规选择器。  |
+| `key` | 被存储数据的标识用键值。 |
+
+`nbt` 命令需要一个静态数或字符串（`element` 字段）。
+
+`expression` 命令需要一个能返回数字或字符串的表达式（`expression` 字段）。
+
+::: details 示例
+```json
+{
+  "type": "commander:store_expression_data",
+  "target": "level",
+  "selector": "origin",
+  "key": "cmd_my_cool_data",
+  "expression": "random(0, 2)"
+}
+```
+
+<br/>
+
+```json
+{
+  "type": "commander:store_nbt_data",
+  "target": "entity",
+  "selector": "this_entity",
+  "key": "cmd_my_cool_data",
+  "element": 45
+}
+```

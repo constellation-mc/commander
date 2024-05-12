@@ -18,6 +18,7 @@ export const zh_cn = defineConfig({
                     { text: '事件', link: '/zh-cn/Events' },
                     { text: '命令', link: '/zh-cn/Commands' },
                     { text: '表达式', link: '/zh-cn/Expressions' },
+                    { text: '斜杠命令', link: '/zh-cn/BrigadierCommands' },
                 ]
             },
             {
@@ -25,6 +26,7 @@ export const zh_cn = defineConfig({
                 items: [
                     { text: '事件', link: '/zh-cn/develop/Events'},
                     { text: '命令', link: '/zh-cn/develop/Commands'}
+                    { text: '表达式', link: '/zh-cn/develop/Expressions' }
                 ]
             },
             {
