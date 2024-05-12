@@ -90,6 +90,20 @@ minecraft:level.getDayTime
 
 :::
 
+::: details `attributes` (Living Entities)
+
+Allows you to access entity attributes. The key is an identifier, so both `generic.luck` and `minecraft:generic.luck` are acceptible.
+
+Example: `this_entity.attributes.'generic.luck'`
+
+:::
+
+::: details `storage` (Levels, Chunks, Entities, Block Entities)
+
+Allows you to access persistent data storage. The data is modified and written by [`/cmd:data`](/BrigadierCommands#cmd-data), [`commander:store_nbt_data`](/Commands#commander-store-expression-data-and-commander-store-nbt-data) or [`commander:store_expression_data`](/Commands#commander-store-expression-data-and-commander-store-nbt-data)
+
+:::
+
 ### P.S.
 
 如果你不得不在表达式中进行复杂的检查，你可以考虑延迟执行它，如果可以，你还可以通过 `level.getDayTime % 20 == 0` 为表达式添加 1 秒的“冷却”。同理，`% 40` 对应 2 秒，`% 10` 对应 0.5 秒。
