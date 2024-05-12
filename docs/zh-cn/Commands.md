@@ -152,23 +152,23 @@ $(bool){{0}} 0 -> false
 :::
 :::
 
-### `commander:store_expression_data` and `commander:store_nbt_data`
+### `commander:store_expression_data` 和 `commander:store_nbt_data`
 
-These commands allows you to write data to a Commander data storage. This is a JSON variant of the [`/cmd:data`](/BrigadierCommands#cmd-data) command.
+你可以通过它们将数据写入本模组的数据存储中。它们是 JSON 版本的 [`/cmd:data`](/zh-cn/BrigadierCommands#cmd-data) 命令。
 
-Both commands require the following arguments:
+这两个命令都需要以下实际参数：
 
-| Argument  |  Description |
+| 实际参数  |  描述 |
 |---|---|
-| `target` | The target that you want to write data to. Can be `level`, `chunk`, `entity`, `block_entity`. |
-| `selector` | A regular selector which selects the target of specified type.  |
-| `key` | The identifying key of the data you want to store |
+| `target` | 写入数据的目标。可以是 `level`（存档），`chunk`（区块），`entity`（实体），`block_entity`（方块实体）。 |
+| `selector` | 用来选择指定种类的常规选择器。  |
+| `key` | 被存储数据的标识用键值。 |
 
-The `nbt` command requires a static number or a string. (`element` field)
+`nbt` 命令需要一个静态数或字符串（`element` 字段）。
 
-The `expression` command requires an expression which returns a number or a string. (`expression` field)
+`expression` 命令需要一个能返回数字或字符串的表达式（`expression` 字段）。
 
-::: details Example
+::: details 示例
 ```json
 {
   "type": "commander:store_expression_data",
