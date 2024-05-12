@@ -8,16 +8,16 @@
 
 本模组在 EvalEx 的基础上，添加了一些额外功能。
 
-这里的“匿名函数”指带有 `it` 参数的一般表达式。比如：`arrayFind(arrayOf(0, 1, 2), it == 1)`。匿名函数的参数都有 `λ` 作为标记。
+这里的“匿名函数”指带有 `it` 形式参数的一般表达式。比如：`arrayFind(arrayOf(0, 1, 2), it == 1)`。匿名函数的形式参数都有 `λ` 作为标记。
 
-可变参数（VarArgs）都有 `...` 标记（你可以无限指定参数）
+可变实际参数（VarArgs）都有 `...` 标记（你可以无限指定实际参数）
 
 ::: details 计算相关
 
-| 函数  |  描述 |  参数 | 示例 |
+| 函数  |  描述 |  实参 | 示例 |
 |---|---|---|---|
 | `random` | 在指定范围内生成随机数。 | `min`, `max` | `random(0, 23)` |
-| `clamp` | 将其他两个值约束在范围内。  | `value`, `min`, `max` | `clamp(12, 14, 16)` |
+| `clamp` | 将其他两个实际参数约束在范围内。  | `value`, `min`, `max` | `clamp(12, 14, 16)` |
 | `lerp` | 平滑地将初值过渡到末值。  | `delta`, `start`, `end` | `lerp(0.5, 10, 16)` |
 
 :::
@@ -26,7 +26,7 @@
 
 所有的函数都会构建新的数组，不对原本的造成影响。
 
-| 函数  |  描述 |  参数 | 示例 |
+| 函数  |  描述 |  实参 | 示例 |
 |---|---|---|---|
 | `arrayOf` | 指定对象构建数组。 | `args...` | `arrayOf(0, 23)` |
 | `arrayMap` | 对数组中的所有对象应用更改。 | `array`, `function(λ)` | `arrayMap(arrayOf(0,1,2), sqrt(it))` |
@@ -39,10 +39,10 @@
 
 ::: details 杂项
 
-| 函数  |  描述 |  参数 | 示例 |
+| 函数  |  描述 |  实参 | 示例 |
 |---|---|---|---|
 | `structContainsKey` | 检查是否结构中包含指定键值。 | `struct`, `key...` | `structContainsKey(block_state.properties, 'candles')` |
-| `hasContext` | 检查是否表达式的参数可用。  | `key...` | `hasContext('tool')` |
+| `hasContext` | 检查是否表达式的形式参数可用。  | `key...` | `hasContext('tool')` |
 | `length` | 返回指定对象的长度或 0。  | `value` | `length('Hello World!')` |
 | `strFormat` | 将字符串转化为指定格式。  | `pattern`, `args...` | `strFormat('Hello %s World!', 23)` |
 | `ifMatches` | 类似于内置的 `if`，但介入匿名函数。  | `value`, `predicate(λ)`, `ifTrue(λ)`, `ifFalse(λ)` | `ifMatches(arrayFind(arrayOf(0,1,2), it == 1), length(it) > 0, it[0], 0)` |
