@@ -8,7 +8,22 @@ All command types accept a special `condition` field, that can operate on the cu
 
 Various command types can take additional parameters.
 
-Although Commander avoids using commands outside events, other projects might integrate commands to other contexts. This is not unsupported.
+You can also use Commander commands in advancement rewards:
+
+```json
+{
+  "rewards": {
+    "commander:commands": [
+      {
+        "type": "commander:print",
+        "text": "42"
+      }
+    ]
+  }
+}
+```
+
+And other projects might integrate commands to other contexts!
 
 [[toc]]
 
