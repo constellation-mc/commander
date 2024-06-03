@@ -4,7 +4,7 @@
 
 ## `cmd:arithmetica`
 
-这个命令可以让你在聊天栏中运行表达式。情境：`minecraft:level`（存档），`minecraft:origin`（维度）和可选的 `minecraft:this_entity`（实体）。这个命令需要一个字符串类型的表达式，以及可选的数据类型转换。
+这个命令可以让你在聊天栏中运行表达式。上下文：`minecraft:level`（存档），`minecraft:origin`（维度）和可选的 `minecraft:this_entity`（实体）。这个命令需要一个字符串类型的表达式，以及可选的数据类型转换。
 
 ```
 cmd:arithmetica ->
