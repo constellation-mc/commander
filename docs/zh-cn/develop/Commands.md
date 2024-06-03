@@ -45,9 +45,9 @@ public CommandType type() {
 }
 ```
 
-## 事件情境
+## 事件的上下文
 
-你可以通过事件情境，检索与事件类型一起传递的 `LootContext`。
+你可以通过事件的上下文，检索与事件类型一起传递的 `LootContext`。
 
 ```java
 context.lootContext().getWorld(); //返回服务端世界
