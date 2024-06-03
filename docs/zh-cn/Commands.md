@@ -4,17 +4,32 @@
 
 命令相当于 JSON 文件中的对象。事件被触发时，`type` 字段将决定哪些命令被执行。
 
-`condition` 字段可以应用于所有类型的命令，它能够在当下事件的情境中执行。这一字段使用了原版的条件系统，这个工具 [misode.github.io](https://misode.github.io/predicate/) 可以帮你快速创建条件。
+`condition` 字段可以应用于所有类型的命令，它能够在当下事件的上下文中执行。这一字段使用了原版的条件系统，这个工具 [misode.github.io](https://misode.github.io/predicate/) 可以帮你快速创建条件。
 
 部分种类的命令有额外形式参数。
 
-尽管本模组尽量避免在事件外使用命令，其他的项目还是可能把命令整合到其他情境中。这就不在支持范围内了。
+你还可以在成就的奖励中使用本模组的命令：
+
+```json
+{
+  "rewards": {
+    "commander:commands": [
+      {
+        "type": "commander:print",
+        "text": "42"
+      }
+    ]
+  }
+}
+```
+
+其他模组也能将命令集成到其他的上下文中！
 
 [[toc]]
 
 ## 选择器
 
-一些命令需要你指定“选择器”。选择器用于选择执行者，它可以是一个位置，也可以（可选）是一个实体。一些例外除外，选择器模仿了原版的战利品情境。你可以在[内置选择器](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/BuiltInSelectors.java)页面，了解所有的内置选择器：。
+一些命令需要你指定“选择器”。选择器用于选择执行者，它可以是一个位置，也可以（可选）是一个实体。一些例外除外，选择器模仿了原版战利品的上下文。你可以在[内置选择器](https://github.com/constellation-mc/commander/blob/main/src/main/java/me/melontini/commander/impl/builtin/BuiltInSelectors.java)页面，了解所有的内置选择器：。
 
 ## 内置命令
 本模组内置了少量命令，因为游戏内交互应该交给 `/` 样式的命令，或者函数。
