@@ -37,7 +37,7 @@ EventType.builder()
 
 如果你没有指定扩展，或选择返回 `List<Command.Conditioned>`，你可以使用附带的 `EventExecutors` 辅助单元。
 
-为了使用这一辅助单元，你需要传递：事件类型、执行的世界，以及战利品情境提供者。
+为了使用这一辅助单元，你需要传递：事件类型、执行的世界，以及战利品的上下文提供者。
 
 ```java
 CustomEvent.EVENT.register((world, entity) -> runVoid(CUSTOM_EVENT, world, () -> makeContext(world, entity, entity.getPos())));
@@ -57,7 +57,7 @@ private static LootContext makeContext(ServerWorld world, Entity entity, Vec3d o
 
 ```java
 EventContext context = EventContext.builder(type)
-        .addParameter(EventKey.LOOT_CONTEXT, /*战利品情境的实例*/)
+        .addParameter(EventKey.LOOT_CONTEXT, /*战利品的上下文的实例*/)
         .build();
 for (Command.Conditioned subscriber : subscribers) subscriber.execute(context);
 ```
