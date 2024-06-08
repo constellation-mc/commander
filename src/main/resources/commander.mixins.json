@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AdvancementRewardsMixin",
+    "ExecuteCommandMixin",
     "evalex.EvaluationValueAccessor",
     "evalex.EvaluationValueMixin",
     "evalex.ExpressionAccessor",

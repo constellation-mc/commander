@@ -1,3 +1,5 @@
 accessWidener  v2	named
 
+accessible class net/minecraft/server/command/ExecuteCommand$Condition
+
 accessible method net/minecraft/loot/provider/number/LootNumberProviderTypes register (Ljava/lang/String;Lnet/minecraft/util/JsonSerializer;)Lnet/minecraft/loot/provider/number/LootNumberProviderType;
