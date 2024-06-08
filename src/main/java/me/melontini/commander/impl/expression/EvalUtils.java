@@ -10,6 +10,9 @@ import com.ezylang.evalex.functions.FunctionIfc;
 import com.ezylang.evalex.parser.ASTNode;
 import com.ezylang.evalex.parser.ParseException;
 import com.google.common.base.CaseFormat;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
@@ -28,9 +31,12 @@ import me.melontini.commander.impl.mixin.evalex.ExpressionConfigurationAccessor;
 import me.melontini.commander.impl.mixin.evalex.MapBasedFunctionDictionaryAccessor;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -107,12 +113,20 @@ public class EvalUtils {
         }
     }
 
-    public static DataResult<Expression> parseExpression(String expression) {
-        try {
-            Expression exp = new Expression(expression, CONFIGURATION);
+    //Not sure about this cache.
+    private static final LoadingCache<String, Expression> EXPRESSION_CACHE = CacheBuilder.newBuilder().expireAfterAccess(Duration.of(3, ChronoUnit.MINUTES)).build(new CacheLoader<>() {
+        @Override
+        public @NotNull Expression load(@NotNull String key) throws Exception {
+            Expression exp = new Expression(key, CONFIGURATION);
             ((ExpressionAccessor) exp).commander$constants(new Object2ReferenceOpenHashMap<>(CONFIGURATION.getDefaultConstants()));
             exp.validate();
-            return DataResult.success(exp);
+            return exp;
+        }
+    });
+
+    public static DataResult<Expression> parseExpression(String expression) {
+        try {
+            return DataResult.success(EXPRESSION_CACHE.get(expression));
         } catch (Throwable throwable) {
             return DataResult.error(throwable::getLocalizedMessage);
         }
