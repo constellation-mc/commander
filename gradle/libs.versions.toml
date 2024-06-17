@@ -12,7 +12,7 @@ dark-matter-minecraft = { group = "me.melontini", name = "dark-matter-minecraft"
 dark-matter-data = { group = "me.melontini", name = "dark-matter-data", version.ref = "dark-matter" }
 
 [plugins]
-fabric-loom = { id = "fabric-loom", version = "1.6-SNAPSHOT" }
+fabric-loom = { id = "fabric-loom", version = "1.7.1" }
 lombok = { id = "io.freefair.lombok", version = "8.6"}
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 spotbugs-base = { id = "com.github.spotbugs-base", version = "6.0.15" }
