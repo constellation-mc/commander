@@ -3,6 +3,13 @@ comment: false
 ---
 # Commander <Badge type="warning" text="beta" />
 
+<div class="badge-holder">
+
+[![Available on Modrinth](https://raw.githubusercontent.com/melontini/mini-badges/main/minecraft/modrinth.svg)](https://modrinth.com/mod/recipe-book-delight)
+[![Available on CurseForge](https://raw.githubusercontent.com/melontini/mini-badges/main/minecraft/curseforge.svg)](https://www.curseforge.com/minecraft/mc-mods/cmd-project)
+
+</div>
+
 Commander is an extension of the vanilla data pack system.
 
 It adds a new event system, flexible json commands, new `/` commands, support for advanced expressions with data access and more!

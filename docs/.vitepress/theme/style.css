@@ -140,3 +140,7 @@
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
 
+.badge-holder img {
+  margin: 3px;
+  display: inline-block;
+}
