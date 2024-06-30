@@ -28,7 +28,7 @@ export default defineConfig({
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     logo: { src: '/logo.png', width: 24, height: 24 },
-    externalLinkIcon: true,
+    externalLinkIcon: false,
 
     editLink: {
       pattern: 'https://github.com/constellation-mc/commander/edit/documentation/docs/:path'
