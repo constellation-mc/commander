@@ -28,7 +28,7 @@ public class EntityAttributesStruct extends ProxyMap {
 
     @Override
     public EvaluationValue get(Object key) {
-        if (!(key instanceof String s)) return EvaluationValue.nullValue();
+        if (!(key instanceof String s)) return EvaluationValue.NULL_VALUE;
         return EvaluationValue.numberValue(BigDecimal.valueOf(container.getValue(Registries.ATTRIBUTE.get(new Identifier(s)))));
     }
 

@@ -20,7 +20,10 @@ import lombok.SneakyThrows;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
-import me.melontini.commander.impl.expression.functions.*;
+import me.melontini.commander.impl.expression.functions.HasContextFunction;
+import me.melontini.commander.impl.expression.functions.LengthFunction;
+import me.melontini.commander.impl.expression.functions.MatchesFunction;
+import me.melontini.commander.impl.expression.functions.StructContainsKeyFunction;
 import me.melontini.commander.impl.expression.functions.arrays.*;
 import me.melontini.commander.impl.expression.functions.math.ClampFunction;
 import me.melontini.commander.impl.expression.functions.math.LerpFunction;
@@ -73,8 +76,6 @@ public class EvalUtils {
         functions.put("arrayAnyMatch", new ArrayAnyMatch());
         functions.put("arrayNoneMatch", new ArrayNoneMatch());
         functions.put("arrayAllMatch", new ArrayAllMatch());
-
-        functions.put("strFormat", new StringFormatFunction());
 
         functions.put("structContainsKey", new StructContainsKeyFunction());
         functions.put("hasContext", new HasContextFunction());

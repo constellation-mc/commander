@@ -22,7 +22,7 @@ public class NbtCompoundStruct extends ProxyMap {
 
     @Override
     public EvaluationValue get(Object key) {
-        if (!(key instanceof String s)) return EvaluationValue.nullValue();
+        if (!(key instanceof String s)) return EvaluationValue.NULL_VALUE;
         return convert(compound.get(s));
     }
 

@@ -28,7 +28,7 @@ public class StateStruct extends ProxyMap {
         for (Entry<Property<?>, Comparable<?>> e : state.getEntries().entrySet()) {
             if (e.getKey().getName().equals(key)) return convert(e.getValue());
         }
-        return EvaluationValue.nullValue();
+        return EvaluationValue.NULL_VALUE;
     }
 
     @Override

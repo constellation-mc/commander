@@ -2,9 +2,7 @@ package me.melontini.commander.impl.mixin.evalex;
 
 import com.ezylang.evalex.data.EvaluationValue;
 import me.melontini.commander.api.expression.Expression;
-import me.melontini.commander.impl.expression.EvalUtils;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.math.BigDecimal;
@@ -21,24 +19,6 @@ public abstract class EvaluationValueMixin implements Expression.Result {
     @Shadow public abstract Duration getDurationValue();
     @Shadow public abstract boolean isNumberValue();
     @Shadow public abstract boolean isDateTimeValue();
-
-    /**
-     * @author melontini
-     * @reason fold boolean constants
-     */
-    @Overwrite
-    public static EvaluationValue booleanValue(Boolean value) {
-        return value ? EvalUtils.TRUE : EvalUtils.FALSE;
-    }
-
-    /**
-     * @author melontini
-     * @reason fold null constant
-     */
-    @Overwrite
-    public static EvaluationValue nullValue() {
-        return EvalUtils.NULL;
-    }
 
     @Override
     public BigDecimal getAsDecimal() {

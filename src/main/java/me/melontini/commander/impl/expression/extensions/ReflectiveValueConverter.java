@@ -23,7 +23,7 @@ public class ReflectiveValueConverter implements EvaluationValueConverterIfc {
 
     @Override
     public EvaluationValue convertObject(Object object, ExpressionConfiguration configuration) {
-        if (object == null) return EvaluationValue.nullValue();
+        if (object == null) return EvaluationValue.NULL_VALUE;
         if (object instanceof EvaluationValue value) return value;
         if (object instanceof ProxyMap map) return EvaluationValue.structureValue(map); //Proxy maps convert all of their outputs.
 
