@@ -20,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Optional;
+
 @Mixin(ExecuteCommand.class)
 public abstract class ExecuteCommandMixin {
 
@@ -39,7 +41,7 @@ public abstract class ExecuteCommandMixin {
             LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(context.getSource().getWorld())
                     .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
                     .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
-                    .build(LootContextTypes.COMMAND)).build(null);
+                    .build(LootContextTypes.COMMAND)).build(Optional.empty());
 
             return r.result().orElseThrow().apply(context1).getAsBoolean();
         })));
