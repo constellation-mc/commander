@@ -126,7 +126,7 @@ public class EvalUtils {
 
     public static DataResult<Expression> parseExpression(String expression) {
         try {
-            return DataResult.success(EXPRESSION_CACHE.get(expression));
+            return DataResult.success(EXPRESSION_CACHE.get(expression).copy());
         } catch (Throwable throwable) {
             return DataResult.error(throwable::getLocalizedMessage);
         }

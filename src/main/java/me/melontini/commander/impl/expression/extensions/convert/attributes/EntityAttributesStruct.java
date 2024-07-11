@@ -1,6 +1,7 @@
 package me.melontini.commander.impl.expression.extensions.convert.attributes;
 
 import com.ezylang.evalex.data.EvaluationValue;
+import lombok.EqualsAndHashCode;
 import me.melontini.commander.impl.expression.extensions.ProxyMap;
 import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.registry.Registries;
@@ -8,6 +9,7 @@ import net.minecraft.util.Identifier;
 
 import java.math.BigDecimal;
 
+@EqualsAndHashCode(callSuper = false)
 public class EntityAttributesStruct extends ProxyMap {
 
     private final AttributeContainer container;
@@ -32,6 +34,8 @@ public class EntityAttributesStruct extends ProxyMap {
 
     @Override
     public String toString() {
-        return String.valueOf(container.toNbt());
+        return "EntityAttributesStruct{" +
+                "container=" + container.toNbt() +
+                '}';
     }
 }

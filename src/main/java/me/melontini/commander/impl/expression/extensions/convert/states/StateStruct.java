@@ -1,10 +1,12 @@
 package me.melontini.commander.impl.expression.extensions.convert.states;
 
 import com.ezylang.evalex.data.EvaluationValue;
+import lombok.EqualsAndHashCode;
 import me.melontini.commander.impl.expression.extensions.ProxyMap;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 
+@EqualsAndHashCode(callSuper = false)
 public class StateStruct extends ProxyMap {
 
     private final State<?, ?> state;
@@ -36,6 +38,8 @@ public class StateStruct extends ProxyMap {
 
     @Override
     public String toString() {
-        return String.valueOf(state.getEntries());
+        return "StateStruct{" +
+                "state=" + state.getEntries() +
+                '}';
     }
 }
