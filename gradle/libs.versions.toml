@@ -4,7 +4,7 @@ dark-matter = "4.0.0-1.20.4-build.482"
 [libraries]
 fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version = "0.15.11" }
 fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version = "0.97.0+1.20.4" }
-evalx = { group = "com.ezylang", name = "EvalEx", version = "3.2.0" }
+evalx = { group = "com.ezylang", name = "EvalEx", version = "3.3.0" }
 mapping-io = { group = "net.fabricmc", name = "mapping-io", version = "0.6.1" }
 dark-matter-base = { group = "me.melontini", name = "dark-matter-base", version.ref = "dark-matter" }
 dark-matter-mixin = { group = "me.melontini", name = "dark-matter-mixin", version.ref = "dark-matter" }
@@ -12,9 +12,9 @@ dark-matter-minecraft = { group = "me.melontini", name = "dark-matter-minecraft"
 dark-matter-data = { group = "me.melontini", name = "dark-matter-data", version.ref = "dark-matter" }
 
 [plugins]
-fabric-loom = { id = "fabric-loom", version = "1.6-SNAPSHOT" }
+fabric-loom = { id = "fabric-loom", version = "1.7.2" }
 lombok = { id = "io.freefair.lombok", version = "8.6"}
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
-spotbugs-base = { id = "com.github.spotbugs-base", version = "6.0.14" }
+spotbugs-base = { id = "com.github.spotbugs-base", version = "6.0.18" }
 spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
-modmuss50-publish = { id = "me.modmuss50.mod-publish-plugin", version = "0.5.1" }
+modmuss50-publish = { id = "me.modmuss50.mod-publish-plugin", version = "0.5.2" }

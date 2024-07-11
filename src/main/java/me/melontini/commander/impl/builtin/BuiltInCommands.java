@@ -2,8 +2,6 @@ package me.melontini.commander.impl.builtin;
 
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.command.CommandType;
-import me.melontini.commander.impl.builtin.commands.ExpressionDataCommand;
-import me.melontini.commander.impl.builtin.commands.NbtDataCommand;
 import me.melontini.commander.impl.builtin.commands.action.CancelCommand;
 import me.melontini.commander.impl.builtin.commands.action.CommandCommand;
 import me.melontini.commander.impl.builtin.commands.action.PrintArithmeticaCommand;
@@ -27,9 +25,6 @@ public class BuiltInCommands {
     public static final CommandType COMMANDS = CommandType.register(id("commands"), CommandCommand.CODEC);
     public static final CommandType PRINT = CommandType.register(id("print"), PrintCommand.CODEC);
     public static final CommandType PRINT_ARITHMETICA = CommandType.register(id("print_arithmetica"), PrintArithmeticaCommand.CODEC);
-
-    public static final CommandType STORE_EXP_DATA = CommandType.register(id("store_expression_data"), ExpressionDataCommand.CODEC);
-    public static final CommandType STORE_NBT_DATA = CommandType.register(id("store_nbt_data"), NbtDataCommand.CODEC);
 
     public static void init() {
         BrigadierCommands.init();

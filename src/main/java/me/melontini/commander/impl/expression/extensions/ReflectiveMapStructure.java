@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
@@ -23,7 +24,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Function;
 
-@Log4j2
+@Log4j2 @EqualsAndHashCode(callSuper = false)
 public class ReflectiveMapStructure extends ProxyMap {
 
     private static final Map<Class<?>, Struct> MAPPINGS = new Reference2ReferenceOpenHashMap<>();
@@ -33,6 +34,7 @@ public class ReflectiveMapStructure extends ProxyMap {
         CustomFields.init();
     }
 
+    @EqualsAndHashCode.Exclude
     private final Struct mappings;
     private final Object object;
 
@@ -162,7 +164,7 @@ public class ReflectiveMapStructure extends ProxyMap {
 
     @Override
     public String toString() {
-        return String.valueOf(this.object);
+        return "ReflectiveMapStructure{object=" + this.object + ";}";
     }
 
     static final class Struct {
