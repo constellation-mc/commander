@@ -136,8 +136,8 @@ public class EvalUtils {
     public static class LootContextDataAccessor implements DataAccessorIfc {
 
         private static final Map<Identifier, Function<LootContext, Object>> overrides = new Object2ReferenceOpenHashMap<>(Map.of(
-                new Identifier("level"), LootContext::getWorld,
-                new Identifier("luck"), LootContext::getLuck
+                Identifier.of("level"), LootContext::getWorld,
+                Identifier.of("luck"), LootContext::getLuck
         ));
         public static final ThreadLocal<LootContext> LOCAL = new ThreadLocal<>();
         private final Map<String, EvaluationValue> parameters = new Object2ReferenceOpenHashMap<>();

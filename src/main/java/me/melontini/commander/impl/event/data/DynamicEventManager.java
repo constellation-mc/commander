@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Accessors(fluent = true)
 public class DynamicEventManager extends JsonCodecDataLoader<List<? extends Subscription<?>>> implements IdentifiableResourceReloadListener {
 
-    public static final ReloaderType<DynamicEventManager> RELOADER = ReloaderType.create(new Identifier("commander:events"));
+    public static final ReloaderType<DynamicEventManager> RELOADER = ReloaderType.create(Identifier.of("commander:events"));
 
     final IdentityHashMap<EventType, Object> customData = new IdentityHashMap<>();
 

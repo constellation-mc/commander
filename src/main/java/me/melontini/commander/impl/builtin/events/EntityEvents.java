@@ -61,7 +61,7 @@ public class EntityEvents {
         ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY.register((world, entity, killedEntity) -> runVoid(AFTER_KILLED_BY_OTHER, world, () -> {
             LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder((ServerWorld) entity.getWorld());
             builder.add(THIS_ENTITY, killedEntity).add(ORIGIN, killedEntity.getPos());
-            builder.add(DAMAGE_SOURCE, world.getDamageSources().generic()).add(KILLER_ENTITY, entity);
+            builder.add(DAMAGE_SOURCE, world.getDamageSources().generic()).add(ATTACKING_ENTITY, entity);
             return new LootContext.Builder(builder.build(LootContextTypes.ENTITY)).build(Optional.empty());
         }));
     }
@@ -71,8 +71,8 @@ public class EntityEvents {
         builder.add(THIS_ENTITY, entity).add(ORIGIN, origin);
         if (source != null) {
             builder.add(DAMAGE_SOURCE, source);
-            builder.addOptional(DIRECT_KILLER_ENTITY, source.getAttacker());
-            builder.addOptional(KILLER_ENTITY, source.getSource());
+            builder.addOptional(DIRECT_ATTACKING_ENTITY, source.getAttacker());
+            builder.addOptional(ATTACKING_ENTITY, source.getSource());
         }
         return new LootContext.Builder(builder.build(source == null ? LootContextTypes.COMMAND : LootContextTypes.ENTITY)).build(Optional.empty());
     }

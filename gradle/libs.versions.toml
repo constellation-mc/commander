@@ -1,9 +1,9 @@
 [versions]
-dark-matter = "4.0.2-1.20.4-build.81"
+dark-matter = "4.1.0-1.21-build.84"
 
 [libraries]
 fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version = "0.15.11" }
-fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version = "0.97.0+1.20.4" }
+fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version = "0.100.7+1.21" }
 evalx = { group = "com.ezylang", name = "EvalEx", version = "3.3.0" }
 mapping-io = { group = "net.fabricmc", name = "mapping-io", version = "0.6.1" }
 dark-matter-base = { group = "me.melontini", name = "dark-matter-base", version.ref = "dark-matter" }

@@ -28,8 +28,8 @@ public final class BuiltInSelectors {
                 world.getServer(), null);
     });
     public static final Selector THIS_ENTITY = Selector.register(mc("this_entity"), context -> forEntity(context.requireParameter(LootContextParameters.THIS_ENTITY)));
-    public static final Selector KILLER_ENTITY = Selector.register(mc("killer_entity"), context -> forEntity(context.requireParameter(LootContextParameters.KILLER_ENTITY)));
-    public static final Selector DIRECT_KILLER_ENTITY = Selector.register(mc("direct_killer_entity"), context -> forEntity(context.requireParameter(LootContextParameters.DIRECT_KILLER_ENTITY)));
+    public static final Selector KILLER_ENTITY = Selector.register(mc("attacking_entity"), context -> forEntity(context.requireParameter(LootContextParameters.ATTACKING_ENTITY)));
+    public static final Selector DIRECT_KILLER_ENTITY = Selector.register(mc("direct_attacking_entity"), context -> forEntity(context.requireParameter(LootContextParameters.DIRECT_ATTACKING_ENTITY)));
     public static final Selector LAST_DAMAGE_PLAYER = Selector.register(mc("last_damage_player"), context -> forEntity(context.requireParameter(LootContextParameters.LAST_DAMAGE_PLAYER)));
     public static final Selector BLOCK_ENTITY = Selector.register(mc("block_entity"), context -> {
         var be = context.requireParameter(LootContextParameters.BLOCK_ENTITY);
@@ -57,7 +57,7 @@ public final class BuiltInSelectors {
     }
 
     public static Identifier mc(String string) {
-        return new Identifier("minecraft", string);
+        return Identifier.of("minecraft", string);
     }
 
     public static ServerCommandSource forEntity(Entity entity) {

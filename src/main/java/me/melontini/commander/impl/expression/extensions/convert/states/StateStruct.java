@@ -43,3 +43,4 @@ public class StateStruct extends ProxyMap {
                 '}';
     }
 }
+

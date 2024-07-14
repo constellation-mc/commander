@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Cleanup;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -25,6 +26,7 @@ import me.melontini.dark_matter.api.base.util.PrependingLogger;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.loot.condition.LootConditionType;
@@ -32,8 +34,10 @@ import net.minecraft.loot.provider.number.LootNumberProviderType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -49,8 +53,8 @@ import static net.minecraft.loot.context.LootContextParameters.*;
 public class Commander {
 
     public static final PrependingLogger LOGGER = PrependingLogger.get();
-    public static final LootNumberProviderType ARITHMETICA_PROVIDER = Registry.register(Registries.LOOT_NUMBER_PROVIDER_TYPE, id("arithmetica"), new LootNumberProviderType(ArithmeticaLootNumberProvider.CODEC.codec()));
-    public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExpressionLootCondition.CODEC.codec()));
+    public static final LootNumberProviderType ARITHMETICA_PROVIDER = Registry.register(Registries.LOOT_NUMBER_PROVIDER_TYPE, id("arithmetica"), new LootNumberProviderType(ArithmeticaLootNumberProvider.CODEC));
+    public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExpressionLootCondition.CODEC));
 
     private static final Path BASE_PATH = Path.of(System.getProperty("user.home")).resolve(".commander");
     public static final String MINECRAFT_VERSION = getVersion();
@@ -61,9 +65,11 @@ public class Commander {
 
     @Getter
     private AmbiguousRemapper mappingKeeper;
+    @Getter @Setter
+    private @Nullable MinecraftServer currentServer;
 
     public static Identifier id(String path) {
-        return new Identifier("commander", path);
+        return Identifier.of("commander", path);
     }
 
     private static Commander instance;
@@ -113,6 +119,10 @@ public class Commander {
         }
 
         ServerReloadersEvent.EVENT.register(context -> context.register(new DynamicEventManager()));
+
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> this.currentServer = server);
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.currentServer = null);
+
         EvalUtils.init();
 
         try {
@@ -133,9 +143,10 @@ public class Commander {
         LootContextParameterRegistry.register(
                 ORIGIN, TOOL,
                 THIS_ENTITY, LAST_DAMAGE_PLAYER,
-                KILLER_ENTITY, DIRECT_KILLER_ENTITY,
+                ATTACKING_ENTITY, DIRECT_ATTACKING_ENTITY,
                 DAMAGE_SOURCE, EXPLOSION_RADIUS,
-                BLOCK_STATE, BLOCK_ENTITY);
+                BLOCK_STATE, BLOCK_ENTITY,
+                ENCHANTMENT_LEVEL, ENCHANTMENT_ACTIVE);
     }
 
     @SneakyThrows(IOException.class)

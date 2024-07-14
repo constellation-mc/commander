@@ -8,7 +8,6 @@ import me.melontini.commander.api.event.EventContext;
 import me.melontini.commander.impl.event.data.types.SelectorTypes;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.condition.LootConditionTypes;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
@@ -21,7 +20,7 @@ import java.util.function.Function;
 public record ConditionedSelector(Optional<LootCondition> condition, Selector other) implements Selector.Conditioned {
 
     public static final Codec<? extends Selector.Conditioned> CODEC =  ExtraCodecs.either(RecordCodecBuilder.<ConditionedSelector>create(data -> data.group(
-                ExtraCodecs.optional("condition", LootConditionTypes.CODEC).forGetter(ConditionedSelector::condition),
+                ExtraCodecs.optional("condition", LootCondition.CODEC).forGetter(ConditionedSelector::condition),
                 SelectorTypes.CODEC.fieldOf("value").forGetter(ConditionedSelector::other)
         ).apply(data, ConditionedSelector::new)), SelectorTypes.CODEC).xmap(e -> e.map(Function.identity(), selector -> new ConditionedSelector(Optional.empty(), selector)), Either::left);
 

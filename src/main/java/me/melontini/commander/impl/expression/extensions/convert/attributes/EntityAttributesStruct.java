@@ -21,15 +21,14 @@ public class EntityAttributesStruct extends ProxyMap {
     @Override
     public boolean containsKey(Object key) {
         if (!(key instanceof String s)) return false;
-        var attr = Registries.ATTRIBUTE.get(new Identifier(s));
-        if (attr == null) return false;
-        return container.hasAttribute(attr);
+        var attr = Registries.ATTRIBUTE.getEntry(Identifier.validate(s).getOrThrow());
+        return attr.filter(container::hasAttribute).isPresent();
     }
 
     @Override
     public EvaluationValue get(Object key) {
         if (!(key instanceof String s)) return EvaluationValue.NULL_VALUE;
-        return EvaluationValue.numberValue(BigDecimal.valueOf(container.getValue(Registries.ATTRIBUTE.get(new Identifier(s)))));
+        return EvaluationValue.numberValue(BigDecimal.valueOf(container.getValue(Registries.ATTRIBUTE.getEntry(Identifier.of(s)).orElseThrow())));
     }
 
     @Override
