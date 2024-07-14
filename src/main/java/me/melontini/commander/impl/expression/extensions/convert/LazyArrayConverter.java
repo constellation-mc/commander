@@ -3,6 +3,7 @@ package me.melontini.commander.impl.expression.extensions.convert;
 import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.data.conversion.ConverterIfc;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import me.melontini.commander.impl.expression.extensions.ProxyMap;
 
@@ -13,6 +14,7 @@ public class LazyArrayConverter implements ConverterIfc {
     @Override
     public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {
         if (object instanceof List<?> l) return EvaluationValue.arrayValue(Lists.transform(l, ProxyMap::convert));
+        if (object instanceof Iterable<?> itr) return EvaluationValue.arrayValue(Lists.transform(ImmutableList.copyOf(itr), ProxyMap::convert));
         return convertArray(object);
     }
 
