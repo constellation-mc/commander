@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Cleanup;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -26,6 +27,7 @@ import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.loot.condition.LootConditionType;
@@ -34,8 +36,10 @@ import net.minecraft.loot.provider.number.LootNumberProviderTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -63,6 +67,8 @@ public class Commander {
 
     @Getter
     private AmbiguousRemapper mappingKeeper;
+    @Getter @Setter
+    private @Nullable MinecraftServer currentServer;
 
     public static Identifier id(String path) {
         return new Identifier("commander", path);
@@ -115,6 +121,10 @@ public class Commander {
         }
 
         ServerReloadersEvent.EVENT.register(context -> context.register(new DynamicEventManager()));
+
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> this.currentServer = server);
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.currentServer = null);
+
         EvalUtils.init();
 
         try {

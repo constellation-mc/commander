@@ -4,7 +4,9 @@ import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.data.conversion.*;
 import me.melontini.commander.impl.expression.extensions.convert.LazyArrayConverter;
+import me.melontini.commander.impl.expression.extensions.convert.RegistryAccessStruct;
 import me.melontini.commander.impl.expression.extensions.convert.nbt.NbtConverter;
+import net.minecraft.registry.Registry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +32,8 @@ public class ReflectiveValueConverter implements EvaluationValueConverterIfc {
         for (ConverterIfc converter : converters) {
             if (converter.canConvert(object)) return converter.convert(object, configuration);
         }
+
+        if (object instanceof Registry<?> reg) return EvaluationValue.structureValue(new RegistryAccessStruct(reg));
 
         return EvaluationValue.structureValue(new ReflectiveMapStructure(object));
     }

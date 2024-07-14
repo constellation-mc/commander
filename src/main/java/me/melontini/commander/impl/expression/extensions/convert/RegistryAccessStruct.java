@@ -1,38 +1,39 @@
-package me.melontini.commander.impl.expression.extensions.convert.nbt;
+package me.melontini.commander.impl.expression.extensions.convert;
 
 import com.ezylang.evalex.data.EvaluationValue;
 import lombok.EqualsAndHashCode;
 import me.melontini.commander.impl.expression.extensions.ProxyMap;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registry;
+import net.minecraft.util.Identifier;
 
 @EqualsAndHashCode(callSuper = false)
-public class NbtCompoundStruct extends ProxyMap {
+public class RegistryAccessStruct extends ProxyMap {
 
-    private final NbtCompound compound;
+    private final Registry<?> registry;
 
-    public NbtCompoundStruct(NbtCompound compound) {
-        this.compound = compound;
+    public RegistryAccessStruct(Registry<?> registry) {
+        this.registry = registry;
     }
 
     @Override
     public boolean containsKey(Object key) {
         if (!(key instanceof String s)) return false;
-        return compound.contains(s);
+        return registry.containsId(new Identifier(s));
     }
 
     @Override
     public EvaluationValue get(Object key) {
         if (!(key instanceof String s)) return EvaluationValue.NULL_VALUE;
-        return convert(compound.get(s));
+        return convert(registry.get(new Identifier(s)));
     }
 
     @Override
     public int size() {
-        return compound.getSize();
+        return registry.size();
     }
 
     @Override
     public String toString() {
-        return String.valueOf(compound);
+        return String.valueOf(registry);
     }
 }

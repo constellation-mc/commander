@@ -164,7 +164,7 @@ public class ReflectiveMapStructure extends ProxyMap {
 
     @Override
     public String toString() {
-        return "ReflectiveMapStructure{object=" + this.object + ";}";
+        return String.valueOf(this.object);
     }
 
     static final class Struct {

@@ -34,8 +34,6 @@ public class EntityAttributesStruct extends ProxyMap {
 
     @Override
     public String toString() {
-        return "EntityAttributesStruct{" +
-                "container=" + container.toNbt() +
-                '}';
+        return String.valueOf(container.toNbt());
     }
 }

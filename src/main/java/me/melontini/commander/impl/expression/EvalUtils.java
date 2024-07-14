@@ -28,11 +28,16 @@ import me.melontini.commander.impl.expression.functions.arrays.*;
 import me.melontini.commander.impl.expression.functions.math.ClampFunction;
 import me.melontini.commander.impl.expression.functions.math.LerpFunction;
 import me.melontini.commander.impl.expression.functions.math.RangedRandomFunction;
+import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryFunction;
+import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryRegistryFunction;
+import me.melontini.commander.impl.expression.functions.registry.RegistryFunction;
 import me.melontini.commander.impl.mixin.evalex.EvaluationValueAccessor;
 import me.melontini.commander.impl.mixin.evalex.ExpressionAccessor;
 import me.melontini.commander.impl.mixin.evalex.ExpressionConfigurationAccessor;
 import me.melontini.commander.impl.mixin.evalex.MapBasedFunctionDictionaryAccessor;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -81,6 +86,14 @@ public class EvalUtils {
 
         functions.put("structContainsKey", new StructContainsKeyFunction());
         functions.put("hasContext", new HasContextFunction());
+
+        functions.put("Registry", new RegistryFunction(Registries.REGISTRIES));
+        functions.put("Item", new RegistryFunction(Registries.ITEM));
+        functions.put("Block", new RegistryFunction(Registries.BLOCK));
+
+        functions.put("DynamicRegistry", new DynamicRegistryRegistryFunction());
+        functions.put("Biome", new DynamicRegistryFunction(RegistryKeys.BIOME));
+        functions.put("DimensionType", new DynamicRegistryFunction(RegistryKeys.DIMENSION_TYPE));
         builder.functionDictionary(SimpleFunctionDictionary.ofFunctions(functions));
 
         CONFIGURATION = builder.build();
