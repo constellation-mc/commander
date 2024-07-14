@@ -73,6 +73,8 @@ public class EvalUtils {
         functions.put("arrayOf", new ArrayOf());
         functions.put("arrayMap", new ArrayMap());
         functions.put("arrayFind", new ArrayFind());
+        functions.put("arrayFindAny", new ArrayFindAny());
+        functions.put("arrayFindFirst", new ArrayFindFirst());
         functions.put("arrayAnyMatch", new ArrayAnyMatch());
         functions.put("arrayNoneMatch", new ArrayNoneMatch());
         functions.put("arrayAllMatch", new ArrayAllMatch());
