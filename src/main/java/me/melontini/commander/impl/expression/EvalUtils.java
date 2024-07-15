@@ -20,10 +20,7 @@ import lombok.SneakyThrows;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
-import me.melontini.commander.impl.expression.functions.HasContextFunction;
-import me.melontini.commander.impl.expression.functions.LengthFunction;
-import me.melontini.commander.impl.expression.functions.MatchesFunction;
-import me.melontini.commander.impl.expression.functions.StructContainsKeyFunction;
+import me.melontini.commander.impl.expression.functions.*;
 import me.melontini.commander.impl.expression.functions.arrays.*;
 import me.melontini.commander.impl.expression.functions.math.ClampFunction;
 import me.melontini.commander.impl.expression.functions.math.LerpFunction;
@@ -73,6 +70,7 @@ public class EvalUtils {
         functions.put("lerp", new LerpFunction());
         functions.put("clamp", new ClampFunction());
         functions.put("ifMatches", new MatchesFunction());
+        functions.put("chain", new ChainFunction());
         functions.put("length", new LengthFunction());
 
         functions.put("arrayOf", new ArrayOf());
