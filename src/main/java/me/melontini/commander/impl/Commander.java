@@ -2,6 +2,7 @@ package me.melontini.commander.impl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,7 @@ import me.melontini.dark_matter.api.base.util.MakeSure;
 import me.melontini.dark_matter.api.base.util.PrependingLogger;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
+import me.melontini.dark_matter.api.minecraft.util.TextUtil;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -64,6 +66,8 @@ public class Commander {
 
     public static final AttachmentType<NbtCompound> DATA_ATTACHMENT = AttachmentRegistry.<NbtCompound>builder()
             .initializer(NbtCompound::new).persistent(NbtCodecs.COMPOUND_CODEC).buildAndRegister(id("persistent"));
+
+    public static final DynamicCommandExceptionType EXPRESSION_EXCEPTION = new DynamicCommandExceptionType(object -> TextUtil.literal(String.valueOf(object)));
 
     @Getter
     private AmbiguousRemapper mappingKeeper;

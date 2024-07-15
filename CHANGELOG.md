@@ -4,6 +4,8 @@ User Changes:
 
 * Added `arrayFindAny` and `arrayFindFirst` functions to expressions. As the name suggests, those functions will try to find an element of an array or return `null` if the array is empty.
 * Java `Iterable`s can now be converted to arrays.
+* Added `remove` to `cmd:data`.
+* Added `cmd:operate` to the `scoreboard players` command.
 * Added registry access for expressions! Now you can access the game's static and dynamic content registries by using new `Registry` and `DynamicRegistry` functions.
   * Why is this useful? For example, this allows you to compare item stacks based on their item type:
   ```

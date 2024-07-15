@@ -6,6 +6,7 @@
   "mixins": [
     "AdvancementRewardsMixin",
     "ExecuteCommandMixin",
+    "ScoreboardCommandMixin",
     "evalex.EvaluationValueAccessor",
     "evalex.EvaluationValueMixin",
     "evalex.ExpressionAccessor",
