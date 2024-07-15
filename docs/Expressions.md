@@ -100,7 +100,7 @@ Example: `this_entity.attributes.'generic.luck'`
 
 ::: details `storage` (Levels, Chunks, Entities, Block Entities)
 
-Allows you to access persistent data storage. The data is modified and written by [`/cmd:data`](/BrigadierCommands#cmd-data), [`commander:store_nbt_data`](/Commands#commander-store-expression-data-and-commander-store-nbt-data) or [`commander:store_expression_data`](/Commands#commander-store-expression-data-and-commander-store-nbt-data)
+Allows you to access persistent data storage. The data is modified and written by [`/cmd:data`](/BrigadierCommands#cmd-data)
 
 :::
 
@@ -130,18 +130,17 @@ So the output can be: `00:00`, or `13:45`, etc.
 
 The fastest way to get started is to use the `cmd:arithmetica` command. You should wrap your expression with `"` to satisfy Brigadier.
 
-Other places are [command macros](Commands#command-macros), the `commander:arithmetica` number provider and the `commander:expression` predicate.
+Other places you can use expressions in:
 
-Using the predicate:
+::: details JSON Command Macros
 
-```json
-{
-  "condition": "commander:expression",
-  "value": "level.isDay"
-}
-```
+Command Macros are explained in detail on the Commands page. [Link](Commands#command-macros)
 
-Using the provider in conditions:
+:::
+
+::: details Loot number provider
+
+Using the `commander:arithmetica` provider in conditions:
 
 ```json
 {
@@ -156,3 +155,28 @@ Using the provider in conditions:
   }
 }
 ```
+
+:::
+
+::: details Loot predicate
+
+Using the `commander:expression` predicate:
+
+```json
+{
+  "condition": "commander:expression",
+  "value": "level.isDay"
+}
+```
+
+:::
+
+::: details `execute` command
+
+You can use expressions as predicates in the `execute if` command.
+
+```
+/execute if cmd:expression "level.isDay" run say It is day!
+```
+
+:::
