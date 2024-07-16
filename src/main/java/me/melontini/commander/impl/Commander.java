@@ -133,17 +133,7 @@ public class Commander {
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.currentServer = null);
 
         EvalUtils.init();
-
-        try {
-            MinecraftDownloader.downloadMappings();
-
-            CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.supplyAsync(MappingKeeper::loadOffMojmap, Util.getMainWorkerExecutor());
-            CompletableFuture<MemoryMappingTree> offTarget = CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
-            mappingKeeper = new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
-        } catch (Throwable t) {
-            log.error("Failed to download and prepare mappings! Data access remapping will not work!!!", t);
-            mappingKeeper = (cls, name) -> name;//Returning null will force it to traverse the hierarchy.
-        }
+        this.loadMappings();
 
         BuiltInEvents.init();
         BuiltInCommands.init();
@@ -155,6 +145,23 @@ public class Commander {
                 KILLER_ENTITY, DIRECT_KILLER_ENTITY,
                 DAMAGE_SOURCE, EXPLOSION_RADIUS,
                 BLOCK_STATE, BLOCK_ENTITY);
+    }
+
+    private void loadMappings() {
+        if (MappingKeeper.NAMESPACE.equals("mojang")) {
+            mappingKeeper = (cls, name) -> name; // Nothing to remap.
+            return;
+        }
+
+        try {
+            CompletableFuture<MemoryMappingTree> offTarget = CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
+            MinecraftDownloader.downloadMappings();
+            CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.supplyAsync(MappingKeeper::loadOffMojmap, Util.getMainWorkerExecutor());
+            mappingKeeper = new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
+        } catch (Throwable t) {
+            log.error("Failed to download and prepare mappings! Data access remapping will not work!!!", t);
+            mappingKeeper = (cls, name) -> name;//Returning null will force it to traverse the hierarchy.
+        }
     }
 
     @SneakyThrows(IOException.class)

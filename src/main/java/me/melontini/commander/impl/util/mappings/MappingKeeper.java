@@ -31,7 +31,7 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
         var tree = new MemoryMappingTree();
         MemoryMappingTree temp = new MemoryMappingTree();
         offMojmap.accept(temp);
-        if (!NAMESPACE.equals("mojang")) offTarget.accept(temp);
+        offTarget.accept(temp);
         temp.accept(new MappingSourceNsSwitch(tree, "mojang", true));
         Objects.requireNonNull(tree.getClass("net/minecraft/server/MinecraftServer"), "No built-in MinecraftServer mapping?").setDstName("net/minecraft/server/MinecraftServer", tree.getNamespaceId(NAMESPACE));
         return tree;
@@ -39,7 +39,6 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
 
     @SneakyThrows
     @Nullable public static MemoryMappingTree loadOffMojmap() {
-        if (NAMESPACE.equals("mojang")) return null;
         log.info("Loading official->mojmap mappings...");
 
         var tree = new MemoryMappingTree();
