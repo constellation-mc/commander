@@ -1,13 +1,11 @@
 package me.melontini.commander.impl.expression.extensions.convert.attributes;
 
-import com.ezylang.evalex.data.EvaluationValue;
 import lombok.EqualsAndHashCode;
-import me.melontini.commander.impl.expression.extensions.ProxyMap;
+import me.melontini.commander.api.expression.extensions.ProxyMap;
 import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
-import java.math.BigDecimal;
 
 @EqualsAndHashCode(callSuper = false)
 public class EntityAttributesStruct extends ProxyMap {
@@ -19,22 +17,18 @@ public class EntityAttributesStruct extends ProxyMap {
     }
 
     @Override
-    public boolean containsKey(Object key) {
-        if (!(key instanceof String s)) return false;
-        var attr = Registries.ATTRIBUTE.getEntry(Identifier.validate(s).getOrThrow());
+    public boolean containsKey(String key) {
+        var attr = Registries.ATTRIBUTE.getEntry(Identifier.validate(key).getOrThrow());
         return attr.filter(container::hasAttribute).isPresent();
     }
 
     @Override
-    public EvaluationValue get(Object key) {
-        if (!(key instanceof String s)) return EvaluationValue.NULL_VALUE;
-        return EvaluationValue.numberValue(BigDecimal.valueOf(container.getValue(Registries.ATTRIBUTE.getEntry(Identifier.of(s)).orElseThrow())));
+    public Object getValue(String key) {
+        return container.getValue(Registries.ATTRIBUTE.getEntry(Identifier.of(key)).orElseThrow());
     }
 
     @Override
     public String toString() {
-        return "EntityAttributesStruct{" +
-                "container=" + container.toNbt() +
-                '}';
+        return String.valueOf(container.toNbt());
     }
 }

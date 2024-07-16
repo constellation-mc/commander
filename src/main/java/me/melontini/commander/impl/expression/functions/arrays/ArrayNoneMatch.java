@@ -7,7 +7,6 @@ import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.ASTNode;
 import com.ezylang.evalex.parser.Token;
-import me.melontini.commander.impl.expression.EvalUtils;
 
 import java.util.List;
 
@@ -22,6 +21,6 @@ public class ArrayNoneMatch extends AbstractFunction {
         List<EvaluationValue> array = par[0].getArrayValue();
         ASTNode predicate = par[1].getExpressionNode();
 
-        return array.stream().noneMatch(value -> runLambda(expression, value, predicate).getBooleanValue()) ? EvalUtils.TRUE : EvalUtils.FALSE;
+        return array.stream().noneMatch(value -> runLambda(expression, value, predicate).getBooleanValue()) ? EvaluationValue.TRUE : EvaluationValue.FALSE;
     }
 }
