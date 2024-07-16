@@ -186,7 +186,7 @@ public class ReflectiveMapStructure extends ProxyMap {
         @Synchronized
         public void addAccessor(String key, Function<Object, Object> accessor) {
             if (this.accessors == null) this.accessors = new Object2ReferenceOpenHashMap<>();
-            this.accessors.putIfAbsent(key, accessor);
+            this.accessors.put(key, accessor);
 
             if (this.consumers == null) return;
             for (Struct consumer : consumers) {
