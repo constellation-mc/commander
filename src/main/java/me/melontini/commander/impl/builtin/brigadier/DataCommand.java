@@ -2,6 +2,7 @@ package me.melontini.commander.impl.builtin.brigadier;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -22,6 +23,7 @@ import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class DataCommand {
@@ -53,49 +55,27 @@ public class DataCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         var cmd = CommandManager.literal("cmd:data").requires(source -> source.hasPermissionLevel(2));
 
-        var read = CommandManager.literal("read");
-        for (Target value : Target.values()) {
-            var start = CommandManager.literal(value.name().toLowerCase(Locale.ROOT));
-            var keyArg = CommandManager.argument("key", StringArgumentType.string())
-                    .executes(context -> readValue(context.getSource(), TO_TARGET.get(value).apply(context), StringArgumentType.getString(context, "key")));
-
-            var args = ARGS.get(value).get();
-            if (args != null) args.then(keyArg);
-            else args = keyArg;
-
-            read.then(start.then(args));
-        }
-        cmd.then(read);
-
-        var write = CommandManager.literal("write");
-        for (Target value : Target.values()) {
-            var start = CommandManager.literal(value.name().toLowerCase(Locale.ROOT));
-            var keyArg = CommandManager.argument("key", StringArgumentType.string()).then(CommandManager.argument("data", NbtElementArgumentType.nbtElement())
-                    .executes(context -> writeValue(context.getSource(), TO_TARGET.get(value).apply(context), StringArgumentType.getString(context, "key"), NbtElementArgumentType.getNbtElement(context, "data"))));
-
-            var args = ARGS.get(value).get();
-            if (args != null) args.then(keyArg);
-            else args = keyArg;
-
-            write.then(start.then(args));
-        }
-        cmd.then(write);
-
-        var remove = CommandManager.literal("remove");
-        for (Target value : Target.values()) {
-            var start = CommandManager.literal(value.name().toLowerCase(Locale.ROOT));
-            var keyArg = CommandManager.argument("key", StringArgumentType.string())
-                    .executes(context -> removeValue(context.getSource(), TO_TARGET.get(value).apply(context), StringArgumentType.getString(context, "key")));
-
-            var args = ARGS.get(value).get();
-            if (args != null) args.then(keyArg);
-            else args = keyArg;
-
-            remove.then(start.then(args));
-        }
-        cmd.then(remove);
+        attachCommand(cmd, "read", (target, builder) -> builder.executes(context -> readValue(context.getSource(), TO_TARGET.get(target).apply(context), StringArgumentType.getString(context, "key"))));
+        attachCommand(cmd, "write", (target, builder) -> builder.then(CommandManager.argument("data", NbtElementArgumentType.nbtElement())
+                .executes(context -> writeValue(context.getSource(), TO_TARGET.get(target).apply(context), StringArgumentType.getString(context, "key"), NbtElementArgumentType.getNbtElement(context, "data")))));
+        attachCommand(cmd, "remove", (target, builder) -> builder.executes(context -> removeValue(context.getSource(), TO_TARGET.get(target).apply(context), StringArgumentType.getString(context, "key"))));
 
         dispatcher.register(cmd);
+    }
+
+    private static void attachCommand(LiteralArgumentBuilder<ServerCommandSource> base, String name, BiFunction<Target, RequiredArgumentBuilder<ServerCommandSource, ?>, RequiredArgumentBuilder<ServerCommandSource, ?>> keyAttachment) {
+        var command = CommandManager.literal(name);
+        for (Target value : Target.values()) {
+            var start = CommandManager.literal(value.name().toLowerCase(Locale.ROOT));
+            var keyArg = keyAttachment.apply(value, CommandManager.argument("key", StringArgumentType.string()));
+
+            var args = ARGS.get(value).get();
+            if (args != null) args.then(keyArg);
+            else args = keyArg;
+
+            command.then(start.then(args));
+        }
+        base.then(command);
     }
 
     private static int removeValue(ServerCommandSource source, AttachmentTarget target, String key) {

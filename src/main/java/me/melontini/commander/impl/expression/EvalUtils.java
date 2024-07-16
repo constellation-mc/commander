@@ -1,6 +1,6 @@
 package me.melontini.commander.impl.expression;
 
-import com.ezylang.evalex.EvaluationException;
+import com.ezylang.evalex.BaseException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.config.FunctionDictionaryIfc;
@@ -8,7 +8,6 @@ import com.ezylang.evalex.data.DataAccessorIfc;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.functions.FunctionIfc;
 import com.ezylang.evalex.parser.ASTNode;
-import com.ezylang.evalex.parser.ParseException;
 import com.google.common.base.CaseFormat;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -44,6 +43,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -120,7 +120,7 @@ public class EvalUtils {
         try {
             LootContextDataAccessor.LOCAL.set(context);
             return exp.evaluate();
-        } catch (EvaluationException | ParseException e) {
+        } catch (BaseException e) {
             throw new CmdEvalException(Objects.requireNonNullElseGet(e.getMessage(), () -> "Failed to evaluate expression %s".formatted(exp.getExpressionString())), e);
         } finally {
             LootContextDataAccessor.LOCAL.remove();
@@ -128,7 +128,7 @@ public class EvalUtils {
     }
 
     //Not sure about this cache.
-    private static final LoadingCache<String, Expression> EXPRESSION_CACHE = CacheBuilder.newBuilder().expireAfterAccess(Duration.of(3, ChronoUnit.MINUTES)).build(new CacheLoader<>() {
+    private static final LoadingCache<String, Expression> EXPRESSION_CACHE = CacheBuilder.newBuilder().expireAfterAccess(Duration.of(10, ChronoUnit.MINUTES)).build(new CacheLoader<>() {
         @Override
         public @NotNull Expression load(@NotNull String key) throws Exception {
             Expression exp = new Expression(key, CONFIGURATION);
@@ -141,8 +141,11 @@ public class EvalUtils {
     public static DataResult<Expression> parseExpression(String expression) {
         try {
             return DataResult.success(EXPRESSION_CACHE.get(expression).copy());
-        } catch (Throwable throwable) {
-            return DataResult.error(throwable::getLocalizedMessage);
+        } catch (BaseException exception) {
+            return DataResult.error(exception::getMessage);
+        } catch (ExecutionException throwable) {
+            var unwrapped = throwable.getCause();
+            return DataResult.error(unwrapped::getMessage);
         }
     }
 

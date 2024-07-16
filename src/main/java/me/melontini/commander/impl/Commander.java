@@ -22,7 +22,6 @@ import me.melontini.commander.impl.util.mappings.AmbiguousRemapper;
 import me.melontini.commander.impl.util.mappings.MappingKeeper;
 import me.melontini.commander.impl.util.mappings.MinecraftDownloader;
 import me.melontini.dark_matter.api.base.util.Exceptions;
-import me.melontini.dark_matter.api.base.util.MakeSure;
 import me.melontini.dark_matter.api.base.util.PrependingLogger;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
@@ -49,6 +48,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import static net.minecraft.loot.context.LootContextParameters.*;
 
@@ -67,7 +67,7 @@ public class Commander {
     public static final AttachmentType<NbtCompound> DATA_ATTACHMENT = AttachmentRegistry.<NbtCompound>builder()
             .initializer(NbtCompound::new).persistent(NbtCodecs.COMPOUND_CODEC).buildAndRegister(id("persistent"));
 
-    public static final DynamicCommandExceptionType EXPRESSION_EXCEPTION = new DynamicCommandExceptionType(object -> TextUtil.literal(String.valueOf(object)));
+    public static final DynamicCommandExceptionType EXPRESSION_EXCEPTION = new DynamicCommandExceptionType(object -> TextUtil.literal("Failed to evaluate: " + object));
 
     @Getter
     private AmbiguousRemapper mappingKeeper;
@@ -78,15 +78,18 @@ public class Commander {
         return new Identifier("commander", path);
     }
 
-    private static Commander instance;
+    private static Supplier<Commander> instance = () -> {
+        throw new NullPointerException("Commander instance requested too early!");
+    };
 
     public static void init() {
-        instance = new Commander();
-        instance.onInitialize();
+        var cmd = new Commander();
+        cmd.onInitialize();
+        instance = () -> cmd;
     }
 
     public static Commander get() {
-        return MakeSure.notNull(instance);
+        return instance.get();
     }
 
     public void onInitialize() {

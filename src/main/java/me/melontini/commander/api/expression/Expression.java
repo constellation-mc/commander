@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.impl.expression.EvalUtils;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -25,6 +26,13 @@ public interface Expression extends Function<LootContext, Expression.Result> {
 
     Result eval(LootContext context);
     String original();
+
+    /**
+     * Sets an expression variable.<br/>
+     * The expression object will hold on to the variable until it is cleared by calling this method with a {@code null} value.
+     */
+    @ApiStatus.Experimental
+    Expression variable(String variable, Object value);
 
     interface Result {
         BigDecimal getAsDecimal();

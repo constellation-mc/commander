@@ -3,8 +3,8 @@ package me.melontini.commander.impl.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import me.melontini.commander.api.expression.Expression;
 import me.melontini.commander.impl.Commander;
-import me.melontini.commander.impl.expression.EvalUtils;
 import net.minecraft.command.argument.ScoreHolderArgumentType;
 import net.minecraft.command.argument.ScoreboardObjectiveArgumentType;
 import net.minecraft.loot.context.LootContext;
@@ -20,7 +20,9 @@ import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Mixin(ScoreboardCommand.class)
 public class ScoreboardCommandMixin {
@@ -34,8 +36,8 @@ public class ScoreboardCommandMixin {
                                     var targets = new ArrayList<>(ScoreHolderArgumentType.getScoreboardScoreHolders(context, "targets"));
                                     var objective = ScoreboardObjectiveArgumentType.getWritableObjective(context, "objective");
 
-                                    var r = EvalUtils.parseExpression(StringArgumentType.getString(context, "expression"));
-                                    if (r.error().isPresent()) throw Commander.EXPRESSION_EXCEPTION.create(r.error().orElseThrow().message());
+                                    var r = Expression.parse(StringArgumentType.getString(context, "expression"));
+                                    if (r.error().isPresent()) throw Commander.EXPRESSION_EXCEPTION.create(r.error().get().message());
                                     var expression = r.result().orElseThrow();
 
                                     Scoreboard scoreboard = context.getSource().getServer().getScoreboard();
@@ -46,13 +48,14 @@ public class ScoreboardCommandMixin {
 
                                     for (String target : targets) {
                                         ScoreboardPlayerScore score = scoreboard.getPlayerScore(target, objective);
-                                        score.setScore(EvalUtils.evaluate(context1, expression.with("score", score.getScore())).getNumberValue().intValue());
+                                        Optional.ofNullable(expression.variable("score", score.getScore()).eval(context1).getAsDecimal())
+                                                .map(BigDecimal::intValue).ifPresent(score::setScore);
                                     }
 
                                     if (targets.size() == 1) {
-                                        context.getSource().sendFeedback(() -> Text.translatable("commands.scoreboard.players.set.success.single", objective.toHoverableText(), targets.get(0), r.result().orElseThrow().getExpressionString()), true);
+                                        context.getSource().sendFeedback(() -> Text.translatable("commands.scoreboard.players.set.success.single", objective.toHoverableText(), targets.get(0), expression.original()), true);
                                     } else {
-                                        context.getSource().sendFeedback(() -> Text.translatable("commands.scoreboard.players.set.success.multiple", objective.toHoverableText(), targets.size(), r.result().orElseThrow().getExpressionString()), true);
+                                        context.getSource().sendFeedback(() -> Text.translatable("commands.scoreboard.players.set.success.multiple", objective.toHoverableText(), targets.size(), expression.original()), true);
                                     }
 
                                     return targets.size();

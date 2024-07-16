@@ -21,9 +21,9 @@ public class PatternParser {
 
     public static final Pattern PATTERN = Pattern.compile("\\$(?:\\(([a-z]+)\\))?\\{\\{([^{}]*)\\}\\}");
     public static final Map<String, Function<EvaluationValue, String>> CONVERTERS = ImmutableMap.of(
-            "bool", v -> String.valueOf(v.getBooleanValue()),
-            "long", v -> String.valueOf(v.getNumberValue().setScale(0, RoundingMode.DOWN)),
-            "int", v -> String.valueOf(v.getNumberValue().setScale(0, RoundingMode.DOWN)),
+            "bool", v -> v.getBooleanValue().toString(),
+            "long", v -> v.getNumberValue().setScale(0, RoundingMode.DOWN).toString(),
+            "int", v -> v.getNumberValue().setScale(0, RoundingMode.DOWN).toString(),
             "double", v -> v.getNumberValue().toString()
     );
 
@@ -60,12 +60,14 @@ public class PatternParser {
     }
 
     public static DataResult<Function<LootContext, String>> parseExpression(String expression, @Nullable String cast) {
-        var result = EvalUtils.parseExpression(expression);
-        if (cast != null) {
-            var c = CONVERTERS.get(cast);
-            if (c == null) return DataResult.error(() -> "Unknown cast type %s".formatted(cast));
-            return result.map(exp -> context -> c.apply(evaluate(context, exp)));
-        }
-        return result.map(exp -> context -> evaluate(context, exp).getStringValue());
+        if (cast == null)
+            return EvalUtils.parseExpression(expression).map(exp -> context -> evaluate(context, exp).getStringValue());
+
+        var c = CONVERTERS.get(cast);
+        if (c == null) return DataResult.error(() -> "Unknown cast type %s".formatted(cast));
+        return EvalUtils.parseExpression(expression).map(exp -> context -> {
+            var evalResult = evaluate(context, exp);
+            return evalResult.getValue() == null ? null : c.apply(evalResult);
+        });
     }
 }

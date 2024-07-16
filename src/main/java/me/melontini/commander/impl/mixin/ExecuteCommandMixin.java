@@ -20,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Optional;
+
 @Mixin(ExecuteCommand.class)
 public abstract class ExecuteCommandMixin {
 
@@ -31,14 +33,14 @@ public abstract class ExecuteCommandMixin {
     private static void commander$addExpressionCondition(CommandNode<ServerCommandSource> root, LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess, CallbackInfoReturnable<ArgumentBuilder<ServerCommandSource, ?>> cir) {
         argumentBuilder.then(CommandManager.literal("cmd:expression").then(addConditionLogic(root, CommandManager.argument("expression", StringArgumentType.string()), positive, context -> {
             var r = Expression.parse(StringArgumentType.getString(context, "expression"));
-            if (r.error().isPresent()) throw Commander.EXPRESSION_EXCEPTION.create(r.error().orElseThrow().message());
+            if (r.error().isPresent()) throw Commander.EXPRESSION_EXCEPTION.create(r.error().get().message());
 
             LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(context.getSource().getWorld())
                     .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
                     .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
                     .build(LootContextTypes.COMMAND)).build(null);
 
-            return r.result().orElseThrow().apply(context1).getAsBoolean();
+            return r.result().flatMap(expression -> Optional.ofNullable(expression.eval(context1))).map(Expression.Result::getAsBoolean).orElse(false);
         })));
     }
 }
