@@ -10,7 +10,6 @@ User Changes:
   //this is the same as:
   arrayFindFirst(arrayMap(arrayOf(2, 3, 6), sqrt(it)))
   ```
-* Java `Iterable`s can now be converted to arrays.
 * Added `remove` to `cmd:data`.
 * Added `cmd:operate` to the `scoreboard players` command.
 * Added registry access for expressions! Now you can access the game's static and dynamic content registries by using new `Registry` and `DynamicRegistry` functions.
@@ -23,3 +22,17 @@ User Changes:
   this_entity.getHandSlots[0].getItem == Item('chest')
   ```
   * `Biome` and `DimensionType` are available dynamic registry shortcuts.
+
+Dev Changes:
+
+There's a handful new experimental APIs, which allow you to extend the expression system.
+
+* Exposed `Object getValue()` and `Result convert(Object o)` in Expression.Result.
+* Exposed `Expression variable(String variable, Object value)` in Expression.
+* Exposed `ProxyMap` and `ObjectConverter`.
+* Exposed `CustomFields`. One of the more interesting APIs. Allows adding new 'virtual' fields to reflective expression objects.
+  ```java
+  static {
+    CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
+  }
+  ```
