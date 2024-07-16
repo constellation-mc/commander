@@ -31,7 +31,7 @@ public class ReflectiveMapStructure extends ProxyMap {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     static {
-        CustomFields.init();
+        DefaultCustomFields.init();
     }
 
     @EqualsAndHashCode.Exclude
@@ -156,7 +156,7 @@ public class ReflectiveMapStructure extends ProxyMap {
         try {
             Function<Object, Object> field = this.mappings.getAccessor((String) key);
             if (field == null) throw new RuntimeException("%s has no public field or method '%s'".formatted(this.object.getClass().getSimpleName(), key));
-            return convert(field.apply(this.object));
+            return ReflectiveValueConverter.convert(field.apply(this.object));
         } catch (Exception e) {
             throw new CmdEvalException(Objects.requireNonNullElse(e.getMessage(), "Failed to reflectively access member!"));
         }

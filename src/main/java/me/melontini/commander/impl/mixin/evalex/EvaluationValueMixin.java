@@ -2,6 +2,7 @@ package me.melontini.commander.impl.mixin.evalex;
 
 import com.ezylang.evalex.data.EvaluationValue;
 import me.melontini.commander.api.expression.Expression;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,6 +22,7 @@ public abstract class EvaluationValueMixin implements Expression.Result {
     @Shadow public abstract boolean isNumberValue();
     @Shadow public abstract boolean isDateTimeValue();
 
+    @Final
     @Shadow private Object value;
 
     @Override

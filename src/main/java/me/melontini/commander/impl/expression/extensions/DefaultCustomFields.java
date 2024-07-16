@@ -1,5 +1,6 @@
 package me.melontini.commander.impl.expression.extensions;
 
+import me.melontini.commander.api.expression.extensions.CustomFields;
 import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.expression.extensions.convert.attributes.EntityAttributesStruct;
 import me.melontini.commander.impl.expression.extensions.convert.states.StateStruct;
@@ -12,21 +13,21 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.state.State;
 
-class CustomFields {
+class DefaultCustomFields {
 
     private static final NbtCompound EMPTY = new NbtCompound();
 
     static void init() {
-        ReflectiveMapStructure.addField(ItemStack.class, "nbt", object -> {
+        CustomFields.addVirtualField(ItemStack.class, "nbt", object -> {
             if (object.getNbt() == null) return EMPTY;
             return object.getNbt();
         });
-        ReflectiveMapStructure.addField(Entity.class, "nbt", NbtPredicate::entityToNbt);
-        ReflectiveMapStructure.addField(BlockEntity.class, "nbt", BlockEntity::createNbtWithIdentifyingData);
+        CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
+        CustomFields.addVirtualField(BlockEntity.class, "nbt", BlockEntity::createNbtWithIdentifyingData);
 
-        ReflectiveMapStructure.addField(State.class, "properties", StateStruct::new);
-        ReflectiveMapStructure.addField(LivingEntity.class, "attributes", e -> new EntityAttributesStruct(e.getAttributes()));
+        CustomFields.addVirtualField(State.class, "properties", StateStruct::new);
+        CustomFields.addVirtualField(LivingEntity.class, "attributes", e -> new EntityAttributesStruct(e.getAttributes()));
 
-        ReflectiveMapStructure.addField(AttachmentTarget.class, "storage", target -> target.getAttachedOrCreate(Commander.DATA_ATTACHMENT));
+        CustomFields.addVirtualField(AttachmentTarget.class, "storage", target -> target.getAttachedOrCreate(Commander.DATA_ATTACHMENT));
     }
 }

@@ -16,6 +16,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
+
 public class ArithmeticaCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -38,7 +39,7 @@ public class ArithmeticaCommand {
                     .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
                     .build(LootContextTypes.COMMAND)).build(null);
 
-            context.getSource().sendMessage(Text.literal(r.result().orElseThrow().apply(context1)));
+            context.getSource().sendMessage(Text.literal(String.valueOf(r.result().orElseThrow().apply(context1))));
             return 1;
         } catch (CmdEvalException e) {
             throw Commander.EXPRESSION_EXCEPTION.create(e.getMessage());

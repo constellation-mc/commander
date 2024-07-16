@@ -1,13 +1,12 @@
 package me.melontini.commander.impl.expression.extensions.convert;
 
-import com.ezylang.evalex.data.EvaluationValue;
-import me.melontini.commander.impl.expression.extensions.ProxyMap;
+import me.melontini.commander.api.expression.Expression;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.IntFunction;
 
-public class LazyArrayWrapper implements List<EvaluationValue> {
+public class LazyArrayWrapper implements List<Expression.Result> {
 
     private final IntFunction<Object> function;
     private final int size;
@@ -28,11 +27,11 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
     }
 
     @NotNull @Override
-    public ListIterator<EvaluationValue> listIterator(int index) {
+    public ListIterator<Expression.Result> listIterator(int index) {
         return new ArrayIterator(size, index) {
             @Override
-            protected EvaluationValue get(int index) {
-                return ProxyMap.convert(LazyArrayWrapper.this.function.apply(index));
+            protected Expression.Result get(int index) {
+                return Expression.Result.convert(LazyArrayWrapper.this.function.apply(index));
             }
         };
     }
@@ -47,8 +46,8 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
     }
 
     @Override
-    public EvaluationValue get(int index) {
-        return ProxyMap.convert(this.function.apply(index));
+    public Expression.Result get(int index) {
+        return Expression.Result.convert(this.function.apply(index));
     }
 
     @Override
@@ -57,7 +56,7 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
     }
 
     @NotNull @Override
-    public Iterator<EvaluationValue> iterator() {
+    public Iterator<Expression.Result> iterator() {
         return listIterator();
     }
 
@@ -72,7 +71,7 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
     }
 
     @Override
-    public boolean add(EvaluationValue object) {
+    public boolean add(Expression.Result object) {
         throw new IllegalStateException();
     }
 
@@ -87,12 +86,12 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
     }
 
     @Override
-    public boolean addAll(@NotNull Collection<? extends EvaluationValue> c) {
+    public boolean addAll(@NotNull Collection<? extends Expression.Result> c) {
         throw new IllegalStateException();
     }
 
     @Override
-    public boolean addAll(int index, @NotNull Collection<? extends EvaluationValue> c) {
+    public boolean addAll(int index, @NotNull Collection<? extends Expression.Result> c) {
         throw new IllegalStateException();
     }
 
@@ -112,17 +111,17 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
     }
 
     @Override
-    public EvaluationValue set(int index, EvaluationValue element) {
+    public Expression.Result set(int index, Expression.Result element) {
         throw new IllegalStateException();
     }
 
     @Override
-    public void add(int index, EvaluationValue element) {
+    public void add(int index, Expression.Result element) {
         throw new IllegalStateException();
     }
 
     @Override
-    public EvaluationValue remove(int index) {
+    public Expression.Result remove(int index) {
         throw new IllegalStateException();
     }
 
@@ -137,16 +136,16 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
     }
 
     @NotNull @Override
-    public ListIterator<EvaluationValue> listIterator() {
+    public ListIterator<Expression.Result> listIterator() {
         return listIterator(0);
     }
 
     @NotNull @Override
-    public List<EvaluationValue> subList(int fromIndex, int toIndex) {
+    public List<Expression.Result> subList(int fromIndex, int toIndex) {
         throw new IllegalStateException();
     }
 
-    private abstract static class ArrayIterator implements ListIterator<EvaluationValue> {
+    private abstract static class ArrayIterator implements ListIterator<Expression.Result> {
 
         private final int size;
         private int position;
@@ -156,7 +155,7 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
             this.position = position;
         }
 
-        protected abstract EvaluationValue get(int index);
+        protected abstract Expression.Result get(int index);
 
         @Override
         public boolean hasNext() {
@@ -164,7 +163,7 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
         }
 
         @Override
-        public EvaluationValue next() {
+        public Expression.Result next() {
             if (!hasNext()) throw new NoSuchElementException();
             return get(position++);
         }
@@ -175,7 +174,7 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
         }
 
         @Override
-        public EvaluationValue previous() {
+        public Expression.Result previous() {
             if (!hasPrevious()) throw new NoSuchElementException();
             return get(position--);
         }
@@ -196,12 +195,12 @@ public class LazyArrayWrapper implements List<EvaluationValue> {
         }
 
         @Override
-        public void set(EvaluationValue object) {
+        public void set(Expression.Result object) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void add(EvaluationValue object) {
+        public void add(Expression.Result object) {
             throw new UnsupportedOperationException();
         }
     }

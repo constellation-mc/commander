@@ -6,7 +6,7 @@ import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.Token;
-import me.melontini.commander.impl.expression.extensions.ProxyMap;
+import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
@@ -25,7 +25,7 @@ public class RegistryFunction extends AbstractFunction {
     public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
         try {
             var id = new Identifier(par[0].getStringValue());
-            return ProxyMap.convert(this.registry.getOrEmpty(id).orElseThrow(() -> new NoSuchElementException("No such %s: %s".formatted(registry.getKey().getValue(), id))));
+            return ReflectiveValueConverter.convert(this.registry.getOrEmpty(id).orElseThrow(() -> new NoSuchElementException("No such %s: %s".formatted(registry.getKey().getValue(), id))));
         } catch (Exception e) {
             throw new EvaluationException(functionToken, e.getMessage());
         }

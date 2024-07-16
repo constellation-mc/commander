@@ -1,7 +1,6 @@
 package me.melontini.commander.impl.expression.extensions;
 
 import com.ezylang.evalex.data.EvaluationValue;
-import me.melontini.commander.impl.expression.EvalUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,10 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class ProxyMap implements Map<String, EvaluationValue> {
-
-    public static EvaluationValue convert(Object o) {
-        return EvalUtils.CONFIGURATION.getEvaluationValueConverter().convertObject(o, EvalUtils.CONFIGURATION);
-    }
 
     @Override
     public int size() {

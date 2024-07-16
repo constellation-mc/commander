@@ -1,8 +1,7 @@
 package me.melontini.commander.impl.expression.extensions.convert;
 
-import com.ezylang.evalex.data.EvaluationValue;
 import lombok.EqualsAndHashCode;
-import me.melontini.commander.impl.expression.extensions.ProxyMap;
+import me.melontini.commander.api.expression.extensions.ProxyMap;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
@@ -16,15 +15,13 @@ public class RegistryAccessStruct extends ProxyMap {
     }
 
     @Override
-    public boolean containsKey(Object key) {
-        if (!(key instanceof String s)) return false;
-        return registry.containsId(new Identifier(s));
+    public boolean containsKey(String key) {
+        return registry.containsId(new Identifier(key));
     }
 
     @Override
-    public EvaluationValue get(Object key) {
-        if (!(key instanceof String s)) return EvaluationValue.NULL_VALUE;
-        return convert(registry.get(new Identifier(s)));
+    public Object getValue(String key) {
+        return registry.get(new Identifier(key));
     }
 
     @Override

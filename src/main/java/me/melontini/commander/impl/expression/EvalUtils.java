@@ -14,10 +14,11 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMaps;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.SneakyThrows;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
-import me.melontini.commander.impl.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import me.melontini.commander.impl.expression.functions.*;
 import me.melontini.commander.impl.expression.functions.arrays.*;
@@ -27,8 +28,6 @@ import me.melontini.commander.impl.expression.functions.math.RangedRandomFunctio
 import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryFunction;
 import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryRegistryFunction;
 import me.melontini.commander.impl.expression.functions.registry.RegistryFunction;
-import me.melontini.commander.impl.mixin.evalex.EvaluationValueAccessor;
-import me.melontini.commander.impl.mixin.evalex.ExpressionAccessor;
 import me.melontini.commander.impl.mixin.evalex.ExpressionConfigurationAccessor;
 import me.melontini.commander.impl.mixin.evalex.MapBasedFunctionDictionaryAccessor;
 import net.minecraft.loot.context.LootContext;
@@ -51,9 +50,16 @@ import java.util.stream.Collectors;
 public class EvalUtils {
 
     public static final ExpressionConfiguration CONFIGURATION;
-    public static final EvaluationValue TRUE = EvaluationValueAccessor.commander$init(true, EvaluationValue.DataType.BOOLEAN);
-    public static final EvaluationValue FALSE = EvaluationValueAccessor.commander$init(false, EvaluationValue.DataType.BOOLEAN);
-    public static final EvaluationValue NULL = EvaluationValueAccessor.commander$init(null, EvaluationValue.DataType.NULL);
+    public static final Object2ReferenceMap<String, EvaluationValue> CONSTANTS = Object2ReferenceMaps.unmodifiable(new Object2ReferenceOpenHashMap<>(ImmutableMap.of(
+            "true", EvaluationValue.TRUE,
+            "false", EvaluationValue.FALSE,
+            "PI", EvaluationValue.numberValue(new BigDecimal("3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679")),
+            "E", EvaluationValue.numberValue(new BigDecimal("2.71828182845904523536028747135266249775724709369995957496696762772407663")),
+            "null", EvaluationValue.NULL_VALUE,
+            "DT_FORMAT_ISO_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]['['VV']']"),
+            "DT_FORMAT_LOCAL_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS]"),
+            "DT_FORMAT_LOCAL_DATE", EvaluationValue.stringValue("yyyy-MM-dd")
+    )));
 
     static {
         var builder = ExpressionConfiguration.builder()
@@ -95,16 +101,7 @@ public class EvalUtils {
         builder.functionDictionary(SimpleFunctionDictionary.ofFunctions(functions));
 
         CONFIGURATION = builder.build();
-        ((ExpressionConfigurationAccessor) CONFIGURATION).commander$defaultConstants(ImmutableMap.of(
-                "true", TRUE,
-                "false", FALSE,
-                "PI", EvaluationValue.numberValue(new BigDecimal("3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679")),
-                "E", EvaluationValue.numberValue(new BigDecimal("2.71828182845904523536028747135266249775724709369995957496696762772407663")),
-                "null", NULL,
-                "DT_FORMAT_ISO_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]['['VV']']"),
-                "DT_FORMAT_LOCAL_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS]"),
-                "DT_FORMAT_LOCAL_DATE", EvaluationValue.stringValue("yyyy-MM-dd")
-        ));
+        ((ExpressionConfigurationAccessor) CONFIGURATION).commander$defaultConstants(CONSTANTS);
     }
 
     @SneakyThrows
@@ -132,7 +129,6 @@ public class EvalUtils {
         @Override
         public @NotNull Expression load(@NotNull String key) throws Exception {
             Expression exp = new Expression(key, CONFIGURATION);
-            ((ExpressionAccessor) exp).commander$constants(new Object2ReferenceOpenHashMap<>(CONFIGURATION.getDefaultConstants()));
             exp.validate();
             return exp;
         }
@@ -173,7 +169,7 @@ public class EvalUtils {
             var id = r.result().orElseThrow();
             var func = overrides.get(id);
             if (func != null) {
-                supplier = () -> ProxyMap.convert(func.apply(LOCAL.get()));
+                supplier = () -> ReflectiveValueConverter.convert(func.apply(LOCAL.get()));
                 varCache.put(variable, supplier);
                 return supplier.get();
             }
@@ -184,7 +180,7 @@ public class EvalUtils {
             supplier = () -> {
                 var object = LOCAL.get().get(param);
                 if (object == null) return null;
-                return ProxyMap.convert(object);
+                return ReflectiveValueConverter.convert(object);
             };
             varCache.put(variable, supplier);
             return supplier.get();

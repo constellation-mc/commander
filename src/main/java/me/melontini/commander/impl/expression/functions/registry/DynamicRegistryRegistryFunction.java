@@ -7,7 +7,7 @@ import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.Token;
 import me.melontini.commander.impl.Commander;
-import me.melontini.commander.impl.expression.extensions.ProxyMap;
+import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 
@@ -20,7 +20,7 @@ public class DynamicRegistryRegistryFunction extends AbstractFunction {
     public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
         try {
             var id = new Identifier(par[0].getStringValue());
-            return ProxyMap.convert(Commander.get().currentServer().getRegistryManager().getOptional(RegistryKey.ofRegistry(id)).orElseThrow(() -> new NoSuchElementException("No such %s: %s".formatted("minecraft:root", id))));
+            return ReflectiveValueConverter.convert(Commander.get().currentServer().getRegistryManager().getOptional(RegistryKey.ofRegistry(id)).orElseThrow(() -> new NoSuchElementException("No such %s: %s".formatted("minecraft:root", id))));
         } catch (Exception e) {
             throw new EvaluationException(functionToken, e.getMessage());
         }

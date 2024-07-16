@@ -3,12 +3,14 @@ package me.melontini.commander.api.expression;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.impl.expression.EvalUtils;
+import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.function.Function;
 
 public interface Expression extends Function<LootContext, Expression.Result> {
@@ -34,7 +36,31 @@ public interface Expression extends Function<LootContext, Expression.Result> {
     @ApiStatus.Experimental
     Expression variable(String variable, Object value);
 
+    @ApiStatus.Experimental
+    default Result evalWithVariables(LootContext context, Map<String, Object> map) {
+        try {
+            map.forEach(this::variable);
+            return this.eval(context);
+        } finally {
+            map.keySet().forEach(var -> this.variable(var, null));
+        }
+    }
+
+    @ApiStatus.Experimental
+    default Result evalWithVariable(LootContext context, String variable, Object value) {
+        try {
+            return this.variable(variable, value).eval(context);
+        } finally {
+            this.variable(variable, null);
+        }
+    }
+
     interface Result {
+
+        static Result convert(Object o) {
+            return (Result) (Object) ReflectiveValueConverter.convert(o);
+        }
+
         BigDecimal getAsDecimal();
         boolean getAsBoolean();
         String getAsString();
@@ -46,5 +72,7 @@ public interface Expression extends Function<LootContext, Expression.Result> {
         boolean isStringValue();
         boolean isInstantValue();
         boolean isDurationValue();
+
+        Object getValue();
     }
 }

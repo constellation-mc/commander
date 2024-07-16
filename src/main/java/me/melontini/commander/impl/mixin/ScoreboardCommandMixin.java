@@ -48,7 +48,7 @@ public class ScoreboardCommandMixin {
 
                                     for (String target : targets) {
                                         ScoreboardPlayerScore score = scoreboard.getPlayerScore(target, objective);
-                                        Optional.ofNullable(expression.variable("score", score.getScore()).eval(context1).getAsDecimal())
+                                        Optional.ofNullable(expression.evalWithVariable(context1, "score", score.getScore()).getAsDecimal())
                                                 .map(BigDecimal::intValue).ifPresent(score::setScore);
                                     }
 
