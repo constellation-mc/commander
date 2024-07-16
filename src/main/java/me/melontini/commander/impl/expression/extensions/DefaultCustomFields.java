@@ -4,6 +4,7 @@ import me.melontini.commander.api.expression.extensions.CustomFields;
 import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.expression.extensions.convert.RegistryAccessStruct;
 import me.melontini.commander.impl.expression.extensions.convert.attributes.EntityAttributesStruct;
+import me.melontini.commander.impl.expression.extensions.convert.components.ComponentStruct;
 import me.melontini.commander.impl.expression.extensions.convert.states.StateStruct;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
 import net.minecraft.block.entity.BlockEntity;
@@ -21,14 +22,15 @@ class DefaultCustomFields {
 
     static void init() {
         CustomFields.addVirtualField(ItemStack.class, "nbt", object -> {
-            if (object.getNbt() == null) return EMPTY;
-            return object.getNbt();
+            if (object.isEmpty()) return EMPTY;
+            return object.encode(Commander.get().currentServer().getRegistryManager());
         });
         CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
-        CustomFields.addVirtualField(BlockEntity.class, "nbt", BlockEntity::createNbtWithIdentifyingData);
+        CustomFields.addVirtualField(BlockEntity.class, "nbt", be -> be.createNbtWithIdentifyingData(be.getWorld().getRegistryManager()));
 
         CustomFields.addVirtualField(State.class, "properties", StateStruct::new);
         CustomFields.addVirtualField(LivingEntity.class, "attributes", e -> new EntityAttributesStruct(e.getAttributes()));
+        CustomFields.addVirtualField(ItemStack.class, "components", stack -> new ComponentStruct(stack.getComponents()));
 
         CustomFields.addVirtualField(AttachmentTarget.class, "storage", target -> target.getAttachedOrCreate(Commander.DATA_ATTACHMENT));
         CustomFields.addVirtualField(Registry.class, "access", RegistryAccessStruct::forRegistry);

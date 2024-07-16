@@ -19,7 +19,7 @@ public class DynamicRegistryRegistryFunction extends AbstractFunction {
     @Override
     public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
         try {
-            var id = new Identifier(par[0].getStringValue());
+            var id = Identifier.of(par[0].getStringValue());
             return ReflectiveValueConverter.convert(Commander.get().currentServer().getRegistryManager().getOptional(RegistryKey.ofRegistry(id)).orElseThrow(() -> new NoSuchElementException("No such %s: %s".formatted("minecraft:root", id))));
         } catch (Exception e) {
             throw new EvaluationException(functionToken, e.getMessage());

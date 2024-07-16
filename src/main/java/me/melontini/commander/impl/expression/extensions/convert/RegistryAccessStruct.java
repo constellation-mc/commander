@@ -23,7 +23,7 @@ public class RegistryAccessStruct extends ProxyMap {
 
     private RegistryAccessStruct(Registry<?> registry) {
         this.registry = registry;
-        this.cache = Memoize.lruFunction(key -> registry.get(new Identifier(key)), 20);
+        this.cache = Memoize.lruFunction(key -> registry.get(Identifier.of(key)), 20);
     }
 
     @Override
