@@ -16,7 +16,7 @@ User Changes:
 * Added registry access for expressions! Now you can access the game's static and dynamic content registries by using new `Registry` and `DynamicRegistry` functions.
   * Why is this useful? For example, this allows you to compare item stacks based on their item type:
   ```
-  this_entity.getHandSlots[0].getItem == Registry('item').chest
+  this_entity.getHandSlots[0].getItem == Registry('item').access.chest
   ```
   * For item and block registries there is a shortcut: `Item`, `Block`.
   ```

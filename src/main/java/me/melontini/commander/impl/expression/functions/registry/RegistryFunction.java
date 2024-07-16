@@ -7,6 +7,7 @@ import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.Token;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
+import me.melontini.dark_matter.api.base.util.Exceptions;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
@@ -27,7 +28,7 @@ public class RegistryFunction extends AbstractFunction {
             var id = new Identifier(par[0].getStringValue());
             return ReflectiveValueConverter.convert(this.registry.getOrEmpty(id).orElseThrow(() -> new NoSuchElementException("No such %s: %s".formatted(registry.getKey().getValue(), id))));
         } catch (Exception e) {
-            throw new EvaluationException(functionToken, e.getMessage());
+            throw new EvaluationException(functionToken, Exceptions.unwrap(e).getMessage());
         }
     }
 }

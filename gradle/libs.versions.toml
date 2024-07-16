@@ -1,5 +1,5 @@
 [versions]
-dark-matter = "4.0.2-1.20.1-build.80"
+dark-matter = "4.1.0-1.20.1-build.85"
 
 [libraries]
 fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version = "0.16.0" }

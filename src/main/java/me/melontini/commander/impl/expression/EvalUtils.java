@@ -9,15 +9,14 @@ import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.functions.FunctionIfc;
 import com.ezylang.evalex.parser.ASTNode;
 import com.google.common.base.CaseFormat;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMaps;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import me.melontini.commander.impl.expression.functions.*;
@@ -30,23 +29,23 @@ import me.melontini.commander.impl.expression.functions.registry.DynamicRegistry
 import me.melontini.commander.impl.expression.functions.registry.RegistryFunction;
 import me.melontini.commander.impl.mixin.evalex.ExpressionConfigurationAccessor;
 import me.melontini.commander.impl.mixin.evalex.MapBasedFunctionDictionaryAccessor;
+import me.melontini.dark_matter.api.base.util.Exceptions;
+import me.melontini.dark_matter.api.base.util.functions.Memoize;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Log4j2
 public class EvalUtils {
 
     public static final ExpressionConfiguration CONFIGURATION;
@@ -72,8 +71,19 @@ public class EvalUtils {
         Map<String, FunctionIfc> functions = new Object2ReferenceOpenHashMap<>(((MapBasedFunctionDictionaryAccessor) fd)
                 .commander$getFunctions().entrySet().stream()
                 .collect(Collectors.toMap(e -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, e.getKey()), Map.Entry::getValue)));
+
+        Set<String> toCache = ImmutableSet.of(
+                "fact", "floor", "ceiling",
+                "log", "log10", "round", "sqrt",
+                "acos", "acosh", "acosr", "acot", "acoth", "acotr", "asin", "asinh", "asinr",
+                "atan", "atan2", "atan2r", "atanh", "atanr", "cos", "cosh", "cosr", "cot", "coth", "cotr",
+                "csc", "csch", "cscr", "deg", "rad", "sin", "sinh", "sinr", "sec", "sech", "secr", "tan", "tanh", "tanr",
+                "strContains", "strEndsWith", "strLower", "strStartsWith", "strTrim", "strUpper"
+        );
+        toCache.forEach(f -> functions.put(f, LruCachingFunction.of(functions.get(f))));
+
         functions.put("random", new RangedRandomFunction());
-        functions.put("lerp", new LerpFunction());
+        functions.put("lerp", LruCachingFunction.of(new LerpFunction()));
         functions.put("clamp", new ClampFunction());
         functions.put("ifMatches", new MatchesFunction());
         functions.put("chain", new ChainFunction());
@@ -92,8 +102,8 @@ public class EvalUtils {
         functions.put("hasContext", new HasContextFunction());
 
         functions.put("Registry", new RegistryFunction(Registries.REGISTRIES));
-        functions.put("Item", new RegistryFunction(Registries.ITEM));
-        functions.put("Block", new RegistryFunction(Registries.BLOCK));
+        functions.put("Item", LruCachingFunction.of(new RegistryFunction(Registries.ITEM)));
+        functions.put("Block", LruCachingFunction.of(new RegistryFunction(Registries.BLOCK)));
 
         functions.put("DynamicRegistry", new DynamicRegistryRegistryFunction());
         functions.put("Biome", new DynamicRegistryFunction(RegistryKeys.BIOME));
@@ -124,23 +134,17 @@ public class EvalUtils {
         }
     }
 
-    //Not sure about this cache.
-    private static final LoadingCache<String, Expression> EXPRESSION_CACHE = CacheBuilder.newBuilder().expireAfterAccess(Duration.of(10, ChronoUnit.MINUTES)).build(new CacheLoader<>() {
-        @Override
-        public @NotNull Expression load(@NotNull String key) throws Exception {
-            Expression exp = new Expression(key, CONFIGURATION);
-            exp.validate();
-            return exp;
-        }
-    });
+    private static final Function<String, Expression> EXPRESSION_CACHE = Memoize.lruFunction(Exceptions.function(key -> {
+        Expression exp = new Expression(key, CONFIGURATION);
+        exp.validate();
+        return exp;
+    }), 35);
 
     public static DataResult<Expression> parseExpression(String expression) {
         try {
-            return DataResult.success(EXPRESSION_CACHE.get(expression).copy());
-        } catch (BaseException exception) {
-            return DataResult.error(exception::getMessage);
-        } catch (ExecutionException throwable) {
-            var unwrapped = throwable.getCause();
+            return DataResult.success(EXPRESSION_CACHE.apply(expression).copy());
+        } catch (Throwable throwable) {
+            var unwrapped = Exceptions.unwrap(throwable);
             return DataResult.error(unwrapped::getMessage);
         }
     }
