@@ -11,8 +11,9 @@ import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.scoreboard.ScoreAccess;
+import net.minecraft.scoreboard.ScoreHolder;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ScoreboardCommand;
 import net.minecraft.server.command.ServerCommandSource;
@@ -27,7 +28,7 @@ import java.util.Optional;
 @Mixin(ScoreboardCommand.class)
 public class ScoreboardCommandMixin {
 
-    @ModifyExpressionValue(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/command/CommandManager;literal(Ljava/lang/String;)Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;", ordinal = 8))
+    @ModifyExpressionValue(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/command/CommandManager;literal(Ljava/lang/String;)Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;", ordinal = 11))
     private static LiteralArgumentBuilder<ServerCommandSource> addCommanderOperator(LiteralArgumentBuilder<ServerCommandSource> original) {
         return original.then(CommandManager.literal("cmd:operate")
                 .then(CommandManager.argument("targets", ScoreHolderArgumentType.scoreHolders()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
@@ -44,16 +45,16 @@ public class ScoreboardCommandMixin {
 
                                     LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(context.getSource().getWorld())
                                             .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
-                                            .build(LootContextTypes.COMMAND)).build(null);
+                                            .build(LootContextTypes.COMMAND)).build(Optional.empty());
 
-                                    for (String target : targets) {
-                                        ScoreboardPlayerScore score = scoreboard.getPlayerScore(target, objective);
+                                    for (ScoreHolder target : targets) {
+                                        ScoreAccess score = scoreboard.getOrCreateScore(target, objective);
                                         Optional.ofNullable(expression.evalWithVariable(context1, "score", score.getScore()).getAsDecimal())
                                                 .map(BigDecimal::intValue).ifPresent(score::setScore);
                                     }
 
                                     if (targets.size() == 1) {
-                                        context.getSource().sendFeedback(() -> Text.translatable("commands.scoreboard.players.set.success.single", objective.toHoverableText(), targets.get(0), expression.original()), true);
+                                        context.getSource().sendFeedback(() -> Text.translatable("commands.scoreboard.players.set.success.single", objective.toHoverableText(), targets.get(0).getStyledDisplayName(), expression.original()), true);
                                     } else {
                                         context.getSource().sendFeedback(() -> Text.translatable("commands.scoreboard.players.set.success.multiple", objective.toHoverableText(), targets.size(), expression.original()), true);
                                     }
