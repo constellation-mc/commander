@@ -1,8 +1,7 @@
 package me.melontini.commander.impl.expression.extensions.convert.states;
 
-import com.ezylang.evalex.data.EvaluationValue;
 import lombok.EqualsAndHashCode;
-import me.melontini.commander.impl.expression.extensions.ProxyMap;
+import me.melontini.commander.api.expression.extensions.ProxyMap;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 
@@ -16,7 +15,7 @@ public class StateStruct extends ProxyMap {
     }
 
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(String key) {
         for (Entry<Property<?>, Comparable<?>> e : state.getEntries().entrySet()) {
             if (e.getKey().getName().equals(key)) return true;
         }
@@ -24,11 +23,11 @@ public class StateStruct extends ProxyMap {
     }
 
     @Override
-    public EvaluationValue get(Object key) {
+    public Object getValue(String key) {
         for (Entry<Property<?>, Comparable<?>> e : state.getEntries().entrySet()) {
-            if (e.getKey().getName().equals(key)) return convert(e.getValue());
+            if (e.getKey().getName().equals(key)) return e.getValue();
         }
-        return EvaluationValue.NULL_VALUE;
+        return null;
     }
 
     @Override
@@ -38,8 +37,6 @@ public class StateStruct extends ProxyMap {
 
     @Override
     public String toString() {
-        return "StateStruct{" +
-                "state=" + state.getEntries() +
-                '}';
+        return String.valueOf(state.getEntries());
     }
 }

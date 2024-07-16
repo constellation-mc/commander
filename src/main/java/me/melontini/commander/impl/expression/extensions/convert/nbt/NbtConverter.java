@@ -5,7 +5,7 @@ import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.data.conversion.ConverterIfc;
 import com.ezylang.evalex.data.conversion.NumberConverter;
 import com.google.common.collect.Lists;
-import me.melontini.commander.impl.expression.extensions.ProxyMap;
+import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import net.minecraft.nbt.*;
 
 public class NbtConverter implements ConverterIfc {
@@ -20,7 +20,7 @@ public class NbtConverter implements ConverterIfc {
         } else if (object instanceof NbtString n) {
             return EvaluationValue.stringValue(n.asString());
         } else if (object instanceof AbstractNbtList<?> n) {
-            return EvaluationValue.arrayValue(Lists.transform(n, ProxyMap::convert));
+            return EvaluationValue.arrayValue(Lists.transform(n, ReflectiveValueConverter::convert));
         } else if (object instanceof NbtCompound n) {
             return EvaluationValue.structureValue(new NbtCompoundStruct(n));
         }

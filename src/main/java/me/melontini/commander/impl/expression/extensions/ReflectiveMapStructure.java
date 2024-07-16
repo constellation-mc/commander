@@ -1,6 +1,5 @@
 package me.melontini.commander.impl.expression.extensions;
 
-import com.ezylang.evalex.data.EvaluationValue;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -9,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
+import me.melontini.commander.api.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.expression.CmdEvalException;
 import me.melontini.dark_matter.api.base.util.tuple.Tuple;
@@ -31,7 +31,7 @@ public class ReflectiveMapStructure extends ProxyMap {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     static {
-        CustomFields.init();
+        DefaultCustomFields.init();
     }
 
     @EqualsAndHashCode.Exclude
@@ -85,10 +85,7 @@ public class ReflectiveMapStructure extends ProxyMap {
     }
 
     @Override
-    public boolean containsKey(Object obj) {
-        if (obj == null) return false;
-        if (!(obj instanceof String key)) return false;
-
+    public boolean containsKey(String key) {
         if (this.mappings.isInvalid(key)) return false;
 
         var cache = this.mappings.getAccessor(key);
@@ -152,11 +149,11 @@ public class ReflectiveMapStructure extends ProxyMap {
     }
 
     @Override
-    public EvaluationValue get(Object key) {
+    public Object getValue(String key) {
         try {
-            Function<Object, Object> field = this.mappings.getAccessor((String) key);
+            Function<Object, Object> field = this.mappings.getAccessor(key);
             if (field == null) throw new RuntimeException("%s has no public field or method '%s'".formatted(this.object.getClass().getSimpleName(), key));
-            return convert(field.apply(this.object));
+            return field.apply(this.object);
         } catch (Exception e) {
             throw new CmdEvalException(Objects.requireNonNullElse(e.getMessage(), "Failed to reflectively access member!"));
         }
@@ -164,7 +161,7 @@ public class ReflectiveMapStructure extends ProxyMap {
 
     @Override
     public String toString() {
-        return "ReflectiveMapStructure{object=" + this.object + ";}";
+        return String.valueOf(this.object);
     }
 
     static final class Struct {

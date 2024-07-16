@@ -6,9 +6,8 @@
   "mixins": [
     "AdvancementRewardsMixin",
     "ExecuteCommandMixin",
-    "evalex.EvaluationValueAccessor",
+    "ScoreboardCommandMixin",
     "evalex.EvaluationValueMixin",
-    "evalex.ExpressionAccessor",
     "evalex.ExpressionConfigurationAccessor",
     "evalex.ExpressionMixin",
     "evalex.MapBasedFunctionDictionaryAccessor",

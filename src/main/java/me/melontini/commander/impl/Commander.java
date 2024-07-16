@@ -2,8 +2,10 @@ package me.melontini.commander.impl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import lombok.Cleanup;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -20,11 +22,12 @@ import me.melontini.commander.impl.util.mappings.AmbiguousRemapper;
 import me.melontini.commander.impl.util.mappings.MappingKeeper;
 import me.melontini.commander.impl.util.mappings.MinecraftDownloader;
 import me.melontini.dark_matter.api.base.util.Exceptions;
-import me.melontini.dark_matter.api.base.util.MakeSure;
 import me.melontini.dark_matter.api.base.util.PrependingLogger;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
+import me.melontini.dark_matter.api.minecraft.util.TextUtil;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.loot.condition.LootConditionType;
@@ -32,8 +35,10 @@ import net.minecraft.loot.provider.number.LootNumberProviderType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import static net.minecraft.loot.context.LootContextParameters.*;
 
@@ -59,22 +65,29 @@ public class Commander {
     public static final AttachmentType<NbtCompound> DATA_ATTACHMENT = AttachmentRegistry.<NbtCompound>builder()
             .initializer(NbtCompound::new).persistent(NbtCodecs.COMPOUND_CODEC).buildAndRegister(id("persistent"));
 
+    public static final DynamicCommandExceptionType EXPRESSION_EXCEPTION = new DynamicCommandExceptionType(object -> TextUtil.literal("Failed to evaluate: " + object));
+
     @Getter
     private AmbiguousRemapper mappingKeeper;
+    @Getter @Setter
+    private @Nullable MinecraftServer currentServer;
 
     public static Identifier id(String path) {
         return new Identifier("commander", path);
     }
 
-    private static Commander instance;
+    private static Supplier<Commander> instance = () -> {
+        throw new NullPointerException("Commander instance requested too early!");
+    };
 
     public static void init() {
-        instance = new Commander();
-        instance.onInitialize();
+        var cmd = new Commander();
+        cmd.onInitialize();
+        instance = () -> cmd;
     }
 
     public static Commander get() {
-        return MakeSure.notNull(instance);
+        return instance.get();
     }
 
     public void onInitialize() {
@@ -113,18 +126,12 @@ public class Commander {
         }
 
         ServerReloadersEvent.EVENT.register(context -> context.register(new DynamicEventManager()));
+
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> this.currentServer = server);
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.currentServer = null);
+
         EvalUtils.init();
-
-        try {
-            MinecraftDownloader.downloadMappings();
-
-            CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.supplyAsync(MappingKeeper::loadOffMojmap, Util.getMainWorkerExecutor());
-            CompletableFuture<MemoryMappingTree> offTarget = CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
-            mappingKeeper = new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
-        } catch (Throwable t) {
-            log.error("Failed to download and prepare mappings! Data access remapping will not work!!!", t);
-            mappingKeeper = (cls, name) -> name;//Returning null will force it to traverse the hierarchy.
-        }
+        this.loadMappings();
 
         BuiltInEvents.init();
         BuiltInCommands.init();
@@ -136,6 +143,23 @@ public class Commander {
                 KILLER_ENTITY, DIRECT_KILLER_ENTITY,
                 DAMAGE_SOURCE, EXPLOSION_RADIUS,
                 BLOCK_STATE, BLOCK_ENTITY);
+    }
+
+    private void loadMappings() {
+        if (MappingKeeper.NAMESPACE.equals("mojang")) {
+            mappingKeeper = (cls, name) -> name; // Nothing to remap.
+            return;
+        }
+
+        try {
+            CompletableFuture<MemoryMappingTree> offTarget = CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
+            MinecraftDownloader.downloadMappings();
+            CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.supplyAsync(MappingKeeper::loadOffMojmap, Util.getMainWorkerExecutor());
+            mappingKeeper = new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
+        } catch (Throwable t) {
+            log.error("Failed to download and prepare mappings! Data access remapping will not work!!!", t);
+            mappingKeeper = (cls, name) -> name;//Returning null will force it to traverse the hierarchy.
+        }
     }
 
     @SneakyThrows(IOException.class)

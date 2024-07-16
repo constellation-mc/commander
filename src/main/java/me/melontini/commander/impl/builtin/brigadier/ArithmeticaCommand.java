@@ -3,6 +3,7 @@ package me.melontini.commander.impl.builtin.brigadier;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.expression.CmdEvalException;
 import me.melontini.commander.impl.expression.macro.PatternParser;
@@ -16,6 +17,7 @@ import net.minecraft.text.Text;
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
+
 public class ArithmeticaCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -28,26 +30,20 @@ public class ArithmeticaCommand {
         dispatcher.register(CommandManager.literal("cmd:arithmetica").requires(source -> source.hasPermissionLevel(2)).then(cmd));
     }
 
-    private static int execute(CommandContext<ServerCommandSource> context, String expression, @Nullable String cast) {
+    private static int execute(CommandContext<ServerCommandSource> context, String expression, @Nullable String cast) throws CommandSyntaxException {
         try {
             var r = PatternParser.parseExpression(expression, cast);
-            if (r.error().isPresent()) {
-                context.getSource().sendError(Text.literal(r.error().get().message()));
-                return 0;
-            }
+            if (r.error().isPresent()) throw Commander.EXPRESSION_EXCEPTION.create(r.error().get().message());
+
             LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(context.getSource().getWorld())
                     .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
                     .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
                     .build(LootContextTypes.COMMAND)).build(Optional.empty());
 
-            context.getSource().sendMessage(Text.literal(r.result().orElseThrow().apply(context1)));
+            context.getSource().sendMessage(Text.literal(String.valueOf(r.result().orElseThrow().apply(context1))));
             return 1;
         } catch (CmdEvalException e) {
-            context.getSource().sendError(Text.literal(e.getMessage()));
-            return 0;
-        } catch (Throwable t) {
-            Commander.LOGGER.error(t);
-            throw t;
+            throw Commander.EXPRESSION_EXCEPTION.create(e.getMessage());
         }
     }
 }

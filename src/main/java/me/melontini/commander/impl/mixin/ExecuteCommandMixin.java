@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import me.melontini.commander.api.expression.Expression;
-import me.melontini.dark_matter.api.minecraft.util.TextUtil;
+import me.melontini.commander.impl.Commander;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
@@ -33,17 +33,14 @@ public abstract class ExecuteCommandMixin {
     private static void commander$addExpressionCondition(CommandNode<ServerCommandSource> root, LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess, CallbackInfoReturnable<ArgumentBuilder<ServerCommandSource, ?>> cir) {
         argumentBuilder.then(CommandManager.literal("cmd:expression").then(addConditionLogic(root, CommandManager.argument("expression", StringArgumentType.string()), positive, context -> {
             var r = Expression.parse(StringArgumentType.getString(context, "expression"));
-            if (r.error().isPresent()) {
-                context.getSource().sendError(TextUtil.literal(r.error().orElseThrow().message()));
-                throw new IllegalArgumentException();
-            }
+            if (r.error().isPresent()) throw Commander.EXPRESSION_EXCEPTION.create(r.error().get().message());
 
             LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(context.getSource().getWorld())
                     .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
                     .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
                     .build(LootContextTypes.COMMAND)).build(Optional.empty());
 
-            return r.result().orElseThrow().apply(context1).getAsBoolean();
+            return r.result().flatMap(expression -> Optional.ofNullable(expression.eval(context1))).map(Expression.Result::getAsBoolean).orElse(false);
         })));
     }
 }

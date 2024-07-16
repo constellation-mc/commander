@@ -1,6 +1,6 @@
 package me.melontini.commander.impl.expression;
 
-import com.ezylang.evalex.EvaluationException;
+import com.ezylang.evalex.BaseException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.config.FunctionDictionaryIfc;
@@ -8,50 +8,57 @@ import com.ezylang.evalex.data.DataAccessorIfc;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.functions.FunctionIfc;
 import com.ezylang.evalex.parser.ASTNode;
-import com.ezylang.evalex.parser.ParseException;
 import com.google.common.base.CaseFormat;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.DataResult;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMaps;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
-import me.melontini.commander.impl.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
-import me.melontini.commander.impl.expression.functions.HasContextFunction;
-import me.melontini.commander.impl.expression.functions.LengthFunction;
-import me.melontini.commander.impl.expression.functions.MatchesFunction;
-import me.melontini.commander.impl.expression.functions.StructContainsKeyFunction;
+import me.melontini.commander.impl.expression.functions.*;
 import me.melontini.commander.impl.expression.functions.arrays.*;
 import me.melontini.commander.impl.expression.functions.math.ClampFunction;
 import me.melontini.commander.impl.expression.functions.math.LerpFunction;
 import me.melontini.commander.impl.expression.functions.math.RangedRandomFunction;
-import me.melontini.commander.impl.mixin.evalex.EvaluationValueAccessor;
-import me.melontini.commander.impl.mixin.evalex.ExpressionAccessor;
+import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryFunction;
+import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryRegistryFunction;
+import me.melontini.commander.impl.expression.functions.registry.RegistryFunction;
 import me.melontini.commander.impl.mixin.evalex.ExpressionConfigurationAccessor;
 import me.melontini.commander.impl.mixin.evalex.MapBasedFunctionDictionaryAccessor;
+import me.melontini.dark_matter.api.base.util.Exceptions;
+import me.melontini.dark_matter.api.base.util.functions.Memoize;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Log4j2
 public class EvalUtils {
 
     public static final ExpressionConfiguration CONFIGURATION;
-    public static final EvaluationValue TRUE = EvaluationValueAccessor.commander$init(true, EvaluationValue.DataType.BOOLEAN);
-    public static final EvaluationValue FALSE = EvaluationValueAccessor.commander$init(false, EvaluationValue.DataType.BOOLEAN);
-    public static final EvaluationValue NULL = EvaluationValueAccessor.commander$init(null, EvaluationValue.DataType.NULL);
+    public static final Object2ReferenceMap<String, EvaluationValue> CONSTANTS = Object2ReferenceMaps.unmodifiable(new Object2ReferenceOpenHashMap<>(ImmutableMap.of(
+            "true", EvaluationValue.TRUE,
+            "false", EvaluationValue.FALSE,
+            "PI", EvaluationValue.numberValue(new BigDecimal("3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679")),
+            "E", EvaluationValue.numberValue(new BigDecimal("2.71828182845904523536028747135266249775724709369995957496696762772407663")),
+            "null", EvaluationValue.NULL_VALUE,
+            "DT_FORMAT_ISO_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]['['VV']']"),
+            "DT_FORMAT_LOCAL_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS]"),
+            "DT_FORMAT_LOCAL_DATE", EvaluationValue.stringValue("yyyy-MM-dd")
+    )));
 
     static {
         var builder = ExpressionConfiguration.builder()
@@ -64,34 +71,47 @@ public class EvalUtils {
         Map<String, FunctionIfc> functions = new Object2ReferenceOpenHashMap<>(((MapBasedFunctionDictionaryAccessor) fd)
                 .commander$getFunctions().entrySet().stream()
                 .collect(Collectors.toMap(e -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, e.getKey()), Map.Entry::getValue)));
+
+        Set<String> toCache = ImmutableSet.of(
+                "fact", "floor", "ceiling",
+                "log", "log10", "round", "sqrt",
+                "acos", "acosh", "acosr", "acot", "acoth", "acotr", "asin", "asinh", "asinr",
+                "atan", "atan2", "atan2r", "atanh", "atanr", "cos", "cosh", "cosr", "cot", "coth", "cotr",
+                "csc", "csch", "cscr", "deg", "rad", "sin", "sinh", "sinr", "sec", "sech", "secr", "tan", "tanh", "tanr",
+                "strContains", "strEndsWith", "strLower", "strStartsWith", "strTrim", "strUpper"
+        );
+        toCache.forEach(f -> functions.put(f, LruCachingFunction.of(functions.get(f))));
+
         functions.put("random", new RangedRandomFunction());
-        functions.put("lerp", new LerpFunction());
+        functions.put("lerp", LruCachingFunction.of(new LerpFunction()));
         functions.put("clamp", new ClampFunction());
         functions.put("ifMatches", new MatchesFunction());
+        functions.put("chain", new ChainFunction());
         functions.put("length", new LengthFunction());
 
         functions.put("arrayOf", new ArrayOf());
         functions.put("arrayMap", new ArrayMap());
         functions.put("arrayFind", new ArrayFind());
+        functions.put("arrayFindAny", new ArrayFindAny());
+        functions.put("arrayFindFirst", new ArrayFindFirst());
         functions.put("arrayAnyMatch", new ArrayAnyMatch());
         functions.put("arrayNoneMatch", new ArrayNoneMatch());
         functions.put("arrayAllMatch", new ArrayAllMatch());
 
         functions.put("structContainsKey", new StructContainsKeyFunction());
         functions.put("hasContext", new HasContextFunction());
+
+        functions.put("Registry", new RegistryFunction(Registries.REGISTRIES));
+        functions.put("Item", LruCachingFunction.of(new RegistryFunction(Registries.ITEM)));
+        functions.put("Block", LruCachingFunction.of(new RegistryFunction(Registries.BLOCK)));
+
+        functions.put("DynamicRegistry", new DynamicRegistryRegistryFunction());
+        functions.put("Biome", new DynamicRegistryFunction(RegistryKeys.BIOME));
+        functions.put("DimensionType", new DynamicRegistryFunction(RegistryKeys.DIMENSION_TYPE));
         builder.functionDictionary(SimpleFunctionDictionary.ofFunctions(functions));
 
         CONFIGURATION = builder.build();
-        ((ExpressionConfigurationAccessor) CONFIGURATION).commander$defaultConstants(ImmutableMap.of(
-                "true", TRUE,
-                "false", FALSE,
-                "PI", EvaluationValue.numberValue(new BigDecimal("3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679")),
-                "E", EvaluationValue.numberValue(new BigDecimal("2.71828182845904523536028747135266249775724709369995957496696762772407663")),
-                "null", NULL,
-                "DT_FORMAT_ISO_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]['['VV']']"),
-                "DT_FORMAT_LOCAL_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS]"),
-                "DT_FORMAT_LOCAL_DATE", EvaluationValue.stringValue("yyyy-MM-dd")
-        ));
+        ((ExpressionConfigurationAccessor) CONFIGURATION).commander$defaultConstants(CONSTANTS);
     }
 
     @SneakyThrows
@@ -107,29 +127,25 @@ public class EvalUtils {
         try {
             LootContextDataAccessor.LOCAL.set(context);
             return exp.evaluate();
-        } catch (EvaluationException | ParseException e) {
+        } catch (BaseException e) {
             throw new CmdEvalException(Objects.requireNonNullElseGet(e.getMessage(), () -> "Failed to evaluate expression %s".formatted(exp.getExpressionString())), e);
         } finally {
             LootContextDataAccessor.LOCAL.remove();
         }
     }
 
-    //Not sure about this cache.
-    private static final LoadingCache<String, Expression> EXPRESSION_CACHE = CacheBuilder.newBuilder().expireAfterAccess(Duration.of(3, ChronoUnit.MINUTES)).build(new CacheLoader<>() {
-        @Override
-        public @NotNull Expression load(@NotNull String key) throws Exception {
-            Expression exp = new Expression(key, CONFIGURATION);
-            ((ExpressionAccessor) exp).commander$constants(new Object2ReferenceOpenHashMap<>(CONFIGURATION.getDefaultConstants()));
-            exp.validate();
-            return exp;
-        }
-    });
+    private static final Function<String, Expression> EXPRESSION_CACHE = Memoize.lruFunction(Exceptions.function(key -> {
+        Expression exp = new Expression(key, CONFIGURATION);
+        exp.validate();
+        return exp;
+    }), 35);
 
     public static DataResult<Expression> parseExpression(String expression) {
         try {
-            return DataResult.success(EXPRESSION_CACHE.get(expression).copy());
+            return DataResult.success(EXPRESSION_CACHE.apply(expression).copy());
         } catch (Throwable throwable) {
-            return DataResult.error(throwable::getLocalizedMessage);
+            var unwrapped = Exceptions.unwrap(throwable);
+            return DataResult.error(unwrapped::getMessage);
         }
     }
 
@@ -157,7 +173,7 @@ public class EvalUtils {
             var id = r.result().orElseThrow();
             var func = overrides.get(id);
             if (func != null) {
-                supplier = () -> ProxyMap.convert(func.apply(LOCAL.get()));
+                supplier = () -> ReflectiveValueConverter.convert(func.apply(LOCAL.get()));
                 varCache.put(variable, supplier);
                 return supplier.get();
             }
@@ -168,7 +184,7 @@ public class EvalUtils {
             supplier = () -> {
                 var object = LOCAL.get().get(param);
                 if (object == null) return null;
-                return ProxyMap.convert(object);
+                return ReflectiveValueConverter.convert(object);
             };
             varCache.put(variable, supplier);
             return supplier.get();
