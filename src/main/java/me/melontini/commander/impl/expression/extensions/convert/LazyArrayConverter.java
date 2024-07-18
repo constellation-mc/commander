@@ -11,7 +11,7 @@ import java.util.List;
 
 public class LazyArrayConverter implements ConverterIfc {
 
-    private static final EvaluationValue EMPTY = EvaluationValue.arrayValue(Collections.emptyList());
+    public static final EvaluationValue EMPTY = EvaluationValue.arrayValue(Collections.emptyList());
 
     @Override
     public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {

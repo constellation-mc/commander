@@ -14,7 +14,7 @@ public class RegistryAccessStruct extends ProxyMap {
 
     private static final Function<Identity<Registry<?>>, RegistryAccessStruct> CACHE = Memoize.lruFunction(eq -> new RegistryAccessStruct(eq.value()), 10);
 
-    public static RegistryAccessStruct forRegistry(Registry<?> registry) {
+    public synchronized static RegistryAccessStruct forRegistry(Registry<?> registry) {
         return CACHE.apply(new Identity<>(registry));
     }
 

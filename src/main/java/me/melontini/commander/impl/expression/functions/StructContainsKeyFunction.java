@@ -5,11 +5,13 @@ import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
+import com.ezylang.evalex.parser.ASTNode;
+import com.ezylang.evalex.parser.ParseException;
 import com.ezylang.evalex.parser.Token;
 
 @FunctionParameter(name = "struct")
 @FunctionParameter(name = "key", isVarArg = true)
-public class StructContainsKeyFunction extends AbstractFunction {
+public class StructContainsKeyFunction extends AbstractFunction implements CustomInlinerFunction {
     @Override
     public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
         return switch (par.length) {
@@ -24,5 +26,10 @@ public class StructContainsKeyFunction extends AbstractFunction {
                 yield  EvaluationValue.TRUE;
             }
         };
+    }
+
+    @Override
+    public EvaluationValue cmd$inlineFunction(Expression expression, ASTNode node) throws ParseException, EvaluationException {
+        return null;
     }
 }
