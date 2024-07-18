@@ -9,8 +9,7 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(ASTNode.class)
 public class ASTNodeMixin implements ASTInliner.InlinedNode {
 
-    @Unique
-    private EvaluationValue cmd$value;
+    @Unique private EvaluationValue cmd$value;
 
     @Override
     public EvaluationValue cmd$value() {
