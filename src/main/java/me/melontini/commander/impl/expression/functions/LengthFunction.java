@@ -30,6 +30,7 @@ public class LengthFunction extends AbstractFunction implements CustomInlinerFun
         if (value == null) return null;
 
         if (value.isStringValue()) return EvaluationValue.numberValue(BigDecimal.valueOf(value.getStringValue().length()));
+        if (value.isArrayValue()) return EvaluationValue.numberValue(BigDecimal.valueOf(value.getArrayValue().size()));
         if (value.isDurationValue()) return EvaluationValue.numberValue(BigDecimal.valueOf(value.getDurationValue().toMillis()));
 
         return null;

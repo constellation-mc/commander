@@ -30,6 +30,6 @@ public class ArrayAnyMatch extends AbstractFunction implements CustomInlinerFunc
     public EvaluationValue cmd$inlineFunction(Expression expression, ASTNode node) throws ParseException, EvaluationException {
         var value = CustomInlinerFunction.getNodeValue(node.getParameters().get(0));
         if (value == null) return null;
-        return CustomInlinerFunction.withConstant(expression, node.getParameters().get(1), "it", value);
+        return evaluate(expression, node.getToken(), value, EvaluationValue.expressionNodeValue(node.getParameters().get(1)));
     }
 }
