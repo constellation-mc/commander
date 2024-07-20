@@ -18,10 +18,10 @@ public class LruCachingFunction implements FunctionIfc {
 
     private final FunctionIfc delegate;
     private final Function<EvaluationValue[], Object> keyGetter;
-    private final Map<Object, EvaluationValue> cache = Collections.synchronizedMap(new LinkedHashMap<>(60 + 1, 0.75f, true) {
+    private final Map<Object, EvaluationValue> cache = Collections.synchronizedMap(new LinkedHashMap<>(128 + 1, 0.75f, true) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<Object, EvaluationValue> eldest) {
-            return size() > 60;
+            return size() > 128;
         }
     });
 

@@ -29,6 +29,7 @@ import me.melontini.commander.impl.expression.functions.registry.DynamicRegistry
 import me.melontini.commander.impl.expression.functions.registry.RegistryFunction;
 import me.melontini.commander.impl.mixin.evalex.ExpressionConfigurationAccessor;
 import me.melontini.commander.impl.mixin.evalex.MapBasedFunctionDictionaryAccessor;
+import me.melontini.commander.impl.util.ASTInliner;
 import me.melontini.dark_matter.api.base.util.Exceptions;
 import me.melontini.dark_matter.api.base.util.functions.Memoize;
 import net.minecraft.loot.context.LootContext;
@@ -73,17 +74,16 @@ public class EvalUtils {
                 .collect(Collectors.toMap(e -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, e.getKey()), Map.Entry::getValue)));
 
         Set<String> toCache = ImmutableSet.of(
-                "fact", "floor", "ceiling",
-                "log", "log10", "round", "sqrt",
+                "fact", "sqrt",
                 "acos", "acosh", "acosr", "acot", "acoth", "acotr", "asin", "asinh", "asinr",
-                "atan", "atan2", "atan2r", "atanh", "atanr", "cos", "cosh", "cosr", "cot", "coth", "cotr",
-                "csc", "csch", "cscr", "deg", "rad", "sin", "sinh", "sinr", "sec", "sech", "secr", "tan", "tanh", "tanr",
+                "atan", "atan2", "atan2r", "atanh", "atanr", "cosh", "cosr", "cot", "coth", "cotr",
+                "csc", "csch", "cscr", "sinh", "sinr", "sec", "sech", "secr", "tanh", "tanr",
                 "strContains", "strEndsWith", "strLower", "strStartsWith", "strTrim", "strUpper"
         );
         toCache.forEach(f -> functions.put(f, LruCachingFunction.of(functions.get(f))));
 
         functions.put("random", new RangedRandomFunction());
-        functions.put("lerp", LruCachingFunction.of(new LerpFunction()));
+        functions.put("lerp", new LerpFunction());
         functions.put("clamp", new ClampFunction());
         functions.put("ifMatches", new MatchesFunction());
         functions.put("chain", new ChainFunction());
@@ -136,9 +136,9 @@ public class EvalUtils {
 
     private static final Function<String, Expression> EXPRESSION_CACHE = Memoize.lruFunction(Exceptions.function(key -> {
         Expression exp = new Expression(key, CONFIGURATION);
-        exp.validate();
+        ASTInliner.optimize(exp, exp.getAbstractSyntaxTree());
         return exp;
-    }), 35);
+    }), 60);
 
     public static DataResult<Expression> parseExpression(String expression) {
         try {
