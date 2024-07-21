@@ -15,6 +15,7 @@ import me.melontini.commander.impl.builtin.BuiltInEvents;
 import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.expression.EvalUtils;
+import me.melontini.commander.impl.expression.extensions.convert.RegistryAccessStruct;
 import me.melontini.commander.impl.util.NbtCodecs;
 import me.melontini.commander.impl.util.loot.ArithmeticaLootNumberProvider;
 import me.melontini.commander.impl.util.loot.ExpressionLootCondition;
@@ -127,10 +128,16 @@ public class Commander {
             }
         }
 
-        ServerReloadersEvent.EVENT.register(context -> context.register(new DynamicEventManager()));
+        ServerReloadersEvent.EVENT.register(context -> {
+            this.resetCaches();
+            context.register(new DynamicEventManager());
+        });
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> this.currentServer = server);
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.currentServer = null);
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            this.currentServer = null;
+            this.resetCaches();
+        });
 
         EvalUtils.init();
         this.loadMappings();
@@ -145,6 +152,11 @@ public class Commander {
                 KILLER_ENTITY, DIRECT_KILLER_ENTITY,
                 DAMAGE_SOURCE, EXPLOSION_RADIUS,
                 BLOCK_STATE, BLOCK_ENTITY);
+    }
+
+    private void resetCaches() {
+        EvalUtils.resetCache();
+        RegistryAccessStruct.resetCache();
     }
 
     private void loadMappings() {

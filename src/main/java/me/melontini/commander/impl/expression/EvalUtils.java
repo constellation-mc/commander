@@ -134,15 +134,30 @@ public class EvalUtils {
         }
     }
 
-    private static final Function<String, Expression> EXPRESSION_CACHE = Memoize.lruFunction(Exceptions.function(key -> {
-        Expression exp = new Expression(key, CONFIGURATION);
-        ASTInliner.optimize(exp, exp.getAbstractSyntaxTree());
-        return exp;
-    }), 60);
+    private static final Object CACHE_LOCK = new Object();
+    private static Function<String, Expression> EXPRESSION_CACHE;
+
+    static {
+        resetCache();
+    }
+
+    public static void resetCache() {
+        synchronized (CACHE_LOCK) {
+            EXPRESSION_CACHE = Memoize.lruFunction(Exceptions.function(key -> {
+                Expression exp = new Expression(key, CONFIGURATION);
+                ASTInliner.optimize(exp, exp.getAbstractSyntaxTree());
+                return exp;
+            }), 60);
+        }
+    }
 
     public static DataResult<Expression> parseExpression(String expression) {
         try {
-            return DataResult.success(EXPRESSION_CACHE.apply(expression).copy());
+            Expression result;
+            synchronized (CACHE_LOCK) {
+                result = EXPRESSION_CACHE.apply(expression);
+            }
+            return DataResult.success(result.copy());
         } catch (Throwable throwable) {
             var unwrapped = Exceptions.unwrap(throwable);
             return DataResult.error(unwrapped::getMessage);

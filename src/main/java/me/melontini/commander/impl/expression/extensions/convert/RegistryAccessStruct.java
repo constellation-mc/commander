@@ -12,10 +12,23 @@ import java.util.function.Function;
 @EqualsAndHashCode(callSuper = false)
 public class RegistryAccessStruct extends ProxyMap {
 
-    private static final Function<Identity<Registry<?>>, RegistryAccessStruct> CACHE = Memoize.lruFunction(eq -> new RegistryAccessStruct(eq.value()), 10);
+    private static final Object CACHE_LOCK = new Object();
+    private static Function<Identity<Registry<?>>, RegistryAccessStruct> CACHE;
+
+    static {
+        resetCache();
+    }
+
+    public static void resetCache() {
+        synchronized (CACHE_LOCK) {
+            CACHE = Memoize.lruFunction(identity -> new RegistryAccessStruct(identity.value()), 10);
+        }
+    }
 
     public synchronized static RegistryAccessStruct forRegistry(Registry<?> registry) {
-        return CACHE.apply(new Identity<>(registry));
+        synchronized (CACHE_LOCK) {
+            return CACHE.apply(new Identity<>(registry));
+        }
     }
 
     private final Registry<?> registry;
