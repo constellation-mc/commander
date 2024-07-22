@@ -100,7 +100,7 @@ minecraft:level.getDayTime
 
 ::: details `storage`（存档，区块，实体，方块实体）
 
-你可以用它获取持久型数据。这一数据可以通过 [`/cmd:data`](zh-cn/BrigadierCommands#cmd-data) 来读取或修改。
+你可以用它获取持久型数据。这一数据可以通过 [`/cmd:data`](/zh-cn/BrigadierCommands#cmd-data) 来读取或修改。
 
 :::
 
@@ -134,7 +134,7 @@ minecraft:level.getDayTime
 
 ::: details JSON 命令宏
 
-详情见命令页面中，命令宏的相关内容。[链接](zh-cn/Commands#command-macros)
+详情见命令页面中，命令宏的相关内容。[链接](/zh-cn/Commands#command-macros)
 
 :::
 
