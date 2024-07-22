@@ -100,7 +100,7 @@ minecraft:level.getDayTime
 
 ::: details `storage`（存档，区块，实体，方块实体）
 
-你可以用它获取持久型数据。这一数据可以通过 [`/cmd:data`](/zh-cn/BrigadierCommands#cmd-data)，[`commander:store_nbt_data`](/zh-cn/Commands#commander-store-expression-data-and-commander-store-nbt-data) 或 [`commander:store_expression_data`](/zh-cn/Commands#commander-store-expression-data-and-commander-store-nbt-data) 来读取或修改。
+你可以用它获取持久型数据。这一数据可以通过 [`/cmd:data`](/zh-cn/BrigadierCommands#cmd-data) 来读取或修改。
 
 :::
 
@@ -130,18 +130,17 @@ minecraft:level.getDayTime
 
 通过使用 `cmd:arithmetica` 命令，你可以快速上手。记得用 `"` 括住表达式来满足格式要求。
 
-其他使用情境见[命令宏](Commands#command-macros)，`commander:arithmetica` 的数字提供器以及 `commander:expression` 接口。
+其他使用情境见：
 
-使用接口的例子：
+::: details JSON 命令宏
 
-```json
-{
-  "condition": "commander:expression",
-  "value": "level.isDay"
-}
-```
+详情见命令页面中，命令宏的相关内容。[链接](/zh-cn/Commands#command-macros)
 
-在条件下使用接口的例子：
+:::
+
+::: details 战利品数字提供器
+
+在条件中使用 `commander:arithmetica` 提供器：
 
 ```json
 {
@@ -156,3 +155,28 @@ minecraft:level.getDayTime
   }
 }
 ```
+
+:::
+
+::: details 战利品条件
+
+使用 `commander:expression` 条件：
+
+```json
+{
+  "condition": "commander:expression",
+  "value": "level.isDay"
+}
+```
+
+:::
+
+::: details `execute` 命令
+
+你可以将表达式作为 `execute if` 命令的条件。
+
+```
+/execute if cmd:expression "level.isDay" run say 现在是白天！
+```
+
+:::
