@@ -7,8 +7,8 @@ import com.google.common.collect.Lists;
 import me.melontini.commander.api.expression.extensions.ObjectConverter;
 import me.melontini.commander.api.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.expression.EvalUtils;
-import me.melontini.commander.impl.expression.extensions.convert.LazyArrayConverter;
 import me.melontini.commander.impl.expression.extensions.convert.nbt.NbtConverter;
+import me.melontini.dark_matter.api.base.util.MathUtil;
 
 import java.util.List;
 
@@ -20,12 +20,12 @@ public class ReflectiveValueConverter implements EvaluationValueConverterIfc {
             new BooleanConverter(),
             new ExpressionNodeConverter(),
             new NbtConverter(),
-            new LazyArrayConverter(),
+            new ArrayConverter(),
             new DateTimeConverter(),
             new DurationConverter());
 
     public static void registerConverter(int priority, ObjectConverter converter) {
-        if (priority > converters.size()) priority = converters.size();
+        priority = MathUtil.clamp(priority, 0, converters.size());
 
         converters.add(priority, new ConverterIfc() {
             @Override

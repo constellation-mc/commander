@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 
 @Mixin(ScoreboardCommand.class)
@@ -48,7 +49,7 @@ public class ScoreboardCommandMixin {
 
                                     for (String target : targets) {
                                         ScoreboardPlayerScore score = scoreboard.getPlayerScore(target, objective);
-                                        Optional.ofNullable(expression.evalWithVariable(context1, "score", score.getScore()).getAsDecimal())
+                                        Optional.ofNullable(expression.eval(context1, Collections.singletonMap("score", score.getScore())).getAsDecimal())
                                                 .map(BigDecimal::intValue).ifPresent(score::setScore);
                                     }
 

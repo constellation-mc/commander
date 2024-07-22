@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.math.RoundingMode;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -35,7 +36,7 @@ public class PatternParser {
         if (matcher.results().findAny().isEmpty()) return DataResult.success(new ConstantMacro(input));
         matcher.reset();
 
-        Function<LootContext, StringBuilder> start = context -> new StringBuilder();
+        BiFunction<LootContext, Map<String, Object>, StringBuilder> start = (context, params) -> new StringBuilder();
         while (matcher.find()) {
             var result = parseExpression(matcher.group(EXPRESSION), matcher.group(CAST));
             if (result.error().isPresent()) return result.map(e -> null);
@@ -43,12 +44,12 @@ public class PatternParser {
             var func = result.result().orElseThrow();
             var cmd = sb(b -> matcher.appendReplacement(b, ""));
             var fin = start;
-            start = context -> fin.apply(context).append(cmd).append(func.apply(context));
+            start = (context, params) -> fin.apply(context, params).append(cmd).append(func.apply(context, params));
         }
 
         var cmd = sb(matcher::appendTail);
         var fin = start;
-        start = context -> fin.apply(context).append(cmd);
+        start = (context, params) -> fin.apply(context, params).append(cmd);
 
         return DataResult.success(new DynamicMacro(input, start));
     }
@@ -59,14 +60,14 @@ public class PatternParser {
         return b.toString();
     }
 
-    public static DataResult<Function<LootContext, String>> parseExpression(String expression, @Nullable String cast) {
+    public static DataResult<BiFunction<LootContext, Map<String, Object>, String>> parseExpression(String expression, @Nullable String cast) {
         if (cast == null)
-            return EvalUtils.parseExpression(expression).map(exp -> context -> evaluate(context, exp).getStringValue());
+            return EvalUtils.parseExpression(expression).map(exp -> (context, params) -> evaluate(context, exp, params).getStringValue());
 
         var c = CONVERTERS.get(cast);
         if (c == null) return DataResult.error(() -> "Unknown cast type %s".formatted(cast));
-        return EvalUtils.parseExpression(expression).map(exp -> context -> {
-            var evalResult = evaluate(context, exp);
+        return EvalUtils.parseExpression(expression).map(exp -> (context, params) -> {
+            var evalResult = evaluate(context, exp, params);
             return evalResult.getValue() == null ? null : c.apply(evalResult);
         });
     }

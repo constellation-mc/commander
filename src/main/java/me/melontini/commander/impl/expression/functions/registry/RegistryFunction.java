@@ -1,7 +1,7 @@
 package me.melontini.commander.impl.expression.functions.registry;
 
+import com.ezylang.evalex.EvaluationContext;
 import com.ezylang.evalex.EvaluationException;
-import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
@@ -23,7 +23,7 @@ public class RegistryFunction extends AbstractFunction {
     }
 
     @Override
-    public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
+    public EvaluationValue evaluate(EvaluationContext context, Token functionToken, EvaluationValue... par) throws EvaluationException {
         try {
             var id = new Identifier(par[0].getStringValue());
             return ReflectiveValueConverter.convert(this.registry.getOrEmpty(id).orElseThrow(() -> new NoSuchElementException("No such %s: %s".formatted(registry.getKey().getValue(), id))));

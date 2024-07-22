@@ -39,7 +39,7 @@ public class ArithmeticaCommand {
                     .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
                     .build(LootContextTypes.COMMAND)).build(null);
 
-            context.getSource().sendMessage(Text.literal(String.valueOf(r.result().orElseThrow().apply(context1))));
+            context.getSource().sendMessage(Text.literal(String.valueOf(r.result().orElseThrow().apply(context1, null))));
             return 1;
         } catch (CmdEvalException e) {
             throw Commander.EXPRESSION_EXCEPTION.create(e.getMessage());

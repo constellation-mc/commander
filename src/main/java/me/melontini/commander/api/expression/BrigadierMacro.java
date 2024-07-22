@@ -4,7 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.impl.expression.macro.PatternParser;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -24,6 +27,10 @@ public interface BrigadierMacro extends Function<LootContext, String> {
         return this.build(context);
     }
 
-    String build(LootContext context);
+    default String build(LootContext context) {
+        return this.build(context, null);
+    }
+    @ApiStatus.Experimental
+    String build(LootContext context, @Nullable Map<String, Object> params);
     String original();
 }

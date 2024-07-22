@@ -1,7 +1,5 @@
 package me.melontini.commander.impl.util;
 
-import java.util.Objects;
-
 public record Identity<V>(V value) {
 
     @Override
@@ -12,6 +10,6 @@ public record Identity<V>(V value) {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(value);
+        return System.identityHashCode(value);
     }
 }

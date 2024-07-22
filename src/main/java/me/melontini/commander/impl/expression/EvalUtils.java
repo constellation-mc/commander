@@ -1,13 +1,16 @@
 package me.melontini.commander.impl.expression;
 
 import com.ezylang.evalex.BaseException;
+import com.ezylang.evalex.EvaluationContext;
+import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.config.ExpressionConfiguration;
-import com.ezylang.evalex.config.FunctionDictionaryIfc;
 import com.ezylang.evalex.data.DataAccessorIfc;
 import com.ezylang.evalex.data.EvaluationValue;
-import com.ezylang.evalex.functions.FunctionIfc;
 import com.ezylang.evalex.parser.ASTNode;
+import com.ezylang.evalex.parser.ExpressionParser;
+import com.ezylang.evalex.parser.InlinedASTNode;
+import com.ezylang.evalex.parser.Token;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -15,7 +18,6 @@ import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMaps;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
@@ -27,9 +29,7 @@ import me.melontini.commander.impl.expression.functions.math.RangedRandomFunctio
 import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryFunction;
 import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryRegistryFunction;
 import me.melontini.commander.impl.expression.functions.registry.RegistryFunction;
-import me.melontini.commander.impl.mixin.evalex.ExpressionConfigurationAccessor;
-import me.melontini.commander.impl.mixin.evalex.MapBasedFunctionDictionaryAccessor;
-import me.melontini.commander.impl.util.ASTInliner;
+import me.melontini.commander.impl.util.ThrowingOptional;
 import me.melontini.dark_matter.api.base.util.Exceptions;
 import me.melontini.dark_matter.api.base.util.functions.Memoize;
 import net.minecraft.loot.context.LootContext;
@@ -43,13 +43,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @Log4j2
 public class EvalUtils {
 
     public static final ExpressionConfiguration CONFIGURATION;
+    public static final ExpressionParser PARSER;
     public static final Object2ReferenceMap<String, EvaluationValue> CONSTANTS = Object2ReferenceMaps.unmodifiable(new Object2ReferenceOpenHashMap<>(ImmutableMap.of(
             "true", EvaluationValue.TRUE,
             "false", EvaluationValue.FALSE,
@@ -64,14 +63,11 @@ public class EvalUtils {
     static {
         var builder = ExpressionConfiguration.builder()
                 .dataAccessorSupplier(LootContextDataAccessor::new)
+                .parameterMapSupplier(Object2ReferenceOpenHashMap::new)
                 .evaluationValueConverter(new ReflectiveValueConverter())
                 .allowOverwriteConstants(false)
+                .additionalAllowedIdentifierChars(new char[] {':'})
                 .singleQuoteStringLiteralsAllowed(true);
-
-        var fd = ExpressionConfiguration.defaultConfiguration().getFunctionDictionary();
-        Map<String, FunctionIfc> functions = new Object2ReferenceOpenHashMap<>(((MapBasedFunctionDictionaryAccessor) fd)
-                .commander$getFunctions().entrySet().stream()
-                .collect(Collectors.toMap(e -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, e.getKey()), Map.Entry::getValue)));
 
         Set<String> toCache = ImmutableSet.of(
                 "fact", "sqrt",
@@ -80,57 +76,64 @@ public class EvalUtils {
                 "csc", "csch", "cscr", "sinh", "sinr", "sec", "sech", "secr", "tanh", "tanr",
                 "strContains", "strEndsWith", "strLower", "strStartsWith", "strTrim", "strUpper"
         );
-        toCache.forEach(f -> functions.put(f, LruCachingFunction.of(functions.get(f))));
 
-        functions.put("random", new RangedRandomFunction());
-        functions.put("lerp", new LerpFunction());
-        functions.put("clamp", new ClampFunction());
-        functions.put("ifMatches", new MatchesFunction());
-        functions.put("chain", new ChainFunction());
-        functions.put("length", new LengthFunction());
+        var fd = ExpressionConfiguration.defaultConfiguration().getFunctionDictionary();
+        var dictionary = fd.toBuilder(Object2ReferenceOpenHashMap::new);
+        fd.forEach((string, functionIfc) -> {
+            var newName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, string);
+            dictionary.add(newName, toCache.contains(newName) ? LruCachingFunction.of(functionIfc) : functionIfc);
+        });
 
-        functions.put("arrayOf", new ArrayOf());
-        functions.put("arrayMap", new ArrayMap());
-        functions.put("arrayFind", new ArrayFind());
-        functions.put("arrayFindAny", new ArrayFindAny());
-        functions.put("arrayFindFirst", new ArrayFindFirst());
-        functions.put("arrayAnyMatch", new ArrayAnyMatch());
-        functions.put("arrayNoneMatch", new ArrayNoneMatch());
-        functions.put("arrayAllMatch", new ArrayAllMatch());
+        dictionary.add("random", new RangedRandomFunction());
+        dictionary.add("lerp", new LerpFunction());
+        dictionary.add("clamp", new ClampFunction());
+        dictionary.add("ifMatches", new MatchesFunction());
+        dictionary.add("chain", new ChainFunction());
+        dictionary.add("length", new LengthFunction());
 
-        functions.put("structContainsKey", new StructContainsKeyFunction());
-        functions.put("hasContext", new HasContextFunction());
+        dictionary.add("arrayOf", new ArrayOf());
+        dictionary.add("arrayMap", new ArrayMap());
+        dictionary.add("arrayFind", new ArrayFind());
+        dictionary.add("arrayFindAny", new ArrayFindAny());
+        dictionary.add("arrayFindFirst", new ArrayFindFirst());
+        dictionary.add("arrayAnyMatch", new ArrayAnyMatch());
+        dictionary.add("arrayNoneMatch", new ArrayNoneMatch());
+        dictionary.add("arrayAllMatch", new ArrayAllMatch());
 
-        functions.put("Registry", new RegistryFunction(Registries.REGISTRIES));
-        functions.put("Item", LruCachingFunction.of(new RegistryFunction(Registries.ITEM)));
-        functions.put("Block", LruCachingFunction.of(new RegistryFunction(Registries.BLOCK)));
+        dictionary.add("structContainsKey", new StructContainsKeyFunction());
+        dictionary.add("hasContext", new HasContextFunction());
 
-        functions.put("DynamicRegistry", new DynamicRegistryRegistryFunction());
-        functions.put("Biome", new DynamicRegistryFunction(RegistryKeys.BIOME));
-        functions.put("DimensionType", new DynamicRegistryFunction(RegistryKeys.DIMENSION_TYPE));
-        builder.functionDictionary(SimpleFunctionDictionary.ofFunctions(functions));
+        dictionary.add("Registry", new RegistryFunction(Registries.REGISTRIES));
+        dictionary.add("Item", LruCachingFunction.of(new RegistryFunction(Registries.ITEM)));
+        dictionary.add("Block", LruCachingFunction.of(new RegistryFunction(Registries.BLOCK)));
+
+        dictionary.add("DynamicRegistry", new DynamicRegistryRegistryFunction());
+        dictionary.add("Biome", new DynamicRegistryFunction(RegistryKeys.BIOME));
+        dictionary.add("DimensionType", new DynamicRegistryFunction(RegistryKeys.DIMENSION_TYPE));
+        builder.functionDictionary(dictionary.build());
+
+        builder.constants(CONSTANTS);
 
         CONFIGURATION = builder.build();
-        ((ExpressionConfigurationAccessor) CONFIGURATION).commander$defaultConstants(CONSTANTS);
+        PARSER = new ExpressionParser(CONFIGURATION);
     }
 
-    @SneakyThrows
-    public static EvaluationValue runLambda(Expression expression, EvaluationValue value, ASTNode predicate) {
-        try {
-            return expression.with("it", value).evaluateSubtree(predicate);
-        } finally {
-            expression.getDataAccessor().setData("it", null);
-        }
+    public static ThrowingOptional<EvaluationValue> valueOrEmpty(ASTNode node) {
+        if (node instanceof InlinedASTNode inlined) return ThrowingOptional.of(inlined.value());
+        return ThrowingOptional.empty();
     }
 
-    public static EvaluationValue evaluate(LootContext context, Expression exp) {
+    public static EvaluationValue runLambda(EvaluationContext context, EvaluationValue value, ASTNode predicate) throws EvaluationException {
+        return context.expression().evaluateSubtree(predicate, context.withParameter("it", value));
+    }
+
+    public static EvaluationValue evaluate(LootContext context, Expression exp, @Nullable Map<String, Object> params) {
         try {
-            LootContextDataAccessor.LOCAL.set(context);
-            return exp.evaluate();
+            var builder = EvaluationContext.builder(exp).context(context);
+            if (params != null && !params.isEmpty()) builder.parameters(params);
+            return exp.evaluate(builder.build());
         } catch (BaseException e) {
             throw new CmdEvalException(Objects.requireNonNullElseGet(e.getMessage(), () -> "Failed to evaluate expression %s".formatted(exp.getExpressionString())), e);
-        } finally {
-            LootContextDataAccessor.LOCAL.remove();
         }
     }
 
@@ -143,11 +146,7 @@ public class EvalUtils {
 
     public static void resetCache() {
         synchronized (CACHE_LOCK) {
-            EXPRESSION_CACHE = Memoize.lruFunction(Exceptions.function(key -> {
-                Expression exp = new Expression(key, CONFIGURATION);
-                ASTInliner.optimize(exp, exp.getAbstractSyntaxTree());
-                return exp;
-            }), 60);
+            EXPRESSION_CACHE = Memoize.lruFunction(Exceptions.function(PARSER::parseAndInline), 60);
         }
     }
 
@@ -170,71 +169,36 @@ public class EvalUtils {
                 new Identifier("level"), LootContext::getWorld,
                 new Identifier("luck"), LootContext::getLuck
         ));
-        public static final ThreadLocal<LootContext> LOCAL = new ThreadLocal<>();
-        private final Map<String, EvaluationValue> parameters = new Object2ReferenceOpenHashMap<>();
         //In most cases the expression is reused, so caching this helps us avoid some big overhead.
-        private final Map<String, Supplier<EvaluationValue>> varCache = new Object2ReferenceOpenHashMap<>();
+        private final Map<String, Function<LootContext, EvaluationValue>> varCache = new Object2ReferenceOpenHashMap<>();
 
         @Override
-        public @Nullable EvaluationValue getData(String variable) {
+        public EvaluationValue getData(String variable, Token token, EvaluationContext context) throws EvaluationException {
             var supplier = varCache.get(variable);
-            if (supplier != null) return supplier.get(); //Parameters are cached by setData, so this is fine.
+            if (supplier != null) return supplier.apply((LootContext) context.context()[0]); //Parameters are cached by setData, so this is fine.
 
             var r = Identifier.validate(variable);
             if (r.error().isPresent()) {
-                throw new CmdEvalException("%s - no such variable or %s".formatted(variable, r.error().orElseThrow().message()));
+                throw new EvaluationException(token, "%s - no such variable or %s".formatted(variable, r.error().orElseThrow().message()));
             }
 
             var id = r.result().orElseThrow();
             var func = overrides.get(id);
             if (func != null) {
-                supplier = () -> ReflectiveValueConverter.convert(func.apply(LOCAL.get()));
-                varCache.put(variable, supplier);
-                return supplier.get();
+                varCache.put(variable, supplier = (lootContext) -> ReflectiveValueConverter.convert(func.apply(lootContext)));
+                return supplier.apply((LootContext) context.context()[0]);
             }
 
             var param = ExtractionTypes.getParameter(id);
-            if (param == null)
-                throw new CmdEvalException("%s is not a registered loot context parameter, variable or override!".formatted(id));
-            supplier = () -> {
-                var object = LOCAL.get().get(param);
+            if (param == null) {
+                throw new EvaluationException(token, "%s is not a registered loot context parameter, variable or override!".formatted(id));
+            }
+            varCache.put(variable, supplier = (lootContext) -> {
+                var object = lootContext.get(param);
                 if (object == null) return null;
                 return ReflectiveValueConverter.convert(object);
-            };
-            varCache.put(variable, supplier);
-            return supplier.get();
-        }
-
-        @Override
-        public void setData(String variable, EvaluationValue value) {
-            parameters.put(variable, value);
-
-            if (value == null) {
-                varCache.remove(variable);
-            } else {
-                varCache.put(variable, () -> parameters.get(variable)); //We're already here, so might as well cache.
-            }
-        }
-    }
-
-    public static class SimpleFunctionDictionary implements FunctionDictionaryIfc {
-
-        private final Map<String, FunctionIfc> functions = new Object2ReferenceOpenHashMap<>();
-
-        public static FunctionDictionaryIfc ofFunctions(Map<String, FunctionIfc> functions) {
-            FunctionDictionaryIfc dictionary = new SimpleFunctionDictionary();
-            functions.forEach(dictionary::addFunction);
-            return dictionary;
-        }
-
-        @Override
-        public @Nullable FunctionIfc getFunction(String functionName) {
-            return functions.get(functionName);
-        }
-
-        @Override
-        public void addFunction(String functionName, FunctionIfc function) {
-            functions.put(functionName, function);
+            });
+            return supplier.apply((LootContext) context.context()[0]);
         }
     }
 

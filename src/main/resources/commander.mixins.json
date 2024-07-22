@@ -7,13 +7,8 @@
     "AdvancementRewardsMixin",
     "ExecuteCommandMixin",
     "ScoreboardCommandMixin",
-    "evalex.ASTNodeMixin",
     "evalex.EvaluationValueMixin",
-    "evalex.ExpressionConfigurationAccessor",
-    "evalex.ExpressionMixin",
-    "evalex.MapBasedFunctionDictionaryAccessor",
-    "evalex.NonInlineableFunctionMixin",
-    "evalex.TokenizerMixin"
+    "evalex.ExpressionMixin"
   ],
   "client": [
   ],

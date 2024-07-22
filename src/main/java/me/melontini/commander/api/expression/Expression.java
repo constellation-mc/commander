@@ -6,6 +6,7 @@ import me.melontini.commander.impl.expression.EvalUtils;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -26,34 +27,14 @@ public interface Expression extends Function<LootContext, Expression.Result> {
         return this.eval(context);
     }
 
-    Result eval(LootContext context);
+    default Result eval(LootContext context) {
+        return this.eval(context, null);
+    }
+
+    @ApiStatus.Experimental
+    Result eval(LootContext context, @Nullable Map<String, Object> parameters);
+
     String original();
-
-    /**
-     * Sets an expression variable.<br/>
-     * The expression object will hold on to the variable until it is cleared by calling this method with a {@code null} value.
-     */
-    @ApiStatus.Experimental
-    Expression variable(String variable, Object value);
-
-    @ApiStatus.Experimental
-    default Result evalWithVariables(LootContext context, Map<String, Object> map) {
-        try {
-            map.forEach(this::variable);
-            return this.eval(context);
-        } finally {
-            map.keySet().forEach(var -> this.variable(var, null));
-        }
-    }
-
-    @ApiStatus.Experimental
-    default Result evalWithVariable(LootContext context, String variable, Object value) {
-        try {
-            return this.variable(variable, value).eval(context);
-        } finally {
-            this.variable(variable, null);
-        }
-    }
 
     interface Result {
 

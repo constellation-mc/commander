@@ -1,7 +1,7 @@
 package me.melontini.commander.impl.expression.functions;
 
+import com.ezylang.evalex.EvaluationContext;
 import com.ezylang.evalex.EvaluationException;
-import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.functions.FunctionIfc;
 import com.ezylang.evalex.functions.FunctionParameterDefinition;
@@ -41,11 +41,11 @@ public class LruCachingFunction implements FunctionIfc {
     }
 
     @Override
-    public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... parameterValues) throws EvaluationException {
+    public EvaluationValue evaluate(EvaluationContext context, Token functionToken, EvaluationValue... parameterValues) throws EvaluationException {
         var key = this.keyGetter.apply(parameterValues);
         var r = this.cache.get(key);
         if (r == null) {
-            r = delegate.evaluate(expression, functionToken, parameterValues);
+            r = delegate.evaluate(context, functionToken, parameterValues);
             this.cache.put(key, r);
             return r;
         }

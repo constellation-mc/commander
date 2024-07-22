@@ -23,6 +23,7 @@ base {
 
 apply from: "https://raw.githubusercontent.com/constellation-mc/artifacts/main/artifacts.groovy"
 constellationRepo(project, "dark-matter")
+anyGitHubRepo(project, "melontini", "EvalEx")
 
 repositories {
     maven { url 'https://jitpack.io' }
