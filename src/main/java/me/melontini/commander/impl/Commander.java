@@ -167,8 +167,8 @@ public class Commander {
 
         try {
             CompletableFuture<MemoryMappingTree> offTarget = CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
-            MinecraftDownloader.downloadMappings();
-            CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.supplyAsync(MappingKeeper::loadOffMojmap, Util.getMainWorkerExecutor());
+            CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.runAsync(MinecraftDownloader::downloadMappings, Util.getMainWorkerExecutor())
+                    .thenApplyAsync(unused -> MappingKeeper.loadOffMojmap(), Util.getMainWorkerExecutor());
             mappingKeeper = new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
         } catch (Throwable t) {
             log.error("Failed to download and prepare mappings! Data access remapping will not work!!!", t);
