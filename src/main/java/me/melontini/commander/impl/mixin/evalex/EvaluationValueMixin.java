@@ -1,60 +1,72 @@
 package me.melontini.commander.impl.mixin.evalex;
 
 import com.ezylang.evalex.data.EvaluationValue;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import me.melontini.commander.api.expression.Expression;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.Instant;
-
 @Mixin(value = EvaluationValue.class, remap = false)
 public abstract class EvaluationValueMixin implements Expression.Result {
 
-    @Shadow public abstract BigDecimal getNumberValue();
-    @Shadow public abstract Boolean getBooleanValue();
-    @Shadow public abstract String getStringValue();
-    @Shadow public abstract Instant getDateTimeValue();
-    @Shadow public abstract Duration getDurationValue();
-    @Shadow public abstract boolean isNumberValue();
-    @Shadow public abstract boolean isDateTimeValue();
+  @Shadow
+  public abstract BigDecimal getNumberValue();
 
-    @Shadow
-    public abstract Object getValue();
+  @Shadow
+  public abstract Boolean getBooleanValue();
 
-    @Override
-    public BigDecimal getAsDecimal() {
-        return getNumberValue();
-    }
+  @Shadow
+  public abstract String getStringValue();
 
-    @Override
-    public boolean getAsBoolean() {
-        return getBooleanValue();
-    }
+  @Shadow
+  public abstract Instant getDateTimeValue();
 
-    @Override
-    public String getAsString() {
-        return getStringValue();
-    }
+  @Shadow
+  public abstract Duration getDurationValue();
 
-    @Override
-    public Instant getAsInstant() {
-        return getDateTimeValue();
-    }
+  @Shadow
+  public abstract boolean isNumberValue();
 
-    @Override
-    public Duration getAsDuration() {
-        return getDurationValue();
-    }
+  @Shadow
+  public abstract boolean isDateTimeValue();
 
-    @Override
-    public boolean isDecimalValue() {
-        return isNumberValue();
-    }
+  @Shadow
+  public abstract Object getValue();
 
-    @Override
-    public boolean isInstantValue() {
-        return isDateTimeValue();
-    }
+  @Override
+  public BigDecimal getAsDecimal() {
+    return getNumberValue();
+  }
+
+  @Override
+  public boolean getAsBoolean() {
+    return getBooleanValue();
+  }
+
+  @Override
+  public String getAsString() {
+    return getStringValue();
+  }
+
+  @Override
+  public Instant getAsInstant() {
+    return getDateTimeValue();
+  }
+
+  @Override
+  public Duration getAsDuration() {
+    return getDurationValue();
+  }
+
+  @Override
+  public boolean isDecimalValue() {
+    return isNumberValue();
+  }
+
+  @Override
+  public boolean isInstantValue() {
+    return isDateTimeValue();
+  }
 }

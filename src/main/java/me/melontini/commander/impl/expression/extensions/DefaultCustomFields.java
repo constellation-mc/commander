@@ -17,20 +17,25 @@ import net.minecraft.state.State;
 
 class DefaultCustomFields {
 
-    private static final NbtCompound EMPTY = new NbtCompound();
+  private static final NbtCompound EMPTY = new NbtCompound();
 
-    static void init() {
-        CustomFields.addVirtualField(ItemStack.class, "nbt", object -> {
-            if (object.getNbt() == null) return EMPTY;
-            return object.getNbt();
-        });
-        CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
-        CustomFields.addVirtualField(BlockEntity.class, "nbt", BlockEntity::createNbtWithIdentifyingData);
+  static void init() {
+    CustomFields.addVirtualField(ItemStack.class, "nbt", object -> {
+      if (object.getNbt() == null) return EMPTY;
+      return object.getNbt();
+    });
+    CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
+    CustomFields.addVirtualField(
+        BlockEntity.class, "nbt", BlockEntity::createNbtWithIdentifyingData);
 
-        CustomFields.addVirtualField(State.class, "properties", StateStruct::new);
-        CustomFields.addVirtualField(LivingEntity.class, "attributes", e -> new EntityAttributesStruct(e.getAttributes()));
+    CustomFields.addVirtualField(State.class, "properties", StateStruct::new);
+    CustomFields.addVirtualField(
+        LivingEntity.class, "attributes", e -> new EntityAttributesStruct(e.getAttributes()));
 
-        CustomFields.addVirtualField(AttachmentTarget.class, "storage", target -> target.getAttachedOrCreate(Commander.DATA_ATTACHMENT));
-        CustomFields.addVirtualField(Registry.class, "access", RegistryAccessStruct::forRegistry);
-    }
+    CustomFields.addVirtualField(
+        AttachmentTarget.class,
+        "storage",
+        target -> target.getAttachedOrCreate(Commander.DATA_ATTACHMENT));
+    CustomFields.addVirtualField(Registry.class, "access", RegistryAccessStruct::forRegistry);
+  }
 }

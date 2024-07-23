@@ -9,11 +9,11 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 @UtilityClass
 public class BrigadierCommands {
 
-    public static void init() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            ExplodeCommand.register(dispatcher);
-            ArithmeticaCommand.register(dispatcher);
-            DataCommand.register(dispatcher);
-        });
-    }
+  public static void init() {
+    CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+      ExplodeCommand.register(dispatcher);
+      ArithmeticaCommand.register(dispatcher);
+      DataCommand.register(dispatcher);
+    });
+  }
 }

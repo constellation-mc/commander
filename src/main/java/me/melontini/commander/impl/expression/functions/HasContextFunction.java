@@ -9,29 +9,32 @@ import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.ASTNode;
 import com.ezylang.evalex.parser.Token;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 @FunctionParameter(name = "key", isVarArg = true)
 public class HasContextFunction extends AbstractFunction {
-    @Override
-    public EvaluationValue evaluate(EvaluationContext context, Token token, EvaluationValue... par) throws EvaluationException {
-        return switch (par.length) {
-            case 0 -> BooleanValue.TRUE;
-            case 1 -> BooleanValue.of(context.expression().getDataAccessor().getData(par[0].getStringValue(), token, context) != null);
-            default -> {
-                var da = context.expression().getDataAccessor();
-                for (EvaluationValue value : par) {
-                    if (da.getData(value.getStringValue(), token, context) == null) yield  BooleanValue.FALSE;
-                }
-                yield  BooleanValue.TRUE;
-            }
-        };
-    }
+  @Override
+  public EvaluationValue evaluate(EvaluationContext context, Token token, EvaluationValue... par)
+      throws EvaluationException {
+    return switch (par.length) {
+      case 0 -> BooleanValue.TRUE;
+      case 1 -> BooleanValue.of(
+          context.expression().getDataAccessor().getData(par[0].getStringValue(), token, context)
+              != null);
+      default -> {
+        var da = context.expression().getDataAccessor();
+        for (EvaluationValue value : par) {
+          if (da.getData(value.getStringValue(), token, context) == null) yield BooleanValue.FALSE;
+        }
+        yield BooleanValue.TRUE;
+      }
+    };
+  }
 
-    @Override
-    public @Nullable EvaluationValue inlineFunction(Expression expression, Token token, List<ASTNode> parameters) throws EvaluationException {
-        return null;
-    }
+  @Override
+  public @Nullable EvaluationValue inlineFunction(
+      Expression expression, Token token, List<ASTNode> parameters) throws EvaluationException {
+    return null;
+  }
 }

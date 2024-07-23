@@ -11,13 +11,14 @@ import net.minecraft.util.Identifier;
 @UtilityClass
 public final class SelectorTypes {
 
-    private static final BiMap<Identifier, Selector> SELECTORS = HashBiMap.create();
+  private static final BiMap<Identifier, Selector> SELECTORS = HashBiMap.create();
 
-    public static final Codec<Selector> CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, SELECTORS);
+  public static final Codec<Selector> CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, SELECTORS);
 
-    public static Selector register(Identifier identifier, Selector selector) {
-        var old = SELECTORS.put(identifier, selector);
-        if (old != null) throw new IllegalStateException("Already registered selector %s".formatted(identifier));
-        return selector;
-    }
+  public static Selector register(Identifier identifier, Selector selector) {
+    var old = SELECTORS.put(identifier, selector);
+    if (old != null)
+      throw new IllegalStateException("Already registered selector %s".formatted(identifier));
+    return selector;
+  }
 }

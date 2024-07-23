@@ -1,8 +1,17 @@
 package me.melontini.commander.impl;
 
+import static net.minecraft.loot.context.LootContextParameters.*;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,143 +52,155 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
-
-import static net.minecraft.loot.context.LootContextParameters.*;
-
 @Accessors(fluent = true)
 @Log4j2
 public class Commander {
 
-    public static final PrependingLogger LOGGER = PrependingLogger.get();
-    public static final LootNumberProviderType ARITHMETICA_PROVIDER = LootNumberProviderTypes.register("commander:arithmetica", ExtraCodecs.toJsonSerializer(ArithmeticaLootNumberProvider.CODEC.codec()));
-    public static final LootConditionType EXPRESSION_CONDITION = Registry.register(Registries.LOOT_CONDITION_TYPE, id("expression"), new LootConditionType(ExtraCodecs.toJsonSerializer(ExpressionLootCondition.CODEC.codec())));
+  public static final PrependingLogger LOGGER = PrependingLogger.get();
+  public static final LootNumberProviderType ARITHMETICA_PROVIDER =
+      LootNumberProviderTypes.register(
+          "commander:arithmetica",
+          ExtraCodecs.toJsonSerializer(ArithmeticaLootNumberProvider.CODEC.codec()));
+  public static final LootConditionType EXPRESSION_CONDITION = Registry.register(
+      Registries.LOOT_CONDITION_TYPE,
+      id("expression"),
+      new LootConditionType(ExtraCodecs.toJsonSerializer(ExpressionLootCondition.CODEC.codec())));
 
-    private static final Path BASE_PATH = Path.of(System.getProperty("user.home")).resolve(".commander");
-    public static final String MINECRAFT_VERSION = getVersion();
-    public static final Path COMMANDER_PATH = BASE_PATH.resolve(MINECRAFT_VERSION);
+  private static final Path BASE_PATH =
+      Path.of(System.getProperty("user.home")).resolve(".commander");
+  public static final String MINECRAFT_VERSION = getVersion();
+  public static final Path COMMANDER_PATH = BASE_PATH.resolve(MINECRAFT_VERSION);
 
-    public static final AttachmentType<NbtCompound> DATA_ATTACHMENT = AttachmentRegistry.<NbtCompound>builder()
-            .initializer(NbtCompound::new).persistent(NbtCodecs.COMPOUND_CODEC).buildAndRegister(id("persistent"));
+  public static final AttachmentType<NbtCompound> DATA_ATTACHMENT =
+      AttachmentRegistry.<NbtCompound>builder()
+          .initializer(NbtCompound::new)
+          .persistent(NbtCodecs.COMPOUND_CODEC)
+          .buildAndRegister(id("persistent"));
 
-    public static final DynamicCommandExceptionType EXPRESSION_EXCEPTION = new DynamicCommandExceptionType(object -> TextUtil.literal("Failed to evaluate: " + object));
+  public static final DynamicCommandExceptionType EXPRESSION_EXCEPTION =
+      new DynamicCommandExceptionType(object -> TextUtil.literal("Failed to evaluate: " + object));
 
-    @Getter
-    private AmbiguousRemapper mappingKeeper;
-    @Getter @Setter
-    private @Nullable MinecraftServer currentServer;
+  @Getter
+  private AmbiguousRemapper mappingKeeper;
 
-    public static Identifier id(String path) {
-        return new Identifier("commander", path);
-    }
+  @Getter
+  @Setter
+  private @Nullable MinecraftServer currentServer;
 
-    private static Supplier<Commander> instance = () -> {
-        throw new NullPointerException("Commander instance requested too early!");
-    };
+  public static Identifier id(String path) {
+    return new Identifier("commander", path);
+  }
 
-    public static void init() {
-        var cmd = new Commander();
-        cmd.onInitialize();
-        instance = () -> cmd;
-    }
+  private static Supplier<Commander> instance = () -> {
+    throw new NullPointerException("Commander instance requested too early!");
+  };
 
-    public static Commander get() {
-        return instance.get();
-    }
+  public static void init() {
+    var cmd = new Commander();
+    cmd.onInitialize();
+    instance = () -> cmd;
+  }
 
-    public void onInitialize() {
-        try {
-            var oldPath = FabricLoader.getInstance().getGameDir().resolve(".commander");
-            if (Files.exists(oldPath)) {
-                if (!Files.exists(BASE_PATH)) Files.move(oldPath, BASE_PATH);
-                else {
-                    Files.walkFileTree(oldPath, new SimpleFileVisitor<>() {
-                        @Override
-                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                            Files.delete(file);
-                            return super.visitFile(file, attrs);
-                        }
+  public static Commander get() {
+    return instance.get();
+  }
 
-                        @Override
-                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                            Files.delete(dir);
-                            return super.postVisitDirectory(dir, exc);
-                        }
-                    });
-                }
+  public void onInitialize() {
+    try {
+      var oldPath = FabricLoader.getInstance().getGameDir().resolve(".commander");
+      if (Files.exists(oldPath)) {
+        if (!Files.exists(BASE_PATH)) Files.move(oldPath, BASE_PATH);
+        else {
+          Files.walkFileTree(oldPath, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                throws IOException {
+              Files.delete(file);
+              return super.visitFile(file, attrs);
             }
-        } catch (IOException e) {
-            log.error("Failed to move old .commander folder!", e);
-        }
 
-        if (!Files.exists(COMMANDER_PATH)) {
-            Exceptions.run(() -> Files.createDirectories(COMMANDER_PATH));
-            try {
-                if (BASE_PATH.getFileSystem().supportedFileAttributeViews().contains("dos"))
-                    Files.setAttribute(BASE_PATH, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
-            } catch (IOException ignored) {
-                LOGGER.warn("Failed to hide the .commander folder");
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                throws IOException {
+              Files.delete(dir);
+              return super.postVisitDirectory(dir, exc);
             }
+          });
         }
-
-        ServerReloadersEvent.EVENT.register(context -> {
-            this.resetCaches();
-            context.register(new DynamicEventManager());
-        });
-
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> this.currentServer = server);
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            this.currentServer = null;
-            this.resetCaches();
-        });
-
-        EvalUtils.init();
-        this.loadMappings();
-
-        BuiltInEvents.init();
-        BuiltInCommands.init();
-        BuiltInSelectors.init();
-
-        LootContextParameterRegistry.register(
-                ORIGIN, TOOL,
-                THIS_ENTITY, LAST_DAMAGE_PLAYER,
-                KILLER_ENTITY, DIRECT_KILLER_ENTITY,
-                DAMAGE_SOURCE, EXPLOSION_RADIUS,
-                BLOCK_STATE, BLOCK_ENTITY);
+      }
+    } catch (IOException e) {
+      log.error("Failed to move old .commander folder!", e);
     }
 
-    private void resetCaches() {
-        EvalUtils.resetCache();
-        RegistryAccessStruct.resetCache();
+    if (!Files.exists(COMMANDER_PATH)) {
+      Exceptions.run(() -> Files.createDirectories(COMMANDER_PATH));
+      try {
+        if (BASE_PATH.getFileSystem().supportedFileAttributeViews().contains("dos"))
+          Files.setAttribute(BASE_PATH, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
+      } catch (IOException ignored) {
+        LOGGER.warn("Failed to hide the .commander folder");
+      }
     }
 
-    private void loadMappings() {
-        if (MappingKeeper.NAMESPACE.equals("mojang")) {
-            mappingKeeper = (cls, name) -> name; // Nothing to remap.
-            return;
-        }
+    ServerReloadersEvent.EVENT.register(context -> {
+      this.resetCaches();
+      context.register(new DynamicEventManager());
+    });
 
-        try {
-            CompletableFuture<MemoryMappingTree> offTarget = CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
-            CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.runAsync(MinecraftDownloader::downloadMappings, Util.getMainWorkerExecutor())
-                    .thenApplyAsync(unused -> MappingKeeper.loadOffMojmap(), Util.getMainWorkerExecutor());
-            mappingKeeper = new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
-        } catch (Throwable t) {
-            log.error("Failed to download and prepare mappings! Data access remapping will not work!!!", t);
-            mappingKeeper = (cls, name) -> name;//Returning null will force it to traverse the hierarchy.
-        }
+    ServerLifecycleEvents.SERVER_STARTING.register(server -> this.currentServer = server);
+    ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+      this.currentServer = null;
+      this.resetCaches();
+    });
+
+    EvalUtils.init();
+    this.loadMappings();
+
+    BuiltInEvents.init();
+    BuiltInCommands.init();
+    BuiltInSelectors.init();
+
+    LootContextParameterRegistry.register(
+        ORIGIN, TOOL,
+        THIS_ENTITY, LAST_DAMAGE_PLAYER,
+        KILLER_ENTITY, DIRECT_KILLER_ENTITY,
+        DAMAGE_SOURCE, EXPLOSION_RADIUS,
+        BLOCK_STATE, BLOCK_ENTITY);
+  }
+
+  private void resetCaches() {
+    EvalUtils.resetCache();
+    RegistryAccessStruct.resetCache();
+  }
+
+  private void loadMappings() {
+    if (MappingKeeper.NAMESPACE.equals("mojang")) {
+      mappingKeeper = (cls, name) -> name; // Nothing to remap.
+      return;
     }
 
-    @SneakyThrows(IOException.class)
-    private static String getVersion() {
-        @Cleanup var stream = new InputStreamReader(MinecraftDownloader.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8);
-        JsonObject o = JsonParser.parseReader(stream).getAsJsonObject();
-        return o.getAsJsonPrimitive("id").getAsString();
+    try {
+      CompletableFuture<MemoryMappingTree> offTarget =
+          CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
+      CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.runAsync(
+              MinecraftDownloader::downloadMappings, Util.getMainWorkerExecutor())
+          .thenApplyAsync(unused -> MappingKeeper.loadOffMojmap(), Util.getMainWorkerExecutor());
+      mappingKeeper =
+          new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
+    } catch (Throwable t) {
+      log.error(
+          "Failed to download and prepare mappings! Data access remapping will not work!!!", t);
+      mappingKeeper =
+          (cls, name) -> name; // Returning null will force it to traverse the hierarchy.
     }
+  }
+
+  @SneakyThrows(IOException.class)
+  private static String getVersion() {
+    @Cleanup
+    var stream = new InputStreamReader(
+        MinecraftDownloader.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8);
+    JsonObject o = JsonParser.parseReader(stream).getAsJsonObject();
+    return o.getAsJsonPrimitive("id").getAsString();
+  }
 }

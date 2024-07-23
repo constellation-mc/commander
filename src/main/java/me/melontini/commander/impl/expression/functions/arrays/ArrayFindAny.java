@@ -11,8 +11,10 @@ import com.ezylang.evalex.parser.Token;
 @FunctionParameter(name = "array")
 public class ArrayFindAny extends AbstractFunction {
 
-    @Override
-    public EvaluationValue evaluate(EvaluationContext context, Token functionToken, EvaluationValue... par) throws EvaluationException {
-        return par[0].getArrayValue().stream().findAny().orElse(NullValue.of());
-    }
+  @Override
+  public EvaluationValue evaluate(
+      EvaluationContext context, Token functionToken, EvaluationValue... par)
+      throws EvaluationException {
+    return par[0].getArrayValue().stream().findAny().orElse(NullValue.of());
+  }
 }

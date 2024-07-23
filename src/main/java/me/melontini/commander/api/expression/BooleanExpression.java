@@ -16,51 +16,55 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface BooleanExpression {
 
-    Codec<BooleanExpression> CODEC = ExtraCodecs.either(Codec.BOOL, Codec.STRING).comapFlatMap((either) -> either.map(b -> DataResult.success(constant(b)), s -> Expression.parse(s).map(BooleanExpression::of)), BooleanExpression::toSource);
+  Codec<BooleanExpression> CODEC = ExtraCodecs.either(Codec.BOOL, Codec.STRING)
+      .comapFlatMap(
+          (either) -> either.map(b -> DataResult.success(constant(b)), s -> Expression.parse(s)
+              .map(BooleanExpression::of)),
+          BooleanExpression::toSource);
 
-    boolean asBoolean(LootContext context);
+  boolean asBoolean(LootContext context);
 
-    Either<Boolean, String> toSource();
+  Either<Boolean, String> toSource();
 
-    @Contract("_ -> new")
-    static @NotNull BooleanExpression constant(boolean b) {
-        Either<Boolean, String> either = Either.left(b);
-        return new BooleanExpression() {
-            @Override
-            public Either<Boolean, String> toSource() {
-                return either;
-            }
+  @Contract("_ -> new")
+  static @NotNull BooleanExpression constant(boolean b) {
+    Either<Boolean, String> either = Either.left(b);
+    return new BooleanExpression() {
+      @Override
+      public Either<Boolean, String> toSource() {
+        return either;
+      }
 
-            @Override
-            public boolean asBoolean(LootContext context) {
-                return b;
-            }
+      @Override
+      public boolean asBoolean(LootContext context) {
+        return b;
+      }
 
-            @Override
-            public String toString() {
-                return "BooleanExpression{boolean=" + b + "}";
-            }
-        };
-    }
+      @Override
+      public String toString() {
+        return "BooleanExpression{boolean=" + b + "}";
+      }
+    };
+  }
 
-    @Contract("_ -> new")
-    static @NotNull BooleanExpression of(Expression expression) {
-        Either<Boolean, String> either = Either.right(expression.original());
-        return new BooleanExpression() {
-            @Override
-            public Either<Boolean, String> toSource() {
-                return either;
-            }
+  @Contract("_ -> new")
+  static @NotNull BooleanExpression of(Expression expression) {
+    Either<Boolean, String> either = Either.right(expression.original());
+    return new BooleanExpression() {
+      @Override
+      public Either<Boolean, String> toSource() {
+        return either;
+      }
 
-            @Override
-            public boolean asBoolean(LootContext context) {
-                return expression.eval(context).getAsBoolean();
-            }
+      @Override
+      public boolean asBoolean(LootContext context) {
+        return expression.eval(context).getAsBoolean();
+      }
 
-            @Override
-            public String toString() {
-                return "BooleanExpression{expression=" + expression.original() + "}";
-            }
-        };
-    }
+      @Override
+      public String toString() {
+        return "BooleanExpression{expression=" + expression.original() + "}";
+      }
+    };
+  }
 }

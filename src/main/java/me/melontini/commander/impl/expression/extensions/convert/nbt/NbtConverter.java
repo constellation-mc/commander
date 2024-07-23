@@ -8,32 +8,31 @@ import com.ezylang.evalex.data.types.ArrayValue;
 import com.ezylang.evalex.data.types.StringValue;
 import com.ezylang.evalex.data.types.StructureValue;
 import com.ezylang.evalex.data.util.LazyListWrapper;
-import net.minecraft.nbt.*;
-
 import java.util.Map;
+import net.minecraft.nbt.*;
 
 public class NbtConverter implements ConverterIfc {
 
-    private final NumberConverter converter = new NumberConverter();
+  private final NumberConverter converter = new NumberConverter();
 
-    @Override
-    public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {
+  @Override
+  public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {
 
-        if (object instanceof AbstractNbtNumber n) {
-            return converter.convert(n.numberValue(), configuration);
-        } else if (object instanceof NbtString n) {
-            return StringValue.of(n.asString());
-        } else if (object instanceof AbstractNbtList<?> n) {
-            return ArrayValue.of(new LazyListWrapper(n, configuration));
-        } else if (object instanceof NbtCompound n) {
-            return StructureValue.of((Map<String, EvaluationValue>) (Object) new NbtCompoundStruct(n));
-        }
-
-        throw illegalArgument(object);
+    if (object instanceof AbstractNbtNumber n) {
+      return converter.convert(n.numberValue(), configuration);
+    } else if (object instanceof NbtString n) {
+      return StringValue.of(n.asString());
+    } else if (object instanceof AbstractNbtList<?> n) {
+      return ArrayValue.of(new LazyListWrapper(n, configuration));
+    } else if (object instanceof NbtCompound n) {
+      return StructureValue.of((Map<String, EvaluationValue>) (Object) new NbtCompoundStruct(n));
     }
 
-    @Override
-    public boolean canConvert(Object object) {
-        return object instanceof NbtElement;
-    }
+    throw illegalArgument(object);
+  }
+
+  @Override
+  public boolean canConvert(Object object) {
+    return object instanceof NbtElement;
+  }
 }

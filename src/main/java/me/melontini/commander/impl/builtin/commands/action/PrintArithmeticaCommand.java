@@ -9,16 +9,18 @@ import me.melontini.commander.impl.builtin.BuiltInCommands;
 
 public record PrintArithmeticaCommand(Arithmetica arithmetica) implements Command {
 
-    public static final MapCodec<PrintArithmeticaCommand> CODEC = Arithmetica.CODEC.xmap(PrintArithmeticaCommand::new, PrintArithmeticaCommand::arithmetica).fieldOf("value");
+  public static final MapCodec<PrintArithmeticaCommand> CODEC = Arithmetica.CODEC
+      .xmap(PrintArithmeticaCommand::new, PrintArithmeticaCommand::arithmetica)
+      .fieldOf("value");
 
-    @Override
-    public boolean execute(EventContext context) {
-        System.out.println(arithmetica().asDouble(context.lootContext()));
-        return true;
-    }
+  @Override
+  public boolean execute(EventContext context) {
+    System.out.println(arithmetica().asDouble(context.lootContext()));
+    return true;
+  }
 
-    @Override
-    public CommandType type() {
-        return BuiltInCommands.PRINT_ARITHMETICA;
-    }
+  @Override
+  public CommandType type() {
+    return BuiltInCommands.PRINT_ARITHMETICA;
+  }
 }

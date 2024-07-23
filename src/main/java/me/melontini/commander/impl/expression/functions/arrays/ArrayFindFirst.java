@@ -11,8 +11,10 @@ import com.ezylang.evalex.parser.Token;
 @FunctionParameter(name = "array")
 public class ArrayFindFirst extends AbstractFunction {
 
-    @Override
-    public EvaluationValue evaluate(EvaluationContext context, Token functionToken, EvaluationValue... par) throws EvaluationException {
-        return par[0].getArrayValue().stream().findFirst().orElse(NullValue.of());
-    }
+  @Override
+  public EvaluationValue evaluate(
+      EvaluationContext context, Token functionToken, EvaluationValue... par)
+      throws EvaluationException {
+    return par[0].getArrayValue().stream().findFirst().orElse(NullValue.of());
+  }
 }

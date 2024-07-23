@@ -9,33 +9,44 @@ import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.ASTNode;
 import com.ezylang.evalex.parser.Token;
+import java.math.BigDecimal;
+import java.util.List;
 import me.melontini.commander.impl.expression.EvalUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 @FunctionParameter(name = "value")
 public class LengthFunction extends AbstractFunction {
-    @Override
-    public EvaluationValue evaluate(EvaluationContext context, Token functionToken, EvaluationValue... par) throws EvaluationException {
-        EvaluationValue value = par[0];
+  @Override
+  public EvaluationValue evaluate(
+      EvaluationContext context, Token functionToken, EvaluationValue... par)
+      throws EvaluationException {
+    EvaluationValue value = par[0];
 
-        if (value.isStringValue()) return context.expression().convertValue(value.getStringValue().length());
-        if (value.isArrayValue()) return context.expression().convertValue(value.getArrayValue().size());
-        if (value.isStructureValue()) return context.expression().convertValue(value.getStructureValue().size());
-        if (value.isDurationValue()) return context.expression().convertValue(value.getDurationValue().toMillis());
+    if (value.isStringValue())
+      return context.expression().convertValue(value.getStringValue().length());
+    if (value.isArrayValue())
+      return context.expression().convertValue(value.getArrayValue().size());
+    if (value.isStructureValue())
+      return context.expression().convertValue(value.getStructureValue().size());
+    if (value.isDurationValue())
+      return context.expression().convertValue(value.getDurationValue().toMillis());
 
-        return NumberValue.of(BigDecimal.ZERO);
-    }
+    return NumberValue.of(BigDecimal.ZERO);
+  }
 
-    @Override
-    public @Nullable EvaluationValue inlineFunction(Expression expression, Token token, List<ASTNode> parameters) throws EvaluationException {
-        return EvalUtils.valueOrEmpty(parameters.get(0)).map(value -> {
-            if (value.isStringValue()) return expression.convertValue(value.getStringValue().length());
-            if (value.isArrayValue()) return expression.convertValue(value.getArrayValue().size());
-            if (value.isDurationValue()) return expression.convertValue(value.getDurationValue().toMillis());
-            return null;
-        }).orElse(null);
-    }
+  @Override
+  public @Nullable EvaluationValue inlineFunction(
+      Expression expression, Token token, List<ASTNode> parameters) throws EvaluationException {
+    return EvalUtils.valueOrEmpty(parameters.get(0))
+        .map(value -> {
+          if (value.isStringValue())
+            return expression.convertValue(value.getStringValue().length());
+          if (value.isArrayValue())
+            return expression.convertValue(value.getArrayValue().size());
+          if (value.isDurationValue())
+            return expression.convertValue(value.getDurationValue().toMillis());
+          return null;
+        })
+        .orElse(null);
+  }
 }
