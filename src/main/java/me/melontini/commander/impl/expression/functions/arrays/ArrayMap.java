@@ -4,6 +4,7 @@ import com.ezylang.evalex.EvaluationContext;
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
+import com.ezylang.evalex.data.types.ArrayValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.ASTNode;
@@ -24,7 +25,7 @@ public class ArrayMap extends AbstractFunction {
         List<EvaluationValue> array = par[0].getArrayValue();
         ASTNode function = par[1].getExpressionNode();
 
-        return EvaluationValue.arrayValue(Lists.transform(array, input -> Exceptions.supply(() -> runLambda(expression, input, function))));
+        return ArrayValue.of(Lists.transform(array, input -> Exceptions.supply(() -> runLambda(expression, input, function))));
     }
 
     @Override

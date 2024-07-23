@@ -3,6 +3,8 @@ package me.melontini.commander.impl.expression.extensions;
 import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.data.conversion.*;
+import com.ezylang.evalex.data.types.NullValue;
+import com.ezylang.evalex.data.types.StructureValue;
 import com.google.common.collect.Lists;
 import me.melontini.commander.api.expression.extensions.ObjectConverter;
 import me.melontini.commander.api.expression.extensions.ProxyMap;
@@ -11,6 +13,7 @@ import me.melontini.commander.impl.expression.extensions.convert.nbt.NbtConverte
 import me.melontini.dark_matter.api.base.util.MathUtil;
 
 import java.util.List;
+import java.util.Map;
 
 public class ReflectiveValueConverter implements EvaluationValueConverterIfc {
 
@@ -46,14 +49,14 @@ public class ReflectiveValueConverter implements EvaluationValueConverterIfc {
 
     @Override
     public EvaluationValue convertObject(Object object, ExpressionConfiguration configuration) {
-        if (object == null) return EvaluationValue.NULL_VALUE;
+        if (object == null) return NullValue.of();
         if (object instanceof EvaluationValue value) return value;
-        if (object instanceof ProxyMap map) return EvaluationValue.structureValue(map); //Proxy maps convert all of their outputs.
+        if (object instanceof ProxyMap map) return StructureValue.of((Map<String, EvaluationValue>) (Object) map); //Proxy maps convert all of their outputs.
 
         for (ConverterIfc converter : converters) {
             if (converter.canConvert(object)) return converter.convert(object, configuration);
         }
 
-        return EvaluationValue.structureValue(new ReflectiveMapStructure(object));
+        return StructureValue.of((Map<String, EvaluationValue>) (Object) new ReflectiveMapStructure(object));
     }
 }

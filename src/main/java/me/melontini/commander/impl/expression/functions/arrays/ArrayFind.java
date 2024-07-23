@@ -4,6 +4,7 @@ import com.ezylang.evalex.EvaluationContext;
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
+import com.ezylang.evalex.data.types.ArrayValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.ASTNode;
@@ -23,7 +24,7 @@ public class ArrayFind extends AbstractFunction {
         List<EvaluationValue> array = par[0].getArrayValue();
         ASTNode predicate = par[1].getExpressionNode();
 
-        return EvaluationValue.arrayValue(array.stream().filter(value -> Exceptions.supply(() -> runLambda(context, value, predicate)).getBooleanValue()).toList());
+        return ArrayValue.of(array.stream().filter(value -> Exceptions.supply(() -> runLambda(context, value, predicate)).getBooleanValue()).toList());
     }
 
     @Override

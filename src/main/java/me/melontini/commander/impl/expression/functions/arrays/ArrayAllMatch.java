@@ -4,6 +4,7 @@ import com.ezylang.evalex.EvaluationContext;
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
+import com.ezylang.evalex.data.types.BooleanValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.ASTNode;
@@ -22,7 +23,7 @@ public class ArrayAllMatch extends AbstractFunction {
     public EvaluationValue evaluate(EvaluationContext context, Token functionToken, EvaluationValue... par) throws EvaluationException {
         List<EvaluationValue> array = par[0].getArrayValue();
         ASTNode predicate = par[1].getExpressionNode();
-        return array.stream().allMatch(value -> Exceptions.supply(() -> runLambda(context, value, predicate)).getBooleanValue()) ? EvaluationValue.TRUE : EvaluationValue.FALSE;
+        return BooleanValue.of(array.stream().allMatch(value -> Exceptions.supply(() -> runLambda(context, value, predicate)).getBooleanValue()));
     }
 
     @Override

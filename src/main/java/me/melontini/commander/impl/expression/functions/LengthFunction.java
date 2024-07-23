@@ -4,6 +4,7 @@ import com.ezylang.evalex.EvaluationContext;
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
+import com.ezylang.evalex.data.types.NumberValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.ASTNode;
@@ -25,7 +26,7 @@ public class LengthFunction extends AbstractFunction {
         if (value.isStructureValue()) return context.expression().convertValue(value.getStructureValue().size());
         if (value.isDurationValue()) return context.expression().convertValue(value.getDurationValue().toMillis());
 
-        return EvaluationValue.numberValue(BigDecimal.ZERO);
+        return NumberValue.of(BigDecimal.ZERO);
     }
 
     @Override

@@ -4,9 +4,13 @@ import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.data.conversion.ConverterIfc;
 import com.ezylang.evalex.data.conversion.NumberConverter;
-import com.google.common.collect.Lists;
-import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
+import com.ezylang.evalex.data.types.ArrayValue;
+import com.ezylang.evalex.data.types.StringValue;
+import com.ezylang.evalex.data.types.StructureValue;
+import com.ezylang.evalex.data.util.LazyListWrapper;
 import net.minecraft.nbt.*;
+
+import java.util.Map;
 
 public class NbtConverter implements ConverterIfc {
 
@@ -18,11 +22,11 @@ public class NbtConverter implements ConverterIfc {
         if (object instanceof AbstractNbtNumber n) {
             return converter.convert(n.numberValue(), configuration);
         } else if (object instanceof NbtString n) {
-            return EvaluationValue.stringValue(n.asString());
+            return StringValue.of(n.asString());
         } else if (object instanceof AbstractNbtList<?> n) {
-            return EvaluationValue.arrayValue(Lists.transform(n, ReflectiveValueConverter::convert));
+            return ArrayValue.of(new LazyListWrapper(n, configuration));
         } else if (object instanceof NbtCompound n) {
-            return EvaluationValue.structureValue(new NbtCompoundStruct(n));
+            return StructureValue.of((Map<String, EvaluationValue>) (Object) new NbtCompoundStruct(n));
         }
 
         throw illegalArgument(object);

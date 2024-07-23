@@ -7,6 +7,10 @@ import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.config.ExpressionConfiguration;
 import com.ezylang.evalex.data.DataAccessorIfc;
 import com.ezylang.evalex.data.EvaluationValue;
+import com.ezylang.evalex.data.types.BooleanValue;
+import com.ezylang.evalex.data.types.NullValue;
+import com.ezylang.evalex.data.types.NumberValue;
+import com.ezylang.evalex.data.types.StringValue;
 import com.ezylang.evalex.parser.ASTNode;
 import com.ezylang.evalex.parser.ExpressionParser;
 import com.ezylang.evalex.parser.InlinedASTNode;
@@ -19,6 +23,7 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMaps;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.extern.log4j.Log4j2;
+import me.melontini.commander.api.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import me.melontini.commander.impl.expression.functions.*;
@@ -43,6 +48,7 @@ import java.math.MathContext;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Function;
 
 @Log4j2
@@ -51,14 +57,14 @@ public class EvalUtils {
     public static final ExpressionConfiguration CONFIGURATION;
     public static final ExpressionParser PARSER;
     public static final Object2ReferenceMap<String, EvaluationValue> CONSTANTS = Object2ReferenceMaps.unmodifiable(new Object2ReferenceOpenHashMap<>(ImmutableMap.of(
-            "true", EvaluationValue.TRUE,
-            "false", EvaluationValue.FALSE,
-            "PI", EvaluationValue.numberValue(new BigDecimal("3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679")),
-            "E", EvaluationValue.numberValue(new BigDecimal("2.71828182845904523536028747135266249775724709369995957496696762772407663")),
-            "null", EvaluationValue.NULL_VALUE,
-            "DT_FORMAT_ISO_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]['['VV']']"),
-            "DT_FORMAT_LOCAL_DATE_TIME", EvaluationValue.stringValue("yyyy-MM-dd'T'HH:mm:ss[.SSS]"),
-            "DT_FORMAT_LOCAL_DATE", EvaluationValue.stringValue("yyyy-MM-dd")
+            "true", BooleanValue.TRUE,
+            "false", BooleanValue.FALSE,
+            "PI", NumberValue.of(new BigDecimal("3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679")),
+            "E", NumberValue.of(new BigDecimal("2.71828182845904523536028747135266249775724709369995957496696762772407663")),
+            "null", NullValue.of(),
+            "DT_FORMAT_ISO_DATE_TIME", StringValue.of("yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]['['VV']']"),
+            "DT_FORMAT_LOCAL_DATE_TIME", StringValue.of("yyyy-MM-dd'T'HH:mm:ss[.SSS]"),
+            "DT_FORMAT_LOCAL_DATE", StringValue.of("yyyy-MM-dd")
     )));
 
     static {
@@ -117,6 +123,30 @@ public class EvalUtils {
 
         CONFIGURATION = builder.build();
         PARSER = new ExpressionParser(CONFIGURATION);
+    }
+
+    public static String prettyToString(EvaluationValue value) {
+        if (value.isNumberValue()) return '\'' + value.getStringValue() + '\'';
+        if (value.isBooleanValue()) return value.getBooleanValue() ? "true" : "false";
+        if (value.isStringValue()) return value.getStringValue();
+
+        if (value.isArrayValue()) {
+            StringJoiner joiner = new StringJoiner(", ", "[", "]");
+            value.getArrayValue().forEach(value1 -> joiner.add(prettyToString(value1)));
+            return joiner.toString();
+        }
+
+        if (value.isStructureValue()) {
+            var map = value.getStructureValue();
+            //TODO consider a DataAccessor type to avoid posing as structures.
+            if ((Object) map instanceof ProxyMap) return String.valueOf(map); //Those do not implement any itr methods.
+            StringJoiner joiner = new StringJoiner(", ", "{", "}");
+            map.forEach((string, value1) -> joiner.add(string + "=" + prettyToString(value1)));
+            return joiner.toString();
+        }
+
+        if (value.isNullValue()) return "null";
+        return Objects.toString(value.getValue());
     }
 
     public static ThrowingOptional<EvaluationValue> valueOrEmpty(ASTNode node) {

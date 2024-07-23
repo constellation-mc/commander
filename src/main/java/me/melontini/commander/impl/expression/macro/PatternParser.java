@@ -62,7 +62,7 @@ public class PatternParser {
 
     public static DataResult<BiFunction<LootContext, Map<String, Object>, String>> parseExpression(String expression, @Nullable String cast) {
         if (cast == null)
-            return EvalUtils.parseExpression(expression).map(exp -> (context, params) -> evaluate(context, exp, params).getStringValue());
+            return EvalUtils.parseExpression(expression).map(exp -> (context, params) -> EvalUtils.prettyToString(evaluate(context, exp, params)));
 
         var c = CONVERTERS.get(cast);
         if (c == null) return DataResult.error(() -> "Unknown cast type %s".formatted(cast));
