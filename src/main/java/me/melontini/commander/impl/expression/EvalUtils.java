@@ -39,6 +39,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -67,7 +68,9 @@ public class EvalUtils {
                 .evaluationValueConverter(new ReflectiveValueConverter())
                 .allowOverwriteConstants(false)
                 .additionalAllowedIdentifierChars(new char[] {':'})
-                .singleQuoteStringLiteralsAllowed(true);
+                .singleQuoteStringLiteralsAllowed(true)
+                .mathContext(MathContext.DECIMAL64)
+                .constants(CONSTANTS);
 
         Set<String> toCache = ImmutableSet.of(
                 "fact", "sqrt",
@@ -111,8 +114,6 @@ public class EvalUtils {
         dictionary.add("Biome", new DynamicRegistryFunction(RegistryKeys.BIOME));
         dictionary.add("DimensionType", new DynamicRegistryFunction(RegistryKeys.DIMENSION_TYPE));
         builder.functionDictionary(dictionary.build());
-
-        builder.constants(CONSTANTS);
 
         CONFIGURATION = builder.build();
         PARSER = new ExpressionParser(CONFIGURATION);
