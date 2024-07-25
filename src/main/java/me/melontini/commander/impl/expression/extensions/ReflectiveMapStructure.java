@@ -1,5 +1,10 @@
 package me.melontini.commander.impl.expression.extensions;
 
+import com.ezylang.evalex.EvaluationContext;
+import com.ezylang.evalex.EvaluationException;
+import com.ezylang.evalex.data.DataAccessorIfc;
+import com.ezylang.evalex.data.EvaluationValue;
+import com.ezylang.evalex.parser.Token;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -17,15 +22,13 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
-import me.melontini.commander.api.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.Commander;
-import me.melontini.commander.impl.expression.CmdEvalException;
 import me.melontini.dark_matter.api.base.util.tuple.Tuple;
 import org.jetbrains.annotations.Nullable;
 
 @Log4j2
 @EqualsAndHashCode(callSuper = false)
-public class ReflectiveMapStructure extends ProxyMap {
+public class ReflectiveMapStructure implements DataAccessorIfc {
 
   private static final Map<Class<?>, Struct> MAPPINGS = new Reference2ReferenceOpenHashMap<>();
   private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
@@ -88,22 +91,23 @@ public class ReflectiveMapStructure extends ProxyMap {
   }
 
   @Override
-  public boolean containsKey(String key) {
-    if (this.mappings.isInvalid(key)) return false;
+  public @Nullable EvaluationValue getData(String variable, Token token, EvaluationContext context)
+      throws EvaluationException {
+    if (this.mappings.isInvalid(variable)) return null;
 
-    var cache = this.mappings.getAccessor(key);
-    if (cache != null) return true;
+    var cache = this.mappings.getAccessor(variable);
+    if (cache != null) return ReflectiveValueConverter.convert(cache.apply(this.object));
 
-    var accessor = findFieldOrMethod(this.object.getClass(), key);
+    var accessor = findFieldOrMethod(this.object.getClass(), variable);
     if (accessor == null) {
-      this.mappings.invalidate(key);
-      return false;
+      this.mappings.invalidate(variable);
+      return null;
     }
 
     synchronized (MAPPINGS) {
-      getAccessors(accessor.left()).addAccessor(key, accessor.right());
+      getAccessors(accessor.left()).addAccessor(variable, accessor.right());
     }
-    return true;
+    return ReflectiveValueConverter.convert(accessor.right().apply(this.object));
   }
 
   private static @Nullable Tuple<Class<?>, Function<Object, Object>> findFieldOrMethod(
@@ -152,20 +156,6 @@ public class ReflectiveMapStructure extends ProxyMap {
     }
 
     return null;
-  }
-
-  @Override
-  public Object getValue(String key) {
-    try {
-      Function<Object, Object> field = this.mappings.getAccessor(key);
-      if (field == null)
-        throw new RuntimeException("%s has no public field or method '%s'"
-            .formatted(this.object.getClass().getSimpleName(), key));
-      return field.apply(this.object);
-    } catch (Exception e) {
-      throw new CmdEvalException(
-          Objects.requireNonNullElse(e.getMessage(), "Failed to reflectively access member!"));
-    }
   }
 
   @Override

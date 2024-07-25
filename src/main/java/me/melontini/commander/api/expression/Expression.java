@@ -1,5 +1,6 @@
 package me.melontini.commander.api.expression;
 
+import com.ezylang.evalex.data.types.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ import me.melontini.commander.impl.expression.EvalUtils;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface Expression extends Function<LootContext, Expression.Result> {
@@ -41,15 +43,35 @@ public interface Expression extends Function<LootContext, Expression.Result> {
       return (Result) (Object) ReflectiveValueConverter.convert(o);
     }
 
-    BigDecimal getAsDecimal();
+    static Result convert(BigDecimal decimal) {
+      return (Result) (Object) NumberValue.of(decimal);
+    }
+
+    static Result convert(boolean decimal) {
+      return (Result) (Object) BooleanValue.of(decimal);
+    }
+
+    static Result convert(String string) {
+      return (Result) (Object) StringValue.of(string);
+    }
+
+    static Result convert(Instant instant) {
+      return (Result) (Object) DateTimeValue.of(instant);
+    }
+
+    static Result convert(Duration duration) {
+      return (Result) (Object) DurationValue.of(duration);
+    }
+
+    @NotNull BigDecimal getAsDecimal();
 
     boolean getAsBoolean();
 
-    String getAsString();
+    @NotNull String getAsString();
 
-    Instant getAsInstant();
+    @NotNull Instant getAsInstant();
 
-    Duration getAsDuration();
+    @NotNull Duration getAsDuration();
 
     boolean isDecimalValue();
 
@@ -61,6 +83,8 @@ public interface Expression extends Function<LootContext, Expression.Result> {
 
     boolean isDurationValue();
 
-    Object getValue();
+    boolean isNullValue();
+
+    @Nullable Object getValue();
   }
 }

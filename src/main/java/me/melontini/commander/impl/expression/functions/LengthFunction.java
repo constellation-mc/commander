@@ -41,8 +41,6 @@ public class LengthFunction extends AbstractFunction {
         .map(value -> {
           if (value.isStringValue())
             return expression.convertValue(value.getStringValue().length());
-          if (value.isArrayValue())
-            return expression.convertValue(value.getArrayValue().size());
           if (value.isDurationValue())
             return expression.convertValue(value.getDurationValue().toMillis());
           return null;

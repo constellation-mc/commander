@@ -24,13 +24,9 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceMaps;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.function.Function;
 import lombok.extern.log4j.Log4j2;
-import me.melontini.commander.api.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import me.melontini.commander.impl.expression.functions.*;
@@ -162,9 +158,9 @@ public class EvalUtils {
   }
 
   public static String prettyToString(EvaluationValue value) {
-    if (value.isNumberValue()) return '\'' + value.getStringValue() + '\'';
+    if (value.isNumberValue()) return value.getStringValue();
     if (value.isBooleanValue()) return value.getBooleanValue() ? "true" : "false";
-    if (value.isStringValue()) return value.getStringValue();
+    if (value.isStringValue()) return '\"' + value.getStringValue() + '\"';
 
     if (value.isArrayValue()) {
       StringJoiner joiner = new StringJoiner(", ", "[", "]");
@@ -174,9 +170,6 @@ public class EvalUtils {
 
     if (value.isStructureValue()) {
       var map = value.getStructureValue();
-      // TODO consider a DataAccessor type to avoid posing as structures.
-      if ((Object) map instanceof ProxyMap)
-        return String.valueOf(map); // Those do not implement any itr methods.
       StringJoiner joiner = new StringJoiner(", ", "{", "}");
       map.forEach((string, value1) -> joiner.add(string + "=" + prettyToString(value1)));
       return joiner.toString();
@@ -232,17 +225,16 @@ public class EvalUtils {
       }
       return DataResult.success(result.copy());
     } catch (Throwable throwable) {
-      var unwrapped = Exceptions.unwrap(throwable);
-      return DataResult.error(unwrapped::getMessage);
+      return DataResult.error(Exceptions.unwrap(throwable)::getMessage);
     }
   }
 
   public static class LootContextDataAccessor implements DataAccessorIfc {
 
     private static final Map<Identifier, Function<LootContext, Object>> overrides =
-        new Object2ReferenceOpenHashMap<>(Map.of(
+        Collections.unmodifiableMap(new Object2ReferenceOpenHashMap<>(Map.of(
             new Identifier("level"), LootContext::getWorld,
-            new Identifier("luck"), LootContext::getLuck));
+            new Identifier("luck"), LootContext::getLuck)));
     // In most cases the expression is reused, so caching this helps us avoid some big overhead.
     private final Map<String, Function<LootContext, EvaluationValue>> varCache =
         new Object2ReferenceOpenHashMap<>();
@@ -257,10 +249,7 @@ public class EvalUtils {
 
       var r = Identifier.validate(variable);
       if (r.error().isPresent()) {
-        throw new EvaluationException(
-            token,
-            "%s - no such variable or %s"
-                .formatted(variable, r.error().orElseThrow().message()));
+        throw new EvaluationException(token, r.error().orElseThrow().message());
       }
 
       var id = r.result().orElseThrow();
@@ -275,8 +264,7 @@ public class EvalUtils {
       var param = ExtractionTypes.getParameter(id);
       if (param == null) {
         throw new EvaluationException(
-            token,
-            "%s is not a registered loot context parameter, variable or override!".formatted(id));
+            token, "%s is not a registered loot context parameter!".formatted(id));
       }
       varCache.put(
           variable,

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import me.melontini.commander.api.expression.Expression;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -36,7 +37,7 @@ public abstract class EvaluationValueMixin implements Expression.Result {
   public abstract Object getValue();
 
   @Override
-  public BigDecimal getAsDecimal() {
+  @NotNull public BigDecimal getAsDecimal() {
     return getNumberValue();
   }
 
@@ -46,17 +47,17 @@ public abstract class EvaluationValueMixin implements Expression.Result {
   }
 
   @Override
-  public String getAsString() {
+  @NotNull public String getAsString() {
     return getStringValue();
   }
 
   @Override
-  public Instant getAsInstant() {
+  @NotNull public Instant getAsInstant() {
     return getDateTimeValue();
   }
 
   @Override
-  public Duration getAsDuration() {
+  @NotNull public Duration getAsDuration() {
     return getDurationValue();
   }
 
