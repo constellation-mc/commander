@@ -9,10 +9,10 @@ import me.melontini.commander.impl.builtin.events.ServerTick;
 @UtilityClass
 public class BuiltInEvents {
 
-    public static void init() {
-        ServerLifecycle.init();
-        ServerTick.init();
-        EntityEvents.init();
-        PlayerEvents.init();
-    }
+  public static void init() {
+    ServerLifecycle.init();
+    ServerTick.init();
+    EntityEvents.init();
+    PlayerEvents.init();
+  }
 }

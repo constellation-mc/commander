@@ -6,12 +6,10 @@
   "mixins": [
     "AdvancementRewardsMixin",
     "ExecuteCommandMixin",
+    "NbtCompoundAccessor",
     "ScoreboardCommandMixin",
     "evalex.EvaluationValueMixin",
-    "evalex.ExpressionConfigurationAccessor",
-    "evalex.ExpressionMixin",
-    "evalex.MapBasedFunctionDictionaryAccessor",
-    "evalex.TokenizerMixin"
+    "evalex.ExpressionMixin"
   ],
   "client": [
   ],

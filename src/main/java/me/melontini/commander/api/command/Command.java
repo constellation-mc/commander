@@ -14,20 +14,22 @@ import net.minecraft.util.Identifier;
  */
 public interface Command {
 
-    MapCodec<Conditioned> CODEC = (MapCodec<Conditioned>) ConditionedCommand.CODEC;
+  MapCodec<Conditioned> CODEC = (MapCodec<Conditioned>) ConditionedCommand.CODEC;
 
+  boolean execute(EventContext context);
+
+  CommandType type();
+
+  default DataResult<Void> validate(EventType type) {
+    return DataResult.success(null);
+  }
+
+  /**
+   * Executable command proxy. This interface is to be used when you nest additional commands in your base command.
+   */
+  interface Conditioned {
     boolean execute(EventContext context);
-    CommandType type();
 
-    default DataResult<Void> validate(EventType type) {
-        return DataResult.success(null);
-    }
-
-    /**
-     * Executable command proxy. This interface is to be used when you nest additional commands in your base command.
-     */
-    interface Conditioned {
-        boolean execute(EventContext context);
-        DataResult<Void> validate(EventType type);
-    }
+    DataResult<Void> validate(EventType type);
+  }
 }

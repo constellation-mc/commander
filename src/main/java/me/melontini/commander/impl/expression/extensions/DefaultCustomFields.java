@@ -18,21 +18,26 @@ import net.minecraft.state.State;
 
 class DefaultCustomFields {
 
-    private static final NbtCompound EMPTY = new NbtCompound();
+  private static final NbtCompound EMPTY = new NbtCompound();
 
-    static void init() {
-        CustomFields.addVirtualField(ItemStack.class, "nbt", object -> {
-            if (object.isEmpty()) return EMPTY;
-            return object.encode(Commander.get().currentServer().getRegistryManager());
-        });
-        CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
-        CustomFields.addVirtualField(BlockEntity.class, "nbt", be -> be.createNbtWithIdentifyingData(be.getWorld().getRegistryManager()));
+  static void init() {
+    CustomFields.addVirtualField(ItemStack.class, "nbt", object -> {
+      if (object.isEmpty()) return EMPTY;
+      return object.encode(Commander.get().currentServer().getRegistryManager());
+    });
+    CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
+    CustomFields.addVirtualField(
+        BlockEntity.class, "nbt", be -> be.createNbtWithIdentifyingData(be.getWorld().getRegistryManager()));
 
-        CustomFields.addVirtualField(State.class, "properties", StateStruct::new);
-        CustomFields.addVirtualField(LivingEntity.class, "attributes", e -> new EntityAttributesStruct(e.getAttributes()));
+    CustomFields.addVirtualField(State.class, "properties", StateStruct::new);
+    CustomFields.addVirtualField(
+        LivingEntity.class, "attributes", e -> new EntityAttributesStruct(e.getAttributes()));
         CustomFields.addVirtualField(ItemStack.class, "components", stack -> new ComponentStruct(stack.getComponents()));
 
-        CustomFields.addVirtualField(AttachmentTarget.class, "storage", target -> target.getAttachedOrCreate(Commander.DATA_ATTACHMENT));
-        CustomFields.addVirtualField(Registry.class, "access", RegistryAccessStruct::forRegistry);
-    }
+    CustomFields.addVirtualField(
+        AttachmentTarget.class,
+        "storage",
+        target -> target.getAttachedOrCreate(Commander.DATA_ATTACHMENT));
+    CustomFields.addVirtualField(Registry.class, "access", RegistryAccessStruct::forRegistry);
+  }
 }

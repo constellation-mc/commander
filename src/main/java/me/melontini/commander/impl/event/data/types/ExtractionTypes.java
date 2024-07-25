@@ -10,15 +10,18 @@ import org.jetbrains.annotations.Nullable;
 
 public class ExtractionTypes {
 
-    private static final BiMap<Identifier, LootContextParameter<?>> KNOWN_PARAMETERS = HashBiMap.create();
-    public static final Codec<LootContextParameter<?>> CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, KNOWN_PARAMETERS);
+  private static final BiMap<Identifier, LootContextParameter<?>> KNOWN_PARAMETERS =
+      HashBiMap.create();
+  public static final Codec<LootContextParameter<?>> CODEC =
+      ExtraCodecs.mapLookup(Identifier.CODEC, KNOWN_PARAMETERS);
 
-    public static @Nullable LootContextParameter<?> getParameter(Identifier identifier) {
-        return KNOWN_PARAMETERS.get(identifier);
-    }
+  public static @Nullable LootContextParameter<?> getParameter(Identifier identifier) {
+    return KNOWN_PARAMETERS.get(identifier);
+  }
 
-    public static void register(LootContextParameter<?> parameter) {
-        var old = KNOWN_PARAMETERS.put(parameter.getId(), parameter);
-        if (old != null) throw new IllegalStateException("Already registered context %s".formatted(parameter.getId()));
-    }
+  public static void register(LootContextParameter<?> parameter) {
+    var old = KNOWN_PARAMETERS.put(parameter.getId(), parameter);
+    if (old != null)
+      throw new IllegalStateException("Already registered context %s".formatted(parameter.getId()));
+  }
 }

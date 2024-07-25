@@ -28,11 +28,16 @@ Dev Changes:
 There's a handful new experimental APIs, which allow you to extend the expression system.
 
 * Exposed `Object getValue()` and `Result convert(Object o)` in Expression.Result.
-* Exposed `Expression variable(String variable, Object value)` in Expression.
-* Exposed `ProxyMap` and `ObjectConverter`.
+* Exposed `Expression eval(LootContext context, Map<String, Object> parameters)` in Expression.
+* Exposed `ProxyMap`, `ObjectConverter` and `CustomDataAccessor` (which is now a valid data type).
 * Exposed `CustomFields`. One of the more interesting APIs. Allows adding new 'virtual' fields to reflective expression objects.
   ```java
   static {
     CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
   }
   ```
+  
+Other Changes:
+
+* Switched to a custom fork of EvalEx.
+* Switched to 16-digit precision from the EvalEx's standard of 68-digit.

@@ -11,9 +11,9 @@ import org.jetbrains.annotations.NotNull;
 @ApiStatus.Experimental
 public class LootContextParameterRegistry {
 
-    public static void register(LootContextParameter<?> @NotNull ... parameters) {
-        for (LootContextParameter<?> parameter : parameters) {
-            ExtractionTypes.register(parameter);
-        }
+  public static void register(LootContextParameter<?> @NotNull ... parameters) {
+    for (LootContextParameter<?> parameter : parameters) {
+      ExtractionTypes.register(parameter);
     }
+  }
 }
