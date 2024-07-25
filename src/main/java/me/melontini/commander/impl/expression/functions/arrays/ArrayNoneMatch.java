@@ -1,35 +1,38 @@
 package me.melontini.commander.impl.expression.functions.arrays;
 
+import static me.melontini.commander.impl.expression.EvalUtils.runLambda;
+
+import com.ezylang.evalex.EvaluationContext;
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
+import com.ezylang.evalex.data.types.BooleanValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.ASTNode;
-import com.ezylang.evalex.parser.ParseException;
 import com.ezylang.evalex.parser.Token;
-import me.melontini.commander.impl.expression.functions.CustomInlinerFunction;
-
 import java.util.List;
-
-import static me.melontini.commander.impl.expression.EvalUtils.runLambda;
+import me.melontini.dark_matter.api.base.util.Exceptions;
 
 @FunctionParameter(name = "array")
 @FunctionParameter(name = "predicate", isLazy = true)
-public class ArrayNoneMatch extends AbstractFunction implements CustomInlinerFunction {
+public class ArrayNoneMatch extends AbstractFunction {
 
-    @Override
-    public EvaluationValue evaluate(Expression expression, Token functionToken, EvaluationValue... par) throws EvaluationException {
-        List<EvaluationValue> array = par[0].getArrayValue();
-        ASTNode predicate = par[1].getExpressionNode();
+  @Override
+  public EvaluationValue evaluate(
+      EvaluationContext context, Token functionToken, EvaluationValue... par)
+      throws EvaluationException {
+    List<EvaluationValue> array = par[0].getArrayValue();
+    ASTNode predicate = par[1].getExpressionNode();
 
-        return array.stream().noneMatch(value -> runLambda(expression, value, predicate).getBooleanValue()) ? EvaluationValue.TRUE : EvaluationValue.FALSE;
-    }
+    return BooleanValue.of(array.stream()
+        .noneMatch(value ->
+            Exceptions.supply(() -> runLambda(context, value, predicate)).getBooleanValue()));
+  }
 
-    @Override
-    public EvaluationValue cmd$inlineFunction(Expression expression, ASTNode node) throws ParseException, EvaluationException {
-        var value = CustomInlinerFunction.getNodeValue(node.getParameters().get(0));
-        if (value == null) return null;
-        return evaluate(expression, node.getToken(), value, EvaluationValue.expressionNodeValue(node.getParameters().get(1)));
-    }
+  @Override
+  public EvaluationValue inlineFunction(
+      Expression expression, Token token, List<ASTNode> parameters) throws EvaluationException {
+    return null;
+  }
 }

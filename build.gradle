@@ -23,6 +23,7 @@ base {
 
 apply from: "https://raw.githubusercontent.com/constellation-mc/artifacts/main/artifacts.groovy"
 constellationRepo(project, "dark-matter")
+anyGitHubRepo(project, "melontini", "EvalEx")
 
 repositories {
     maven { url 'https://jitpack.io' }
@@ -108,6 +109,7 @@ tasks.register("spotbugs", SpotBugsTask) { task ->
 spotless {
     java {
         removeUnusedImports()
+        palantirJavaFormat('2.47.0').style("GOOGLE")
         trimTrailingWhitespace()
         formatAnnotations()
     }
@@ -115,6 +117,16 @@ spotless {
 
 loom {
     accessWidenerPath = file("src/main/resources/commander.accesswidener")
+
+    //https://gist.github.com/maityyy/3dbcd558d58a6412c3a2a38c72706e8e
+    afterEvaluate {
+        loom.runs.configureEach {
+            vmArgs("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+
+            vmArg "-javaagent:${ configurations.compileClasspath.find { it.name.contains("sponge-mixin") } }"
+            property("mixin.debug.export", "true")
+        }
+    }
 }
 
 processResources {

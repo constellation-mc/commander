@@ -9,16 +9,17 @@ import me.melontini.commander.impl.builtin.BuiltInCommands;
 
 public record PrintCommand(String text) implements Command {
 
-    public static final MapCodec<PrintCommand> CODEC = Codec.STRING.fieldOf("text").xmap(PrintCommand::new, PrintCommand::text);
+  public static final MapCodec<PrintCommand> CODEC =
+      Codec.STRING.fieldOf("text").xmap(PrintCommand::new, PrintCommand::text);
 
-    @Override
-    public boolean execute(EventContext context) {
-        System.out.println(text());
-        return true;
-    }
+  @Override
+  public boolean execute(EventContext context) {
+    System.out.println(text());
+    return true;
+  }
 
-    @Override
-    public CommandType type() {
-        return BuiltInCommands.PRINT;
-    }
+  @Override
+  public CommandType type() {
+    return BuiltInCommands.PRINT;
+  }
 }

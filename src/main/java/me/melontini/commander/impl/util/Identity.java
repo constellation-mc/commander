@@ -1,17 +1,15 @@
 package me.melontini.commander.impl.util;
 
-import java.util.Objects;
-
 public record Identity<V>(V value) {
 
-    @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof Identity<?> identity)) return false;
-        return value == identity.value;
-    }
+  @Override
+  public boolean equals(Object object) {
+    if (!(object instanceof Identity<?> identity)) return false;
+    return value == identity.value;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(value);
-    }
+  @Override
+  public int hashCode() {
+    return System.identityHashCode(value);
+  }
 }

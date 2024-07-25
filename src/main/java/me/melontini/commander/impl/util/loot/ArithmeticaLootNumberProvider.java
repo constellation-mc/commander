@@ -8,19 +8,21 @@ import net.minecraft.loot.provider.number.LootNumberProvider;
 import net.minecraft.loot.provider.number.LootNumberProviderType;
 
 public record ArithmeticaLootNumberProvider(Arithmetica value) implements LootNumberProvider {
-    public static final MapCodec<ArithmeticaLootNumberProvider> CODEC = Arithmetica.CODEC.xmap(ArithmeticaLootNumberProvider::new, ArithmeticaLootNumberProvider::value).fieldOf("value");
+  public static final MapCodec<ArithmeticaLootNumberProvider> CODEC = Arithmetica.CODEC
+      .xmap(ArithmeticaLootNumberProvider::new, ArithmeticaLootNumberProvider::value)
+      .fieldOf("value");
 
-    @Override
-    public LootNumberProviderType getType() {
-        return Commander.ARITHMETICA_PROVIDER;
-    }
+  @Override
+  public LootNumberProviderType getType() {
+    return Commander.ARITHMETICA_PROVIDER;
+  }
 
-    @Override
-    public float nextFloat(LootContext context) {
-        return this.value.asFloat(context);
-    }
+  @Override
+  public float nextFloat(LootContext context) {
+    return this.value.asFloat(context);
+  }
 
-    public static ArithmeticaLootNumberProvider create(Arithmetica value) {
-        return new ArithmeticaLootNumberProvider(value);
-    }
+  public static ArithmeticaLootNumberProvider create(Arithmetica value) {
+    return new ArithmeticaLootNumberProvider(value);
+  }
 }
