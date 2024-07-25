@@ -3,6 +3,8 @@ package me.melontini.commander.impl.expression.macro;
 import static me.melontini.commander.impl.expression.EvalUtils.evaluate;
 
 import com.ezylang.evalex.data.EvaluationValue;
+import com.ezylang.evalex.data.types.BooleanValue;
+import com.ezylang.evalex.data.types.NumberValue;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.DataResult;
 import java.math.RoundingMode;
@@ -21,11 +23,11 @@ public class PatternParser {
 
   public static final Pattern PATTERN =
       Pattern.compile("\\$(?:\\(([a-z]+)\\))?\\{\\{([^{}]*)\\}\\}");
-  public static final Map<String, Function<EvaluationValue, String>> CONVERTERS = ImmutableMap.of(
-      "bool", v -> v.getBooleanValue().toString(),
-      "long", v -> v.getNumberValue().setScale(0, RoundingMode.DOWN).toString(),
-      "int", v -> v.getNumberValue().setScale(0, RoundingMode.DOWN).toString(),
-      "double", v -> v.getNumberValue().toString());
+  public static final Map<String, Function<EvaluationValue, EvaluationValue>> CONVERTERS = ImmutableMap.of(
+      "bool", v -> BooleanValue.of(v.getBooleanValue()),
+      "long", v -> NumberValue.of(v.getNumberValue().setScale(0, RoundingMode.DOWN)),
+      "int", v -> NumberValue.of(v.getNumberValue().setScale(0, RoundingMode.DOWN)),
+      "double", v -> NumberValue.of(v.getNumberValue()));
 
   public static final int CAST = 1;
   public static final int EXPRESSION = 2;
@@ -45,7 +47,7 @@ public class PatternParser {
       var cmd = sb(b -> matcher.appendReplacement(b, ""));
       var fin = start;
       start = (context, params) ->
-          fin.apply(context, params).append(cmd).append(func.apply(context, params));
+          fin.apply(context, params).append(cmd).append(EvalUtils.toMacroString(func.apply(context, params)));
     }
 
     var cmd = sb(matcher::appendTail);
@@ -61,12 +63,12 @@ public class PatternParser {
     return b.toString();
   }
 
-  public static DataResult<BiFunction<LootContext, Map<String, Object>, String>> parseExpression(
+  public static DataResult<BiFunction<LootContext, Map<String, ?>, EvaluationValue>> parseExpression(
       String expression, @Nullable String cast) {
     if (cast == null)
       return EvalUtils.parseExpression(expression)
           .map(
-              exp -> (context, params) -> EvalUtils.prettyToString(evaluate(context, exp, params)));
+              exp -> (context, params) -> evaluate(context, exp, params));
 
     var c = CONVERTERS.get(cast);
     if (c == null) return DataResult.error(() -> "Unknown cast type %s".formatted(cast));

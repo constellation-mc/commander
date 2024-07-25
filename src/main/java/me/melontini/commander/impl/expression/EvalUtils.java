@@ -41,6 +41,7 @@ import me.melontini.commander.impl.util.ThrowingOptional;
 import me.melontini.dark_matter.api.base.util.Exceptions;
 import me.melontini.dark_matter.api.base.util.functions.Memoize;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
@@ -157,10 +158,29 @@ public class EvalUtils {
     PARSER = new ExpressionParser(CONFIGURATION);
   }
 
+  public static String toMacroString(EvaluationValue value) {
+    if (value.isStringValue()) return value.getStringValue();
+
+    if (value.isArrayValue()) {
+      StringJoiner joiner = new StringJoiner(", ", "[", "]");
+      value.getArrayValue().forEach(value1 -> joiner.add(toMacroString(value1)));
+      return joiner.toString();
+    }
+
+    if (value.isStructureValue()) {
+      var map = value.getStructureValue();
+      StringJoiner joiner = new StringJoiner(", ", "{", "}");
+      map.forEach((string, value1) -> joiner.add(string + "=" + toMacroString(value1)));
+      return joiner.toString();
+    }
+
+    return prettyToString(value);
+  }
+
   public static String prettyToString(EvaluationValue value) {
     if (value.isNumberValue()) return value.getStringValue();
     if (value.isBooleanValue()) return value.getBooleanValue() ? "true" : "false";
-    if (value.isStringValue()) return '\"' + value.getStringValue() + '\"';
+    if (value.isStringValue()) return NbtString.escape(value.getStringValue());
 
     if (value.isArrayValue()) {
       StringJoiner joiner = new StringJoiner(", ", "[", "]");
@@ -191,7 +211,7 @@ public class EvalUtils {
   }
 
   public static EvaluationValue evaluate(
-      LootContext context, Expression exp, @Nullable Map<String, Object> params) {
+      LootContext context, Expression exp, @Nullable Map<String, ?> params) {
     try {
       var builder = EvaluationContext.builder(exp).context(context);
       if (params != null && !params.isEmpty()) builder.parameters(params);

@@ -33,7 +33,7 @@ public interface Expression extends Function<LootContext, Expression.Result> {
   }
 
   @ApiStatus.Experimental
-  Result eval(LootContext context, @Nullable Map<String, Object> parameters);
+  Result eval(LootContext context, @Nullable Map<String, ?> parameters);
 
   String original();
 

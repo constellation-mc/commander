@@ -14,7 +14,7 @@ public abstract class ExpressionMixin implements me.melontini.commander.api.expr
   public abstract String getExpressionString();
 
   @Override
-  public Result eval(LootContext context, Map<String, Object> parameters) {
+  public Result eval(LootContext context, Map<String, ?> parameters) {
     return (Result) (Object) EvalUtils.evaluate(context, (Expression) (Object) this, parameters);
   }
 
