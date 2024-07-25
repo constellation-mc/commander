@@ -253,8 +253,8 @@ public class EvalUtils {
 
     private static final Map<Identifier, Function<LootContext, Object>> overrides =
         Collections.unmodifiableMap(new Object2ReferenceOpenHashMap<>(Map.of(
-                Identifier.of("level"), LootContext::getWorld,
-                Identifier.of("luck"), LootContext::getLuck)));
+            Identifier.of("level"), LootContext::getWorld,
+            Identifier.of("luck"), LootContext::getLuck)));
     // In most cases the expression is reused, so caching this helps us avoid some big overhead.
     private final Map<String, Function<LootContext, EvaluationValue>> varCache =
         new Object2ReferenceOpenHashMap<>();

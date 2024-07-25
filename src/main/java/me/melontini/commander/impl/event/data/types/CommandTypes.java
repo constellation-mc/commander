@@ -3,7 +3,6 @@ package me.melontini.commander.impl.event.data.types;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
-import java.util.IdentityHashMap;
 import java.util.Objects;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.command.Command;
@@ -14,9 +13,11 @@ import net.minecraft.util.Identifier;
 @UtilityClass
 public final class CommandTypes {
 
-    private static final BiMap<Identifier, CommandType> COMMANDS = HashBiMap.create();
-    private static final Codec<CommandType> TYPE_CODEC = ExtraCodecs.mapLookup(Identifier.CODEC, COMMANDS);
-    public static final Codec<Command> CODEC = TYPE_CODEC.dispatch("type", Command::type, CommandType::codec);
+  private static final BiMap<Identifier, CommandType> COMMANDS = HashBiMap.create();
+  private static final Codec<CommandType> TYPE_CODEC =
+      ExtraCodecs.mapLookup(Identifier.CODEC, COMMANDS);
+  public static final Codec<Command> CODEC =
+      TYPE_CODEC.dispatch("type", Command::type, CommandType::codec);
 
   public static Identifier getId(CommandType type) {
     return Objects.requireNonNull(

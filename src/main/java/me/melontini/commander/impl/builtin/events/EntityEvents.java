@@ -104,7 +104,9 @@ public class EntityEvents {
           LootContextParameterSet.Builder builder =
               new LootContextParameterSet.Builder((ServerWorld) entity.getWorld());
           builder.add(THIS_ENTITY, killedEntity).add(ORIGIN, killedEntity.getPos());
-          builder.add(DAMAGE_SOURCE, world.getDamageSources().generic()).add(ATTACKING_ENTITY, entity);
+          builder
+              .add(DAMAGE_SOURCE, world.getDamageSources().generic())
+              .add(ATTACKING_ENTITY, entity);
           return new LootContext.Builder(builder.build(LootContextTypes.ENTITY))
               .build(Optional.empty());
         }));

@@ -27,12 +27,15 @@ class DefaultCustomFields {
     });
     CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
     CustomFields.addVirtualField(
-        BlockEntity.class, "nbt", be -> be.createNbtWithIdentifyingData(be.getWorld().getRegistryManager()));
+        BlockEntity.class,
+        "nbt",
+        be -> be.createNbtWithIdentifyingData(be.getWorld().getRegistryManager()));
 
     CustomFields.addVirtualField(State.class, "properties", StateStruct::new);
     CustomFields.addVirtualField(
         LivingEntity.class, "attributes", e -> new EntityAttributesStruct(e.getAttributes()));
-        CustomFields.addVirtualField(ItemStack.class, "components", stack -> new ComponentStruct(stack.getComponents()));
+    CustomFields.addVirtualField(
+        ItemStack.class, "components", stack -> new ComponentStruct(stack.getComponents()));
 
     CustomFields.addVirtualField(
         AttachmentTarget.class,

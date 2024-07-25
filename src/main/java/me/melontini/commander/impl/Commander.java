@@ -159,13 +159,19 @@ public class Commander {
     BuiltInSelectors.init();
 
     LootContextParameterRegistry.register(
-        ORIGIN, TOOL,
-        THIS_ENTITY, LAST_DAMAGE_PLAYER,
-        ATTACKING_ENTITY, DIRECT_ATTACKING_ENTITY,
-        DAMAGE_SOURCE, EXPLOSION_RADIUS,
-        BLOCK_STATE, BLOCK_ENTITY,
-                ENCHANTMENT_LEVEL, ENCHANTMENT_ACTIVE);
-    }
+        ORIGIN,
+        TOOL,
+        THIS_ENTITY,
+        LAST_DAMAGE_PLAYER,
+        ATTACKING_ENTITY,
+        DIRECT_ATTACKING_ENTITY,
+        DAMAGE_SOURCE,
+        EXPLOSION_RADIUS,
+        BLOCK_STATE,
+        BLOCK_ENTITY,
+        ENCHANTMENT_LEVEL,
+        ENCHANTMENT_ACTIVE);
+  }
 
   private void resetCaches() {
     EvalUtils.resetCache();

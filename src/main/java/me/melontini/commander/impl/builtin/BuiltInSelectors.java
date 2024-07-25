@@ -43,7 +43,8 @@ public final class BuiltInSelectors {
       context -> forEntity(context.requireParameter(LootContextParameters.ATTACKING_ENTITY)));
   public static final Selector DIRECT_KILLER_ENTITY = Selector.register(
       mc("direct_attacking_entity"),
-      context -> forEntity(context.requireParameter(LootContextParameters.DIRECT_ATTACKING_ENTITY)));
+      context ->
+          forEntity(context.requireParameter(LootContextParameters.DIRECT_ATTACKING_ENTITY)));
   public static final Selector LAST_DAMAGE_PLAYER = Selector.register(
       mc("last_damage_player"),
       context -> forEntity(context.requireParameter(LootContextParameters.LAST_DAMAGE_PLAYER)));

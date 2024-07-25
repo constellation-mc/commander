@@ -54,4 +54,3 @@ public final class StateStruct extends AbstractProxyMap {
     return null;
   }
 }
-
