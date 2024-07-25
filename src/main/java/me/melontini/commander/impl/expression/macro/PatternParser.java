@@ -23,11 +23,12 @@ public class PatternParser {
 
   public static final Pattern PATTERN =
       Pattern.compile("\\$(?:\\(([a-z]+)\\))?\\{\\{([^{}]*)\\}\\}");
-  public static final Map<String, Function<EvaluationValue, EvaluationValue>> CONVERTERS = ImmutableMap.of(
-      "bool", v -> BooleanValue.of(v.getBooleanValue()),
-      "long", v -> NumberValue.of(v.getNumberValue().setScale(0, RoundingMode.DOWN)),
-      "int", v -> NumberValue.of(v.getNumberValue().setScale(0, RoundingMode.DOWN)),
-      "double", v -> NumberValue.of(v.getNumberValue()));
+  public static final Map<String, Function<EvaluationValue, EvaluationValue>> CONVERTERS =
+      ImmutableMap.of(
+          "bool", v -> BooleanValue.of(v.getBooleanValue()),
+          "long", v -> NumberValue.of(v.getNumberValue().setScale(0, RoundingMode.DOWN)),
+          "int", v -> NumberValue.of(v.getNumberValue().setScale(0, RoundingMode.DOWN)),
+          "double", v -> NumberValue.of(v.getNumberValue()));
 
   public static final int CAST = 1;
   public static final int EXPRESSION = 2;
@@ -46,8 +47,9 @@ public class PatternParser {
       var func = result.result().orElseThrow();
       var cmd = sb(b -> matcher.appendReplacement(b, ""));
       var fin = start;
-      start = (context, params) ->
-          fin.apply(context, params).append(cmd).append(EvalUtils.toMacroString(func.apply(context, params)));
+      start = (context, params) -> fin.apply(context, params)
+          .append(cmd)
+          .append(EvalUtils.toMacroString(func.apply(context, params)));
     }
 
     var cmd = sb(matcher::appendTail);
@@ -63,12 +65,11 @@ public class PatternParser {
     return b.toString();
   }
 
-  public static DataResult<BiFunction<LootContext, Map<String, ?>, EvaluationValue>> parseExpression(
-      String expression, @Nullable String cast) {
+  public static DataResult<BiFunction<LootContext, Map<String, ?>, EvaluationValue>>
+      parseExpression(String expression, @Nullable String cast) {
     if (cast == null)
       return EvalUtils.parseExpression(expression)
-          .map(
-              exp -> (context, params) -> evaluate(context, exp, params));
+          .map(exp -> (context, params) -> evaluate(context, exp, params));
 
     var c = CONVERTERS.get(cast);
     if (c == null) return DataResult.error(() -> "Unknown cast type %s".formatted(cast));

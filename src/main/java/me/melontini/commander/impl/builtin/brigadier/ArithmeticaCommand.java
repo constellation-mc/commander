@@ -53,8 +53,8 @@ public class ArithmeticaCommand {
 
       context
           .getSource()
-          .sendMessage(
-              Text.literal(EvalUtils.prettyToString(r.result().orElseThrow().apply(context1, null))));
+          .sendMessage(Text.literal(
+              EvalUtils.prettyToString(r.result().orElseThrow().apply(context1, null))));
       return 1;
     } catch (CmdEvalException e) {
       throw Commander.EXPRESSION_EXCEPTION.create(e.getMessage());
