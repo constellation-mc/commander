@@ -4,7 +4,10 @@ import com.mojang.datafixers.kinds.App;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import me.melontini.commander.api.command.Command;
 import me.melontini.commander.api.event.EventContext;
 import me.melontini.commander.api.event.EventKey;
@@ -23,28 +26,39 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-
 @Mixin(AdvancementRewards.class)
 public class AdvancementRewardsMixin {
 
   @Unique private List<Command.Conditioned> commands;
 
-  //https://gist.github.com/kvverti/dec17e824922e1974313b8beadc621c5
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"), index = 0, method = "<clinit>")
-  private static Function<RecordCodecBuilder.Instance<AdvancementRewards>, ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>> commander$modifyCodec(Function<RecordCodecBuilder.Instance<AdvancementRewards>, ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>> builder) {
-        MapCodec<AdvancementRewards> mapCodec = RecordCodecBuilder.mapCodec(builder);
-        Codec<List<Command.Conditioned>> commanderCodec = ExtraCodecs.list(Command.CODEC.codec());
+  // https://gist.github.com/kvverti/dec17e824922e1974313b8beadc621c5
+  @ModifyArg(
+      at =
+          @At(
+              value = "INVOKE",
+              target =
+                  "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"),
+      index = 0,
+      method = "<clinit>",
+      remap = false)
+  private static Function<
+          RecordCodecBuilder.Instance<AdvancementRewards>,
+          ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>>
+      commander$modifyCodec(
+          Function<
+                  RecordCodecBuilder.Instance<AdvancementRewards>,
+                  ? extends App<RecordCodecBuilder.Mu<AdvancementRewards>, AdvancementRewards>>
+              builder) {
+    MapCodec<AdvancementRewards> mapCodec = RecordCodecBuilder.mapCodec(builder);
+    Codec<List<Command.Conditioned>> commanderCodec = ExtraCodecs.list(Command.CODEC.codec());
 
-        return data -> data.group(
-                mapCodec.forGetter(Function.identity()),
-                ExtraCodecs.optional("commander:commands", commanderCodec, Collections.emptyList()).forGetter(object -> ((AdvancementRewardsMixin)(Object)object).commands)
-        ).apply(data, (advancementRewards, commands) -> {
-            ((AdvancementRewardsMixin) (Object) advancementRewards).commands = commands;
-            return advancementRewards;
+    return data -> data.group(
+            mapCodec.forGetter(Function.identity()),
+            ExtraCodecs.optional("commander:commands", commanderCodec, Collections.emptyList())
+                .forGetter(object -> ((AdvancementRewardsMixin) (Object) object).commands))
+        .apply(data, (advancementRewards, commands) -> {
+          ((AdvancementRewardsMixin) (Object) advancementRewards).commands = commands;
+          return advancementRewards;
         });
   }
 

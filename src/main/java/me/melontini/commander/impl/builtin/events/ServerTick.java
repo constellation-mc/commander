@@ -3,6 +3,7 @@ package me.melontini.commander.impl.builtin.events;
 import static me.melontini.commander.api.util.EventExecutors.runVoid;
 import static me.melontini.commander.impl.Commander.id;
 
+import java.util.Optional;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -12,11 +13,6 @@ import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
-
-import java.util.Optional;
-
-import static me.melontini.commander.api.util.EventExecutors.runVoid;
-import static me.melontini.commander.impl.Commander.id;
 
 @UtilityClass
 public class ServerTick {

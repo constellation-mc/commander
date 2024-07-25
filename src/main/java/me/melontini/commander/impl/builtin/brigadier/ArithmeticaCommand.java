@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import java.util.Optional;
 import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.expression.CmdEvalException;
 import me.melontini.commander.impl.expression.EvalUtils;
@@ -15,7 +16,6 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
 public class ArithmeticaCommand {

@@ -6,6 +6,7 @@ import static net.minecraft.loot.context.LootContextParameters.*;
 
 import com.mojang.serialization.Codec;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
@@ -104,7 +105,8 @@ public class EntityEvents {
               new LootContextParameterSet.Builder((ServerWorld) entity.getWorld());
           builder.add(THIS_ENTITY, killedEntity).add(ORIGIN, killedEntity.getPos());
           builder.add(DAMAGE_SOURCE, world.getDamageSources().generic()).add(KILLER_ENTITY, entity);
-          return new LootContext.Builder(builder.build(LootContextTypes.ENTITY)).build(Optional.empty());
+          return new LootContext.Builder(builder.build(LootContextTypes.ENTITY))
+              .build(Optional.empty());
         }));
   }
 

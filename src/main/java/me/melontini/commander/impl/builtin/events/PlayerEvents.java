@@ -4,6 +4,7 @@ import static me.melontini.commander.impl.Commander.id;
 import static net.minecraft.loot.context.LootContextParameters.*;
 
 import com.mojang.serialization.Codec;
+import java.util.Optional;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.api.util.EventExecutors;
@@ -26,11 +27,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Optional;
-
-import static me.melontini.commander.impl.Commander.id;
-import static net.minecraft.loot.context.LootContextParameters.*;
 
 @UtilityClass
 public class PlayerEvents {
@@ -83,7 +79,8 @@ public class PlayerEvents {
               .add(THIS_ENTITY, player)
               .add(ORIGIN, player.getPos())
               .add(TOOL, player.getStackInHand(hand));
-          return new LootContext.Builder(builder.build(LootContextTypes.FISHING)).build(Optional.empty());
+          return new LootContext.Builder(builder.build(LootContextTypes.FISHING))
+              .build(Optional.empty());
         }),
         player.getStackInHand(hand)));
 
@@ -128,7 +125,8 @@ public class PlayerEvents {
           .add(TOOL, tool)
           .add(LAST_DAMAGE_PLAYER, player)
           .add(DAMAGE_SOURCE, source);
-      return new LootContext.Builder(builder.build(LootContextTypes.ENTITY)).build(Optional.empty());
+      return new LootContext.Builder(builder.build(LootContextTypes.ENTITY))
+          .build(Optional.empty());
     });
   }
 
