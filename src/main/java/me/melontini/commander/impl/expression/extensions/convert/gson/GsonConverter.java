@@ -14,34 +14,35 @@ import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverte
 
 public class GsonConverter implements ConverterIfc {
 
-    @Override
-    public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {
-        JsonElement element = (JsonElement) object;
-        if (element.isJsonNull()) return NullValue.of();
+  @Override
+  public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {
+    JsonElement element = (JsonElement) object;
+    if (element.isJsonNull()) return NullValue.of();
 
-        if (element.isJsonPrimitive()) {
-            JsonPrimitive primitive = element.getAsJsonPrimitive();
-            if (primitive.isString()) return StringValue.of(primitive.getAsString());
-            if (primitive.isBoolean()) return BooleanValue.of(primitive.getAsBoolean());
-            if (primitive.isNumber()) return NumberValue.of(primitive.getAsBigDecimal());
-            throw illegalArgument(object);
-        }
-
-        if (element.isJsonArray()) {
-            JsonArray array = element.getAsJsonArray();
-            return ArrayValue.of(new LazyListWrapper(array.asList(), configuration));
-        }
-
-        if (element.isJsonObject()) {
-            JsonObject jsonObject = element.getAsJsonObject();
-            return StructureValue.of(Maps.transformValues(jsonObject.asMap(), ReflectiveValueConverter::convert));
-        }
-
-        throw illegalArgument(object);
+    if (element.isJsonPrimitive()) {
+      JsonPrimitive primitive = element.getAsJsonPrimitive();
+      if (primitive.isString()) return StringValue.of(primitive.getAsString());
+      if (primitive.isBoolean()) return BooleanValue.of(primitive.getAsBoolean());
+      if (primitive.isNumber()) return NumberValue.of(primitive.getAsBigDecimal());
+      throw illegalArgument(object);
     }
 
-    @Override
-    public boolean canConvert(Object object) {
-        return object instanceof JsonElement;
+    if (element.isJsonArray()) {
+      JsonArray array = element.getAsJsonArray();
+      return ArrayValue.of(new LazyListWrapper(array.asList(), configuration));
     }
+
+    if (element.isJsonObject()) {
+      JsonObject jsonObject = element.getAsJsonObject();
+      return StructureValue.of(
+          Maps.transformValues(jsonObject.asMap(), ReflectiveValueConverter::convert));
+    }
+
+    throw illegalArgument(object);
+  }
+
+  @Override
+  public boolean canConvert(Object object) {
+    return object instanceof JsonElement;
+  }
 }
