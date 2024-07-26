@@ -14,6 +14,7 @@ import me.melontini.commander.api.expression.extensions.ProxyMap;
 import me.melontini.commander.impl.expression.EvalUtils;
 import me.melontini.commander.impl.expression.extensions.convert.DataAccessorConverter;
 import me.melontini.commander.impl.expression.extensions.convert.OptionalConverter;
+import me.melontini.commander.impl.expression.extensions.convert.gson.GsonConverter;
 import me.melontini.commander.impl.expression.extensions.convert.nbt.NbtConverter;
 import me.melontini.dark_matter.api.base.util.MathUtil;
 
@@ -26,6 +27,7 @@ public class ReflectiveValueConverter implements EvaluationValueConverterIfc {
       new DataAccessorConverter(),
       new ExpressionNodeConverter(),
       new NbtConverter(),
+      new GsonConverter(),
       new ArrayConverter(),
       new OptionalConverter(),
       new DateTimeConverter(),
