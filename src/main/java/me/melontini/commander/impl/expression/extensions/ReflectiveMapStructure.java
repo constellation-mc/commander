@@ -49,8 +49,10 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     this.mappings = getAccessors(object.getClass());
   }
 
-  public static <C> void addField(Class<C> cls, String name, BiFunction<C, LootContext, Object> accessor) {
-    ReflectiveMapStructure.getAccessors(cls).addAccessor(name, (BiFunction<Object, LootContext, Object>) accessor);
+  public static <C> void addField(
+      Class<C> cls, String name, BiFunction<C, LootContext, Object> accessor) {
+    ReflectiveMapStructure.getAccessors(cls)
+        .addAccessor(name, (BiFunction<Object, LootContext, Object>) accessor);
   }
 
   private static Struct getAccessors(Class<?> cls) {
@@ -99,7 +101,9 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     if (this.mappings.isInvalid(variable)) return null;
 
     var cache = this.mappings.getAccessor(variable);
-    if (cache != null) return ReflectiveValueConverter.convert(cache.apply(this.object, (LootContext) context.context()[0]));
+    if (cache != null)
+      return ReflectiveValueConverter.convert(
+          cache.apply(this.object, (LootContext) context.context()[0]));
 
     var accessor = findFieldOrMethod(this.object.getClass(), variable);
     if (accessor == null) {
@@ -110,11 +114,12 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     synchronized (MAPPINGS) {
       getAccessors(accessor.left()).addAccessor(variable, accessor.right());
     }
-    return ReflectiveValueConverter.convert(accessor.right().apply(this.object, (LootContext) context.context()[0]));
+    return ReflectiveValueConverter.convert(
+        accessor.right().apply(this.object, (LootContext) context.context()[0]));
   }
 
-  private static @Nullable Tuple<Class<?>, BiFunction<Object, LootContext, Object>> findFieldOrMethod(
-      Class<?> cls, String name) {
+  private static @Nullable Tuple<Class<?>, BiFunction<Object, LootContext, Object>>
+      findFieldOrMethod(Class<?> cls, String name) {
     var keeper = Commander.get().mappingKeeper();
     String mapped;
     Class<?> target = cls;
