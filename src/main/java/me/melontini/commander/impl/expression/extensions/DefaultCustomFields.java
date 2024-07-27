@@ -21,15 +21,15 @@ class DefaultCustomFields {
   private static final NbtCompound EMPTY = new NbtCompound();
 
   static void init() {
-    CustomFields.addVirtualField(ItemStack.class, "nbt", object -> {
+    CustomFields.addVirtualField(ItemStack.class, "nbt", (object, context) -> {
       if (object.isEmpty()) return EMPTY;
-      return object.encode(Commander.get().currentServer().getRegistryManager());
+      return object.encode(context.getWorld().getRegistryManager());
     });
     CustomFields.addVirtualField(Entity.class, "nbt", NbtPredicate::entityToNbt);
     CustomFields.addVirtualField(
         BlockEntity.class,
         "nbt",
-        be -> be.createNbtWithIdentifyingData(be.getWorld().getRegistryManager()));
+        (be, context) -> be.createNbtWithIdentifyingData(context.getWorld().getRegistryManager()));
 
     CustomFields.addVirtualField(State.class, "properties", StateStruct::new);
     CustomFields.addVirtualField(

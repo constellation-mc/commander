@@ -46,7 +46,7 @@ public class ExpressionTest implements ServerTestEntrypoint {
   void testLootContextAccess(ServerTestContext context) {
     var lootContext = emptyContext(context);
 
-    Assertions.assertThat(parse("level.dimensionTypeId.location").eval(lootContext))
+    Assertions.assertThat(parse("level.dimension.location").eval(lootContext))
         .isEqualTo(Expression.Result.convert("minecraft:overworld"));
   }
 
