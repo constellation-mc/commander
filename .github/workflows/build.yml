@@ -14,5 +14,5 @@ jobs:
   run_tests:
     uses: constellation-mc/actions/.github/workflows/mc-tests.yml@main
     with:
-      java: 17
+      java: 21
       server_task: runTestServer
