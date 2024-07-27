@@ -1,0 +1,13 @@
+{
+  "event": "commander:test",
+  "commands": [
+    {
+      "type": "commander:print",
+      "text": "Hello from JSON!"
+    },
+    {
+      "type": "commander:cancel",
+      "value": "fail"
+    }
+  ]
+}

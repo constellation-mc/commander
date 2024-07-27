@@ -7,13 +7,13 @@ import com.ezylang.evalex.data.types.StringValue;
 import net.minecraft.util.Identifier;
 
 public class IdentifierConverter implements ConverterIfc {
-    @Override
-    public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {
-        return StringValue.of(object.toString());
-    }
+  @Override
+  public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {
+    return StringValue.of(object.toString());
+  }
 
-    @Override
-    public boolean canConvert(Object object) {
-        return object instanceof Identifier;
-    }
+  @Override
+  public boolean canConvert(Object object) {
+    return object instanceof Identifier;
+  }
 }
