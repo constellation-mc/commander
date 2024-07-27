@@ -4,7 +4,7 @@ Commander introduces support for evaluating math expressions with dynamic contex
 
 Expressions use [EvalEx](https://ezylang.github.io/EvalEx/) for evaluation, it may be useful to familiarize yourself with it. One major difference is that all function, variable, contant names are case-sensitive and all funtion names are camelCase and not UPPER_SNAKE_CASE.
 
-## Additional functions
+## Additional functions and operators
 
 Commander adds some additional functions to EvalEx.
 
@@ -34,6 +34,20 @@ All functions construct new arrays and do not mutate the original array.
 | `arrayAnyMatch` | Checks if any of the objects in this array match the predicate. | `array`, `predicate(λ)` | `arrayAnyMatch(arrayOf(0,1,2), it == 1)` |
 | `arrayNoneMatch` | Checks if none of the objects in this array match the predicate. | `array`, `predicate(λ)` | `arrayNoneMatch(arrayOf(0,1,2), it == 1)` |
 | `arrayAllMatch` | Checks if all objects in this array match the predicate. | `array`, `predicate(λ)` | `arrayAllMatch(arrayOf(0,1,2), it == 1)` |
+| `arrayFindFirst` | Returns the first object in the array or `null` if empty. | `array` | `arrayFindFirst(arrayOf(0, 23))` |
+
+:::
+
+::: details Registries
+
+| Function  |  Description |  Arguments | Example |
+|---|---|---|---|
+| `Registry` | Returns a static content registry | `identifier` | `Registry('entity_type')` |
+| `Item` | Returns an item from the registry | `identifier` | `Item('diamond')` |
+| `Block` | Returns a block from the registry | `identifier` | `Block('chest')` |
+| `DynamicRegistry` | Returns a dynamic content registry | `identifier` | `DynamicRegistry('worldgen/biome')` |
+| `Biome` | Returns a biome from the registry | `identifier` | `Biome('the_void')` |
+| `DimensionType` | Returns a dimension type from the registry | `identifier` | `DimensionType('overworld')` |
 
 :::
 
@@ -46,6 +60,16 @@ All functions construct new arrays and do not mutate the original array.
 | `length` | Returns the length of the specified object or 0.  | `value` | `length('Hello World!')` |
 | `strFormat` | Formats a string according to the pattern.  | `pattern`, `args...` | `strFormat('Hello %s World!', 23)` |
 | `ifMatches` | Simillar to built-in `if`, but with Lambdas.  | `value`, `predicate(λ)`, `ifTrue(λ)`, `ifFalse(λ)` | `ifMatches(arrayFind(arrayOf(0,1,2), it == 1), length(it) > 0, it[0], 0)` |
+| `chain` | Chains multiple functions using lambdas. `it` is the last result.  | `value`, `actions(λ)...` | `chain(23, it + 3, sqrt(it))` |
+
+:::
+
+::: details Operators
+
+| Function  |  Description |  Arguments | Example |
+|---|---|---|---|
+| `?.` | Attempts to get a field from a structure or returns `null` | `struct`, `key` | `struct?.field` |
+| `?` | Returns `b` if `a` is `null`. `a` otherwise.  | `a`, `b` | `struct?.y ? 5` |
 
 :::
 
@@ -177,6 +201,18 @@ You can use expressions as predicates in the `execute if` command.
 
 ```
 /execute if cmd:expression "level.isDay" run say It is day!
+```
+
+:::
+
+::: details `scoreboard players` command
+
+You can use expressions as modifiers for player predicates. `score` variable allows you to get the current score.
+
+The current version does not provide entity context. 
+
+```
+/scoreboard players cmd:operate @s test_objective "(score * 1.5) + level.storage.my_score_modifier"
 ```
 
 :::

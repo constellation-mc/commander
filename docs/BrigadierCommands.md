@@ -66,9 +66,21 @@ cmd:data
             \- position
                 \- key
                     \- data
+    \- remove
+        \- level
+            \- key
+        \- chunk
+            \- position
+                \- key
+        \- entity
+            \- entity
+                \- key
+        \- block_entity
+            \- position
+                \- key
 ```
 :::
 
-Example: `cmd:data read entity @s "my_test_data"` or `cmd:data write entity @s "my_test_data" "Hello "`
+Example: `cmd:data write entity @s "my_test_data" "Hello "`, `cmd:data read entity @s "my_test_data"`,  `cmd:data remove entity @s "my_test_data"`
 
 Example reference: `this_entity.storage.my_test_data + 'World!'`
