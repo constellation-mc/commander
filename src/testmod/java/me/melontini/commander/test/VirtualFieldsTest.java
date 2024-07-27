@@ -5,8 +5,11 @@ import static me.melontini.commander.test.ExpressionTest.parse;
 
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.data.types.BooleanValue;
+import com.ezylang.evalex.data.types.DataAccessorValue;
 import com.ezylang.evalex.data.types.StructureValue;
 import java.util.Map;
+import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
+import me.melontini.commander.impl.expression.extensions.convert.components.ComponentStruct;
 import me.melontini.commander.impl.expression.extensions.convert.nbt.NbtCompoundStruct;
 import me.melontini.handytests.server.ServerTestContext;
 import me.melontini.handytests.server.ServerTestEntrypoint;
@@ -18,6 +21,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.util.math.BlockPos;
 import org.assertj.core.api.Assertions;
@@ -31,8 +35,12 @@ public class VirtualFieldsTest implements ServerTestEntrypoint {
     var lootContext = emptyContext(context);
     Assertions.assertThat(parse("stack.nbt").eval(lootContext, Map.of("stack", stack)))
         .isInstanceOf(StructureValue.class)
-        .isEqualTo(StructureValue.of(
-            (Map<String, EvaluationValue>) (Object) new NbtCompoundStruct(stack.getOrCreateNbt())));
+        .isEqualTo(StructureValue.of((Map<String, EvaluationValue>) (Object) new NbtCompoundStruct(
+            (NbtCompound) stack.encodeAllowEmpty(context.server().getRegistryManager()))));
+
+    Assertions.assertThat(parse("stack.components").eval(lootContext, Map.of("stack", stack)))
+        .isInstanceOf(DataAccessorValue.class)
+        .isEqualTo(ReflectiveValueConverter.convert(new ComponentStruct(stack.getComponents())));
   }
 
   @HandyTest
@@ -54,8 +62,8 @@ public class VirtualFieldsTest implements ServerTestEntrypoint {
     var lootContext = emptyContext(context);
     Assertions.assertThat(parse("be.nbt").eval(lootContext, Map.of("be", entity)))
         .isInstanceOf(StructureValue.class)
-        .isEqualTo(StructureValue.of((Map<String, EvaluationValue>)
-            (Object) new NbtCompoundStruct(entity.createNbtWithIdentifyingData())));
+        .isEqualTo(StructureValue.of((Map<String, EvaluationValue>) (Object) new NbtCompoundStruct(
+            entity.createNbtWithIdentifyingData(context.server().getRegistryManager()))));
   }
 
   @HandyTest

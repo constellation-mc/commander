@@ -33,7 +33,7 @@ public class ConvertersTest implements ServerTestEntrypoint {
     Assertions.assertThat(ReflectiveValueConverter.convert(Identifier.of("cmd", "test_id")))
         .isEqualTo(StringValue.of("cmd:test_id"));
 
-    Assertions.assertThat(ReflectiveValueConverter.convert(new Identifier("test_id")))
+    Assertions.assertThat(ReflectiveValueConverter.convert(Identifier.of("test_id")))
         .isEqualTo(StringValue.of("minecraft:test_id"));
   }
 
