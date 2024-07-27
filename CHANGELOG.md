@@ -14,7 +14,8 @@ You have a variable `struct.x` which might not exist and maybe null. Before, you
 
 Now this can be shortened to: `struct?.x ? valueElse()`. Do note that `?` has a very low precedence, so in ambiguous cases you'll have to wrap it in parentheses. e.g. `23 + struct?.x ? 23` -> `23 + (struct?.x ? 23)`.
 
-* Java `Optional` are now unwrapped in expressions.
+* Java `Optional`s are now unwrapped in expressions.
+* Minecraft `Identifier`s are now converted to strings in expressions.
 * Gson elements can now be used in expressions.
   
 Other Changes:

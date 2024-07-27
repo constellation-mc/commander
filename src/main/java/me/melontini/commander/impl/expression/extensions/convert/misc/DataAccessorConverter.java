@@ -1,4 +1,4 @@
-package me.melontini.commander.impl.expression.extensions.convert;
+package me.melontini.commander.impl.expression.extensions.convert.misc;
 
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.config.ExpressionConfiguration;
