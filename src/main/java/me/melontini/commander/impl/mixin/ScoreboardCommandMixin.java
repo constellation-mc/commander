@@ -35,7 +35,7 @@ public class ScoreboardCommandMixin {
               value = "INVOKE",
               target =
                   "Lnet/minecraft/server/command/CommandManager;literal(Ljava/lang/String;)Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;",
-              ordinal = 11))
+              ordinal = 10))
   private static LiteralArgumentBuilder<ServerCommandSource> addCommanderOperator(
       LiteralArgumentBuilder<ServerCommandSource> original) {
     return original.then(CommandManager.literal("cmd:operate")
