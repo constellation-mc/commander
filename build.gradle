@@ -11,6 +11,7 @@ plugins {
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.spotbugs.snom.SpotBugsTask
 import me.modmuss50.mpp.ReleaseType
+import net.fabricmc.loom.api.RemapConfigurationSettings
 
 def local = !System.getenv().containsKey("GITHUB_RUN_NUMBER");
 
@@ -61,6 +62,23 @@ remapJar {
 }
 tasks.jar.archiveClassifier = "slim"
 
+sourceSets {
+    testmod {
+        compileClasspath += main.compileClasspath
+        runtimeClasspath += main.runtimeClasspath
+    }
+}
+
+loom {
+    addRemapConfiguration("testmodRemapImplementation", (RemapConfigurationSettings configuration) -> {
+        configuration.getTargetConfigurationName().convention("testmodImplementation")
+        configuration.getSourceSet().convention(sourceSets.testmod)
+        configuration.getOnCompileClasspath().convention(true)
+        configuration.getOnRuntimeClasspath().convention(true)
+        configuration.getPublishingMode().convention(RemapConfigurationSettings.PublishingMode.NONE)
+    })
+}
+
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -80,6 +98,12 @@ dependencies {
         implementation it
         shade it
     }
+
+    testmodImplementation sourceSets.main.output
+    testmodRemapImplementation(libs.handy.tests) {
+        exclude(group: "net.fabricmc", module: "fabric-loader")
+    }
+    testmodImplementation libs.assertj.core
 }
 
 tasks.register("spotbugs", SpotBugsTask) { task ->
@@ -118,6 +142,18 @@ spotless {
 loom {
     accessWidenerPath = file("src/main/resources/commander.accesswidener")
 
+    runs {
+        testServer {
+            server()
+            source sourceSets.testmod
+            runDir("run_test_server")
+
+            properties([
+                    "handy-tests.auto-test": "true"
+            ])
+        }
+    }
+
     //https://gist.github.com/maityyy/3dbcd558d58a6412c3a2a38c72706e8e
     afterEvaluate {
         loom.runs.configureEach {
@@ -126,6 +162,14 @@ loom {
             vmArg "-javaagent:${ configurations.compileClasspath.find { it.name.contains("sponge-mixin") } }"
             property("mixin.debug.export", "true")
         }
+    }
+
+    mods.register(project.name) {
+        sourceSet project.sourceSets.main
+    }
+
+    mods.register(project.name + "-testmod") {
+        sourceSet project.sourceSets.testmod
     }
 }
 

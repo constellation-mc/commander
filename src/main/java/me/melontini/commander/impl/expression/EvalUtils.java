@@ -37,6 +37,8 @@ import me.melontini.commander.impl.expression.functions.math.RangedRandomFunctio
 import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryFunction;
 import me.melontini.commander.impl.expression.functions.registry.DynamicRegistryRegistryFunction;
 import me.melontini.commander.impl.expression.functions.registry.RegistryFunction;
+import me.melontini.commander.impl.expression.operators.SafeOrOperator;
+import me.melontini.commander.impl.expression.operators.SafeStructureOperator;
 import me.melontini.commander.impl.util.ThrowingOptional;
 import me.melontini.dark_matter.api.base.util.Exceptions;
 import me.melontini.dark_matter.api.base.util.functions.Memoize;
@@ -119,40 +121,49 @@ public class EvalUtils {
         "strUpper");
 
     var fd = ExpressionConfiguration.defaultConfiguration().getFunctionDictionary();
-    var dictionary = fd.toBuilder(Object2ReferenceOpenHashMap::new);
+    var functions = fd.toBuilder(Object2ReferenceOpenHashMap::new);
     fd.forEach((string, functionIfc) -> {
       var newName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, string);
-      dictionary.add(
+      functions.add(
           newName, toCache.contains(newName) ? LruCachingFunction.of(functionIfc) : functionIfc);
     });
 
-    dictionary.add("random", new RangedRandomFunction());
-    dictionary.add("lerp", new LerpFunction());
-    dictionary.add("clamp", new ClampFunction());
-    dictionary.add("ifMatches", new MatchesFunction());
-    dictionary.add("chain", new ChainFunction());
-    dictionary.add("length", new LengthFunction());
+    functions.add("random", new RangedRandomFunction());
+    functions.add("lerp", new LerpFunction());
+    functions.add("clamp", new ClampFunction());
+    functions.add("ifMatches", new MatchesFunction());
+    functions.add("chain", new ChainFunction());
+    functions.add("length", new LengthFunction());
 
-    dictionary.add("arrayOf", new ArrayOf());
-    dictionary.add("arrayMap", new ArrayMap());
-    dictionary.add("arrayFind", new ArrayFind());
-    dictionary.add("arrayFindAny", new ArrayFindAny());
-    dictionary.add("arrayFindFirst", new ArrayFindFirst());
-    dictionary.add("arrayAnyMatch", new ArrayAnyMatch());
-    dictionary.add("arrayNoneMatch", new ArrayNoneMatch());
-    dictionary.add("arrayAllMatch", new ArrayAllMatch());
+    functions.add("arrayOf", new ArrayOf());
+    functions.add("arrayMap", new ArrayMap());
+    functions.add("arrayFind", new ArrayFind());
+    functions.add("arrayFindAny", new ArrayFindAny());
+    functions.add("arrayFindFirst", new ArrayFindFirst());
+    functions.add("arrayAnyMatch", new ArrayAnyMatch());
+    functions.add("arrayNoneMatch", new ArrayNoneMatch());
+    functions.add("arrayAllMatch", new ArrayAllMatch());
 
-    dictionary.add("structContainsKey", new StructContainsKeyFunction());
-    dictionary.add("hasContext", new HasContextFunction());
+    functions.add("structContainsKey", new StructContainsKeyFunction());
+    functions.add("hasContext", new HasContextFunction());
 
-    dictionary.add("Registry", new RegistryFunction(Registries.REGISTRIES));
-    dictionary.add("Item", LruCachingFunction.of(new RegistryFunction(Registries.ITEM)));
-    dictionary.add("Block", LruCachingFunction.of(new RegistryFunction(Registries.BLOCK)));
+    functions.add("Registry", new RegistryFunction(Registries.REGISTRIES));
+    functions.add("Item", LruCachingFunction.of(new RegistryFunction(Registries.ITEM)));
+    functions.add("Block", LruCachingFunction.of(new RegistryFunction(Registries.BLOCK)));
 
-    dictionary.add("DynamicRegistry", new DynamicRegistryRegistryFunction());
-    dictionary.add("Biome", new DynamicRegistryFunction(RegistryKeys.BIOME));
-    dictionary.add("DimensionType", new DynamicRegistryFunction(RegistryKeys.DIMENSION_TYPE));
-    builder.functionDictionary(dictionary.build());
+    functions.add("DynamicRegistry", new DynamicRegistryRegistryFunction());
+    functions.add("Biome", new DynamicRegistryFunction(RegistryKeys.BIOME));
+    functions.add("DimensionType", new DynamicRegistryFunction(RegistryKeys.DIMENSION_TYPE));
+    builder.functionDictionary(functions.build());
+
+    var operators =
+        ExpressionConfiguration.defaultConfiguration().getOperatorDictionary().toBuilder(
+            Object2ReferenceOpenHashMap::new);
+
+    operators.infix("?.", new SafeStructureOperator());
+    operators.infix("?", new SafeOrOperator());
+
+    builder.operatorDictionary(operators.build());
 
     CONFIGURATION = builder.build();
     PARSER = new ExpressionParser(CONFIGURATION);
