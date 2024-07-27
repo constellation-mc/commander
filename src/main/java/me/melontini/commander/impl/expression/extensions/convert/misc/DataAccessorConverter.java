@@ -34,10 +34,11 @@ public class DataAccessorConverter implements ConverterIfc {
   public record AccessorWrapper(CustomDataAccessor accessor) implements DataAccessorIfc {
 
     @Override
-    public @Nullable EvaluationValue getData(String variable, Token token, EvaluationContext context) throws EvaluationException {
+    public @Nullable EvaluationValue getData(
+        String variable, Token token, EvaluationContext context) throws EvaluationException {
       try {
         return (EvaluationValue)
-                accessor().getExpressionData(variable, (LootContext) context.context()[0]);
+            accessor().getExpressionData(variable, (LootContext) context.context()[0]);
       } catch (Exception e) {
         throw new EvaluationException(token, Exceptions.unwrap(e).getMessage());
       }

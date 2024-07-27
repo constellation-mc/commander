@@ -16,7 +16,8 @@ public class CustomFields {
    * Adds virtual fields to objects. This works only if the object is not handled by object converters. <br/>
    * For better UX, it's best to return types which are handled by converters.
    */
-  public static <C> void addVirtualField(Class<C> cls, String name, BiFunction<C, LootContext, Object> accessor) {
+  public static <C> void addVirtualField(
+      Class<C> cls, String name, BiFunction<C, LootContext, Object> accessor) {
     ReflectiveMapStructure.addField(cls, name, accessor);
   }
 
