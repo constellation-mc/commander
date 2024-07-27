@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "commander-testmod",
+  "version": "1.0.0",
+  "license": "MIT",
+  "entrypoints": {
+    "main": [
+      "me.melontini.commander.test.CustomEventsTest"
+    ],
+    "handy:server_test": [
+      "me.melontini.commander.test.ConvertersTest",
+      "me.melontini.commander.test.ExpressionTest",
+      "me.melontini.commander.test.VirtualFieldsTest",
+      "me.melontini.commander.test.CustomEventsTest"
+    ]
+  }
+}
