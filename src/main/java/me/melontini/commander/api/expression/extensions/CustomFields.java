@@ -1,9 +1,11 @@
 package me.melontini.commander.api.expression.extensions;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.impl.expression.extensions.ReflectiveMapStructure;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
+import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental
@@ -14,8 +16,12 @@ public class CustomFields {
    * Adds virtual fields to objects. This works only if the object is not handled by object converters. <br/>
    * For better UX, it's best to return types which are handled by converters.
    */
-  public static <C> void addVirtualField(Class<C> cls, String name, Function<C, Object> accessor) {
+  public static <C> void addVirtualField(Class<C> cls, String name, BiFunction<C, LootContext, Object> accessor) {
     ReflectiveMapStructure.addField(cls, name, accessor);
+  }
+
+  public static <C> void addVirtualField(Class<C> cls, String name, Function<C, Object> accessor) {
+    ReflectiveMapStructure.addField(cls, name, (c, lootContext) -> accessor.apply(c));
   }
 
   /**

@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -24,6 +25,7 @@ import lombok.Synchronized;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.impl.Commander;
 import me.melontini.dark_matter.api.base.util.tuple.Tuple;
+import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.Nullable;
 
 @Log4j2
@@ -47,8 +49,8 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     this.mappings = getAccessors(object.getClass());
   }
 
-  public static <C> void addField(Class<C> cls, String name, Function<C, Object> accessor) {
-    ReflectiveMapStructure.getAccessors(cls).addAccessor(name, (Function<Object, Object>) accessor);
+  public static <C> void addField(Class<C> cls, String name, BiFunction<C, LootContext, Object> accessor) {
+    ReflectiveMapStructure.getAccessors(cls).addAccessor(name, (BiFunction<Object, LootContext, Object>) accessor);
   }
 
   private static Struct getAccessors(Class<?> cls) {
@@ -74,7 +76,7 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     }
   }
 
-  private static Function<Object, Object> methodAccessor(Method method) {
+  private static BiFunction<Object, LootContext, Object> methodAccessor(Method method) {
     try {
       var handle = LOOKUP.unreflect(method);
       CallSite getterSite = LambdaMetafactory.metafactory(
@@ -84,7 +86,8 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
           MethodType.methodType(Object.class, Object.class),
           handle,
           handle.type().wrap());
-      return (Function<Object, Object>) getterSite.getTarget().invoke();
+      var getter = (Function<Object, Object>) getterSite.getTarget().invoke();
+      return (object1, lootContext) -> getter.apply(object1);
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }
@@ -96,7 +99,7 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     if (this.mappings.isInvalid(variable)) return null;
 
     var cache = this.mappings.getAccessor(variable);
-    if (cache != null) return ReflectiveValueConverter.convert(cache.apply(this.object));
+    if (cache != null) return ReflectiveValueConverter.convert(cache.apply(this.object, (LootContext) context.context()[0]));
 
     var accessor = findFieldOrMethod(this.object.getClass(), variable);
     if (accessor == null) {
@@ -107,10 +110,10 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     synchronized (MAPPINGS) {
       getAccessors(accessor.left()).addAccessor(variable, accessor.right());
     }
-    return ReflectiveValueConverter.convert(accessor.right().apply(this.object));
+    return ReflectiveValueConverter.convert(accessor.right().apply(this.object, (LootContext) context.context()[0]));
   }
 
-  private static @Nullable Tuple<Class<?>, Function<Object, Object>> findFieldOrMethod(
+  private static @Nullable Tuple<Class<?>, BiFunction<Object, LootContext, Object>> findFieldOrMethod(
       Class<?> cls, String name) {
     var keeper = Commander.get().mappingKeeper();
     String mapped;
@@ -132,7 +135,7 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     return findAccessor(cls, name);
   }
 
-  @Nullable private static Tuple<Class<?>, Function<Object, Object>> findAccessor(
+  @Nullable private static Tuple<Class<?>, BiFunction<Object, LootContext, Object>> findAccessor(
       @NonNull Class<?> cls, String mapped) {
     for (Method method : cls.getMethods()) {
       if (!method.getName().equals(mapped)) continue;
@@ -146,7 +149,7 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     for (Field field : cls.getFields()) {
       if (!field.getName().equals(mapped)) continue;
       if (Modifier.isStatic(field.getModifiers())) continue;
-      return Tuple.of(field.getDeclaringClass(), o -> {
+      return Tuple.of(field.getDeclaringClass(), (o, context) -> {
         try {
           return field.get(o);
         } catch (IllegalAccessException e) {
@@ -164,7 +167,7 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
   }
 
   static final class Struct {
-    private Map<String, Function<Object, Object>> accessors;
+    private Map<String, BiFunction<Object, LootContext, Object>> accessors;
     private Set<String> invalid;
     private Set<Struct> consumers;
 
@@ -178,12 +181,12 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
       this.invalid.add(key);
     }
 
-    public @Nullable Function<Object, Object> getAccessor(String key) {
+    public @Nullable BiFunction<Object, LootContext, Object> getAccessor(String key) {
       return this.accessors == null ? null : this.accessors.get(key);
     }
 
     @Synchronized
-    public void addAccessor(String key, Function<Object, Object> accessor) {
+    public void addAccessor(String key, BiFunction<Object, LootContext, Object> accessor) {
       if (this.accessors == null) this.accessors = new Object2ReferenceOpenHashMap<>();
       this.accessors.put(key, accessor);
 

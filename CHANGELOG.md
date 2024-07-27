@@ -17,6 +17,11 @@ Now this can be shortened to: `struct?.x ? valueElse()`. Do note that `?` has a 
 * Java `Optional`s are now unwrapped in expressions.
 * Minecraft `Identifier`s are now converted to strings in expressions.
 * Gson elements can now be used in expressions.
+
+Dev Changes:
+
+* Fixed `equals` on CustomDataAccessors.
+* Added `LootContext` as an argument for the `CustomFields#addVirtualField` function.
   
 Other Changes:
 
