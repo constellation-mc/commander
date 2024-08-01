@@ -4,9 +4,12 @@ import com.mojang.datafixers.util.Either;
 import lombok.EqualsAndHashCode;
 import me.melontini.commander.api.expression.LongExpression;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 @EqualsAndHashCode
-public class ConstantLongExpression implements LongExpression {
+public final class ConstantLongExpression implements LongExpression {
   @EqualsAndHashCode.Exclude
   private final Either<Long, String> either;
 
@@ -23,7 +26,7 @@ public class ConstantLongExpression implements LongExpression {
   }
 
   @Override
-  public long applyAsLong(LootContext context) {
+  public long asLong(LootContext context, @Nullable Map<String, ?> parameters) {
     return value;
   }
 

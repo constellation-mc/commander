@@ -4,6 +4,9 @@ import com.mojang.datafixers.util.Either;
 import lombok.EqualsAndHashCode;
 import me.melontini.commander.api.expression.BooleanExpression;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 @EqualsAndHashCode
 public final class ConstantBooleanExpression implements BooleanExpression {
@@ -23,7 +26,7 @@ public final class ConstantBooleanExpression implements BooleanExpression {
   }
 
   @Override
-  public boolean asBoolean(LootContext context) {
+  public boolean asBoolean(LootContext context, @Nullable Map<String, ?> parameters) {
     return value;
   }
 

@@ -23,16 +23,10 @@ public interface Expression extends Function<LootContext, Expression.Result> {
     return (DataResult<Expression>) (Object) EvalUtils.parseExpression(expression);
   }
 
-  @Override
-  default Result apply(LootContext context) {
-    return this.eval(context);
-  }
-
   default Result eval(LootContext context) {
     return this.eval(context, null);
   }
 
-  @ApiStatus.Experimental
   Result eval(LootContext context, @Nullable Map<String, ?> parameters);
 
   String original();
@@ -47,8 +41,8 @@ public interface Expression extends Function<LootContext, Expression.Result> {
       return (Result) (Object) NumberValue.of(decimal);
     }
 
-    static Result convert(boolean decimal) {
-      return (Result) (Object) BooleanValue.of(decimal);
+    static Result convert(boolean bool) {
+      return (Result) (Object) BooleanValue.of(bool);
     }
 
     static Result convert(String string) {
@@ -86,5 +80,10 @@ public interface Expression extends Function<LootContext, Expression.Result> {
     boolean isNullValue();
 
     @Nullable Object getValue();
+  }
+
+  @Override
+  default Result apply(LootContext context) {
+    return this.eval(context);
   }
 }

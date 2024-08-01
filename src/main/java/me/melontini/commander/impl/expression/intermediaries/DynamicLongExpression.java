@@ -5,9 +5,12 @@ import lombok.EqualsAndHashCode;
 import me.melontini.commander.api.expression.Expression;
 import me.melontini.commander.api.expression.LongExpression;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 @EqualsAndHashCode
-public class DynamicLongExpression implements LongExpression {
+public final class DynamicLongExpression implements LongExpression {
   @EqualsAndHashCode.Exclude
   private final Either<Long, String> either;
 
@@ -24,8 +27,8 @@ public class DynamicLongExpression implements LongExpression {
   }
 
   @Override
-  public long applyAsLong(LootContext context) {
-    return expression.apply(context).getAsDecimal().longValue();
+  public long asLong(LootContext context, @Nullable Map<String, ?> parameters) {
+    return expression.eval(context, parameters).getAsDecimal().longValue();
   }
 
   @Override

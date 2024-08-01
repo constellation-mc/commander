@@ -5,6 +5,9 @@ import lombok.EqualsAndHashCode;
 import me.melontini.commander.api.expression.Arithmetica;
 import me.melontini.commander.api.expression.Expression;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 @EqualsAndHashCode
 public final class DynamicArithmetica implements Arithmetica {
@@ -24,8 +27,8 @@ public final class DynamicArithmetica implements Arithmetica {
   }
 
   @Override
-  public double applyAsDouble(LootContext context) {
-    return expression.apply(context).getAsDecimal().doubleValue();
+  public double asDouble(LootContext context, @Nullable Map<String, ?> parameters) {
+    return expression.eval(context, parameters).getAsDecimal().doubleValue();
   }
 
   public String toString() {

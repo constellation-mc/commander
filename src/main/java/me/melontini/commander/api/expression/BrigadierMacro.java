@@ -3,10 +3,12 @@ package me.melontini.commander.api.expression;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import me.melontini.commander.impl.expression.macro.PatternParser;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -22,11 +24,6 @@ public interface BrigadierMacro extends Function<LootContext, String> {
     return PatternParser.parse(input);
   }
 
-  @Override
-  default String apply(LootContext context) {
-    return this.build(context);
-  }
-
   default String build(LootContext context) {
     return this.build(context, null);
   }
@@ -35,4 +32,9 @@ public interface BrigadierMacro extends Function<LootContext, String> {
   String build(LootContext context, @Nullable Map<String, Object> params);
 
   String original();
+
+  @Override
+  default String apply(LootContext context) {
+    return build(context);
+  }
 }

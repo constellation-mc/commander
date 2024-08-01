@@ -4,6 +4,9 @@ import com.mojang.datafixers.util.Either;
 import lombok.EqualsAndHashCode;
 import me.melontini.commander.api.expression.Arithmetica;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 @EqualsAndHashCode
 public final class ConstantArithmetica implements Arithmetica {
@@ -23,7 +26,7 @@ public final class ConstantArithmetica implements Arithmetica {
   }
 
   @Override
-  public double applyAsDouble(LootContext context) {
+  public double asDouble(LootContext context, @Nullable Map<String, ?> parameters) {
     return value;
   }
 

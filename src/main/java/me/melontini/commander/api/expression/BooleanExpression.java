@@ -5,9 +5,15 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import me.melontini.commander.impl.expression.intermediaries.ConstantBooleanExpression;
 import me.melontini.commander.impl.expression.intermediaries.DynamicBooleanExpression;
+import me.melontini.commander.impl.expression.intermediaries.NegatedBooleanExpression;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 /**
  * A simple {@code context -> boolean} functions, which is encoded as either a boolean or an expression.
@@ -15,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @see Expression
  */
-public interface BooleanExpression {
+public interface BooleanExpression extends Predicate<LootContext>, BiPredicate<LootContext, @Nullable Map<String, ?>> {
 
   Codec<BooleanExpression> CODEC = Codec.either(Codec.BOOL, Codec.STRING)
       .comapFlatMap(
@@ -23,7 +29,11 @@ public interface BooleanExpression {
               .map(BooleanExpression::of)),
           BooleanExpression::toSource);
 
-  boolean asBoolean(LootContext context);
+  default boolean asBoolean(LootContext context) {
+    return this.asBoolean(context, null);
+  }
+
+  boolean asBoolean(LootContext context, @Nullable Map<String, ?> parameters);
 
   Either<Boolean, String> toSource();
 
@@ -37,5 +47,20 @@ public interface BooleanExpression {
   static @NotNull BooleanExpression of(Expression expression) {
     Either<Boolean, String> either = Either.right(expression.original());
     return new DynamicBooleanExpression(either, expression);
+  }
+
+  @Override
+  default boolean test(LootContext context, @Nullable Map<String, ?> parameters) {
+    return this.asBoolean(context, parameters);
+  }
+
+  @Override
+  default boolean test(LootContext context) {
+    return this.asBoolean(context);
+  }
+
+  @Override
+  default @NotNull BooleanExpression negate() {
+    return new NegatedBooleanExpression(this);
   }
 }

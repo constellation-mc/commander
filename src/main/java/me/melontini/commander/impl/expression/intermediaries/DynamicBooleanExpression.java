@@ -5,6 +5,9 @@ import lombok.EqualsAndHashCode;
 import me.melontini.commander.api.expression.BooleanExpression;
 import me.melontini.commander.api.expression.Expression;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 @EqualsAndHashCode
 public final class DynamicBooleanExpression implements BooleanExpression {
@@ -24,8 +27,8 @@ public final class DynamicBooleanExpression implements BooleanExpression {
   }
 
   @Override
-  public boolean asBoolean(LootContext context) {
-    return expression.eval(context).getAsBoolean();
+  public boolean asBoolean(LootContext context, @Nullable Map<String, ?> parameters) {
+    return expression.eval(context, parameters).getAsBoolean();
   }
 
   public String toString() {
