@@ -3,7 +3,8 @@ package me.melontini.commander.api.expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
+import me.melontini.commander.impl.expression.intermediaries.ConstantBooleanExpression;
+import me.melontini.commander.impl.expression.intermediaries.DynamicBooleanExpression;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface BooleanExpression {
 
-  Codec<BooleanExpression> CODEC = ExtraCodecs.either(Codec.BOOL, Codec.STRING)
+  Codec<BooleanExpression> CODEC = Codec.either(Codec.BOOL, Codec.STRING)
       .comapFlatMap(
           (either) -> either.map(b -> DataResult.success(constant(b)), s -> Expression.parse(s)
               .map(BooleanExpression::of)),
@@ -29,42 +30,12 @@ public interface BooleanExpression {
   @Contract("_ -> new")
   static @NotNull BooleanExpression constant(boolean b) {
     Either<Boolean, String> either = Either.left(b);
-    return new BooleanExpression() {
-      @Override
-      public Either<Boolean, String> toSource() {
-        return either;
-      }
-
-      @Override
-      public boolean asBoolean(LootContext context) {
-        return b;
-      }
-
-      @Override
-      public String toString() {
-        return "BooleanExpression{boolean=" + b + "}";
-      }
-    };
+    return new ConstantBooleanExpression(either, b);
   }
 
   @Contract("_ -> new")
   static @NotNull BooleanExpression of(Expression expression) {
     Either<Boolean, String> either = Either.right(expression.original());
-    return new BooleanExpression() {
-      @Override
-      public Either<Boolean, String> toSource() {
-        return either;
-      }
-
-      @Override
-      public boolean asBoolean(LootContext context) {
-        return expression.eval(context).getAsBoolean();
-      }
-
-      @Override
-      public String toString() {
-        return "BooleanExpression{expression=" + expression.original() + "}";
-      }
-    };
+    return new DynamicBooleanExpression(either, expression);
   }
 }
