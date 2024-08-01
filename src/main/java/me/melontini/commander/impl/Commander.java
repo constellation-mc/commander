@@ -25,6 +25,7 @@ import me.melontini.commander.impl.builtin.BuiltInSelectors;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import me.melontini.commander.impl.expression.EvalUtils;
 import me.melontini.commander.impl.expression.extensions.convert.RegistryAccessStruct;
+import me.melontini.commander.impl.expression.library.ExpressionLibraryLoader;
 import me.melontini.commander.impl.util.NbtCodecs;
 import me.melontini.commander.impl.util.loot.ArithmeticaLootNumberProvider;
 import me.melontini.commander.impl.util.loot.ExpressionLootCondition;
@@ -52,11 +53,13 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("UnstableApiUsage")
 @Accessors(fluent = true)
 @Log4j2
 public class Commander {
 
   public static final PrependingLogger LOGGER = PrependingLogger.get();
+
   public static final LootNumberProviderType ARITHMETICA_PROVIDER =
       LootNumberProviderTypes.register(
           "commander:arithmetica",
@@ -144,6 +147,7 @@ public class Commander {
 
     ServerReloadersEvent.EVENT.register(context -> {
       this.resetCaches();
+      context.register(new ExpressionLibraryLoader());
       context.register(new DynamicEventManager());
     });
 

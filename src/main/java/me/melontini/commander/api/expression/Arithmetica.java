@@ -3,7 +3,6 @@ package me.melontini.commander.api.expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-
 import java.util.Map;
 import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
@@ -20,7 +19,9 @@ import org.jetbrains.annotations.Nullable;
  *
  * @see Expression
  */
-public interface Arithmetica extends ToDoubleFunction<LootContext>, ToDoubleBiFunction<LootContext, @Nullable Map<String, ?>> {
+public interface Arithmetica
+    extends ToDoubleFunction<LootContext>,
+        ToDoubleBiFunction<LootContext, @Nullable Map<String, ?>> {
 
   Codec<Arithmetica> CODEC = Codec.either(Codec.DOUBLE, Codec.STRING)
       .comapFlatMap(
@@ -40,7 +41,7 @@ public interface Arithmetica extends ToDoubleFunction<LootContext>, ToDoubleBiFu
     return (float) this.asDouble(context);
   }
 
-    default double asDouble(LootContext context) {
+  default double asDouble(LootContext context) {
     return this.asDouble(context, null);
   }
 
@@ -56,7 +57,7 @@ public interface Arithmetica extends ToDoubleFunction<LootContext>, ToDoubleBiFu
     return (float) this.asDouble(context, parameters);
   }
 
-    double asDouble(LootContext context, @Nullable Map<String, ?> parameters);
+  double asDouble(LootContext context, @Nullable Map<String, ?> parameters);
 
   Either<Double, String> toSource();
 

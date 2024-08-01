@@ -1,13 +1,12 @@
 package me.melontini.commander.impl.expression.intermediaries;
 
 import com.mojang.datafixers.util.Either;
+import java.util.Map;
 import lombok.EqualsAndHashCode;
 import me.melontini.commander.api.expression.BooleanExpression;
 import me.melontini.commander.api.expression.Expression;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 @EqualsAndHashCode
 public final class DynamicBooleanExpression implements BooleanExpression {

@@ -1,12 +1,11 @@
 package me.melontini.commander.impl.expression.intermediaries;
 
 import com.mojang.datafixers.util.Either;
+import java.util.Map;
 import lombok.EqualsAndHashCode;
 import me.melontini.commander.api.expression.LongExpression;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 @EqualsAndHashCode
 public final class ConstantLongExpression implements LongExpression {

@@ -3,6 +3,9 @@ package me.melontini.commander.api.expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import me.melontini.commander.impl.expression.intermediaries.ConstantBooleanExpression;
 import me.melontini.commander.impl.expression.intermediaries.DynamicBooleanExpression;
 import me.melontini.commander.impl.expression.intermediaries.NegatedBooleanExpression;
@@ -11,17 +14,14 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
-
 /**
  * A simple {@code context -> boolean} functions, which is encoded as either a boolean or an expression.
  * <p>Can be used as a substitute for {@link Codec#BOOL} if {@link LootContext} is available</p>
  *
  * @see Expression
  */
-public interface BooleanExpression extends Predicate<LootContext>, BiPredicate<LootContext, @Nullable Map<String, ?>> {
+public interface BooleanExpression
+    extends Predicate<LootContext>, BiPredicate<LootContext, @Nullable Map<String, ?>> {
 
   Codec<BooleanExpression> CODEC = Codec.either(Codec.BOOL, Codec.STRING)
       .comapFlatMap(

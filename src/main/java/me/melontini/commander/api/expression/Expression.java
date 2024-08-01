@@ -11,7 +11,6 @@ import java.util.function.Function;
 import me.melontini.commander.impl.expression.EvalUtils;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import net.minecraft.loot.context.LootContext;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

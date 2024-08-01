@@ -3,10 +3,7 @@ package me.melontini.commander.api.expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-
 import java.util.Map;
-import java.util.function.ToDoubleBiFunction;
-import java.util.function.ToDoubleFunction;
 import java.util.function.ToLongBiFunction;
 import java.util.function.ToLongFunction;
 import me.melontini.commander.impl.expression.intermediaries.ConstantLongExpression;
@@ -16,7 +13,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface LongExpression extends ToLongFunction<LootContext>, ToLongBiFunction<LootContext, @Nullable Map<String, ?>> {
+public interface LongExpression
+    extends ToLongFunction<LootContext>, ToLongBiFunction<LootContext, @Nullable Map<String, ?>> {
 
   Codec<LongExpression> CODEC = Codec.either(Codec.LONG, Codec.STRING)
       .comapFlatMap(
