@@ -10,13 +10,11 @@ public class ExpressionLibraryTest implements ServerTestEntrypoint {
 
   @HandyTest
   void testLibraryInExpressions(ServerTestContext context) {
-    context
-        .server()
-        .getCommandManager()
-        .executeWithPrefix(context.server().getCommandSource(), "/time set day");
+    var r = context.submitAndWait(server -> {
+      server.getCommandManager().executeWithPrefix(server.getCommandSource(), "/time set day");
+      return ExpressionTest.parse("library.cmd:is_day").eval(ExpressionTest.emptyContext(context));
+    });
 
-    Assertions.assertThat(
-            ExpressionTest.parse("library.cmd:is_day").eval(ExpressionTest.emptyContext(context)))
-        .isEqualTo(Expression.Result.convert(true));
+    Assertions.assertThat(r).isEqualTo(Expression.Result.convert(true));
   }
 }

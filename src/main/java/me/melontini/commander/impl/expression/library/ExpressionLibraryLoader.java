@@ -57,6 +57,11 @@ public class ExpressionLibraryLoader extends JsonCodecDataLoader<ExpressionLibra
     return expression.evaluate(context);
   }
 
+  @Override
+  public String toString() {
+    return "ExpressionLibrary()";
+  }
+
   public record Shelf(boolean replace, Map<Identifier, Expression> expressions) {
     public static final Codec<Shelf> CODEC = RecordCodecBuilder.create(data -> data.group(
             Codec.BOOL.fieldOf("replace").forGetter(Shelf::replace),
