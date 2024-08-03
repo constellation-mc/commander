@@ -23,7 +23,7 @@ public class LootContextDataAccessor implements DataAccessorIfc {
           new Identifier("luck"), LootContext::getLuck,
           new Identifier("library"),
               context -> ExpressionLibrary.get(context.getWorld().getServer()))));
-  // In most cases the expression is reused, so caching this helps us avoid some big overhead.
+  // We use the same instance for all expressions, so this can help save some overhead.
   private final Map<String, Function<LootContext, EvaluationValue>> varCache =
       new Object2ReferenceOpenHashMap<>();
 
@@ -33,7 +33,7 @@ public class LootContextDataAccessor implements DataAccessorIfc {
     var supplier = varCache.get(variable);
     if (supplier != null)
       return supplier.apply(
-          (LootContext) context.context()[0]); // Parameters are cached by setData, so this is fine.
+          (LootContext) context.context()[0]);
 
     var r = Identifier.validate(variable);
     if (r.error().isPresent()) {

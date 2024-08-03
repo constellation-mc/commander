@@ -67,8 +67,9 @@ public class EvalUtils {
           "DT_FORMAT_LOCAL_DATE", StringValue.of("yyyy-MM-dd"))));
 
   static {
+    LootContextDataAccessor dataAccessor = new LootContextDataAccessor();
     var builder = ExpressionConfiguration.builder()
-        .dataAccessorSupplier(LootContextDataAccessor::new)
+        .dataAccessorSupplier(() -> dataAccessor)
         .parameterMapSupplier(Object2ReferenceOpenHashMap::new)
         .evaluationValueConverter(new ReflectiveValueConverter())
         .allowOverwriteConstants(false)
