@@ -31,9 +31,7 @@ public class LootContextDataAccessor implements DataAccessorIfc {
   public EvaluationValue getData(String variable, Token token, EvaluationContext context)
       throws EvaluationException {
     var supplier = varCache.get(variable);
-    if (supplier != null)
-      return supplier.apply(
-          (LootContext) context.context()[0]);
+    if (supplier != null) return supplier.apply((LootContext) context.context()[0]);
 
     var r = Identifier.validate(variable);
     if (r.error().isPresent()) {

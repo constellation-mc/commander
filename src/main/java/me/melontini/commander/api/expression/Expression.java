@@ -26,11 +26,21 @@ public interface Expression extends Function<LootContext, Expression.Result> {
     return this.eval(context, null);
   }
 
+  /**
+   * Evaluates expressions with additional parameters.
+   * Parameters must be consistent, if something is unavailable - use {@link Result#NULL}.
+   * Otherwise, expressions could start failing and using the {@code ?} operator will be impossible.
+   *
+   * @return The evaluation {@link Result}.
+   * @see #eval(LootContext)
+   */
   Result eval(LootContext context, @Nullable Map<String, ?> parameters);
 
   String original();
 
   interface Result {
+
+    Result NULL = (Result) (Object) NullValue.of();
 
     static Result convert(Object o) {
       return (Result) (Object) ReflectiveValueConverter.convert(o);

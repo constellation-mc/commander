@@ -1,5 +1,6 @@
 package me.melontini.commander.impl;
 
+import static java.util.concurrent.CompletableFuture.*;
 import static net.minecraft.loot.context.LootContextParameters.*;
 
 import com.google.gson.JsonObject;
@@ -10,12 +11,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
-import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.api.expression.LootContextParameterRegistry;
@@ -33,7 +31,7 @@ import me.melontini.commander.impl.util.mappings.AmbiguousRemapper;
 import me.melontini.commander.impl.util.mappings.MappingKeeper;
 import me.melontini.commander.impl.util.mappings.MinecraftDownloader;
 import me.melontini.dark_matter.api.base.util.Exceptions;
-import me.melontini.dark_matter.api.base.util.PrependingLogger;
+import me.melontini.dark_matter.api.base.util.Result;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import me.melontini.dark_matter.api.data.loading.ServerReloadersEvent;
 import me.melontini.dark_matter.api.minecraft.util.TextUtil;
@@ -41,7 +39,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.loot.condition.LootConditionType;
 import net.minecraft.loot.provider.number.LootNumberProviderType;
 import net.minecraft.loot.provider.number.LootNumberProviderTypes;
@@ -57,8 +54,6 @@ import org.jetbrains.annotations.Nullable;
 @Accessors(fluent = true)
 @Log4j2
 public class Commander {
-
-  public static final PrependingLogger LOGGER = PrependingLogger.get();
 
   public static final LootNumberProviderType ARITHMETICA_PROVIDER =
       LootNumberProviderTypes.register(
@@ -141,7 +136,7 @@ public class Commander {
         if (BASE_PATH.getFileSystem().supportedFileAttributeViews().contains("dos"))
           Files.setAttribute(BASE_PATH, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
       } catch (IOException ignored) {
-        LOGGER.warn("Failed to hide the .commander folder");
+        log.warn("Failed to hide the .commander folder");
       }
     }
 
@@ -183,28 +178,34 @@ public class Commander {
       return;
     }
 
-    try {
-      CompletableFuture<MemoryMappingTree> offTarget =
-          CompletableFuture.supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
-      CompletableFuture<MemoryMappingTree> offMojmap = CompletableFuture.runAsync(
-              MinecraftDownloader::downloadMappings, Util.getMainWorkerExecutor())
-          .thenApplyAsync(unused -> MappingKeeper.loadOffMojmap(), Util.getMainWorkerExecutor());
-      mappingKeeper =
-          new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join()));
-    } catch (Throwable t) {
-      log.error(
-          "Failed to download and prepare mappings! Data access remapping will not work!!!", t);
-      mappingKeeper =
-          (cls, name) -> name; // Returning null will force it to traverse the hierarchy.
-    }
+    var offTarget = supplyAsync(MappingKeeper::loadOffTarget, Util.getMainWorkerExecutor());
+    var offMojmap = runAsync(MinecraftDownloader::downloadMappings, Util.getMainWorkerExecutor())
+        .thenApplyAsync(unused -> MappingKeeper.loadOffMojmap(), Util.getMainWorkerExecutor());
+
+    mappingKeeper = Exceptions.<AmbiguousRemapper>supplyAsResult(() ->
+            new MappingKeeper(MappingKeeper.loadMojmapTarget(offMojmap.join(), offTarget.join())))
+        .ifErrPresent(t -> log.error(
+            "Failed to download and prepare mappings! Data access remapping will not work!!!",
+            Exceptions.unwrap(t)))
+        .flatmapErr(t -> Result.ok((cls, name) -> name))
+        .value()
+        .orElseThrow();
   }
 
-  @SneakyThrows(IOException.class)
   private static String getVersion() {
-    @Cleanup
-    var stream = new InputStreamReader(
-        MinecraftDownloader.class.getResourceAsStream("/version.json"), StandardCharsets.UTF_8);
-    JsonObject o = JsonParser.parseReader(stream).getAsJsonObject();
-    return o.getAsJsonPrimitive("id").getAsString();
+    return Exceptions.supplyAsResult(() -> {
+          try (var stream = new InputStreamReader(
+              MinecraftDownloader.class.getResourceAsStream("/version.json"),
+              StandardCharsets.UTF_8)) {
+            JsonObject o = JsonParser.parseReader(stream).getAsJsonObject();
+            return o.getAsJsonPrimitive("id").getAsString();
+          }
+        })
+        .ifErrPresent(e -> {
+          throw new IllegalStateException(
+              "Failed to read 'version.json' included in the Minecraft jar!");
+        })
+        .value()
+        .orElseThrow();
   }
 }

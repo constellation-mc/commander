@@ -28,7 +28,7 @@ public final class EntityAttributesStruct implements DataAccessorIfc {
   @Override
   public @Nullable EvaluationValue getData(String variable, Token token, EvaluationContext context)
       throws EvaluationException {
-    var attr = registryAccess.getCache().apply(variable);
+    var attr = registryAccess.cache().apply(variable);
     if (attr == null) return null;
     return NumberValue.of(BigDecimal.valueOf(container.getValue((EntityAttribute) attr)));
   }

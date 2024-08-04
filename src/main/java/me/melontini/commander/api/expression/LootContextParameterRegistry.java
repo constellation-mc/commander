@@ -1,9 +1,9 @@
 package me.melontini.commander.api.expression;
 
+import lombok.NonNull;
 import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import net.minecraft.loot.context.LootContextParameter;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A registry for {@link LootContextParameter}. Parameters already come with an identifier, so specifying it separately is unnecessary.
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 @ApiStatus.Experimental
 public class LootContextParameterRegistry {
 
-  public static void register(LootContextParameter<?> @NotNull ... parameters) {
+  public static void register(LootContextParameter<?> @NonNull ... parameters) {
     for (LootContextParameter<?> parameter : parameters) {
       ExtractionTypes.register(parameter);
     }
