@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import me.melontini.commander.impl.Commander;
-import me.melontini.commander.impl.builtin.commands.StoreDataCommand.Target;
+import me.melontini.commander.impl.util.DataTarget;
 import me.melontini.dark_matter.api.minecraft.util.TextUtil;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
 import net.minecraft.command.argument.BlockPosArgumentType;
@@ -36,24 +36,25 @@ public class DataCommand {
   private static final SimpleCommandExceptionType WRONG_DATA_TYPE_EXCEPTION =
       new SimpleCommandExceptionType(TextUtil.literal("Nbt element must be a string or a number!"));
 
-  private static final Map<Target, Supplier<RequiredArgumentBuilder<ServerCommandSource, ?>>> ARGS =
-      Map.of(
-          Target.LEVEL, () -> null,
-          Target.CHUNK, () -> CommandManager.argument("position", BlockPosArgumentType.blockPos()),
-          Target.ENTITY, () -> CommandManager.argument("entity", EntityArgumentType.entity()),
-          Target.BLOCK_ENTITY,
+  private static final Map<DataTarget, Supplier<RequiredArgumentBuilder<ServerCommandSource, ?>>>
+      ARGS = Map.of(
+          DataTarget.LEVEL, () -> null,
+          DataTarget.CHUNK,
+              () -> CommandManager.argument("position", BlockPosArgumentType.blockPos()),
+          DataTarget.ENTITY, () -> CommandManager.argument("entity", EntityArgumentType.entity()),
+          DataTarget.BLOCK_ENTITY,
               () -> CommandManager.argument("position", BlockPosArgumentType.blockPos()));
 
   private static final Map<
-          Target, PseudoFunction<CommandContext<ServerCommandSource>, AttachmentTarget>>
+          DataTarget, PseudoFunction<CommandContext<ServerCommandSource>, AttachmentTarget>>
       TO_TARGET = Map.of(
-          Target.LEVEL, ctx -> ctx.getSource().getWorld(),
-          Target.CHUNK,
+          DataTarget.LEVEL, ctx -> ctx.getSource().getWorld(),
+          DataTarget.CHUNK,
               ctx -> ctx.getSource()
                   .getWorld()
                   .getChunk(BlockPosArgumentType.getBlockPos(ctx, "position")),
-          Target.ENTITY, ctx -> EntityArgumentType.getEntity(ctx, "entity"),
-          Target.BLOCK_ENTITY,
+          DataTarget.ENTITY, ctx -> EntityArgumentType.getEntity(ctx, "entity"),
+          DataTarget.BLOCK_ENTITY,
               ctx -> {
                 var pos = BlockPosArgumentType.getBlockPos(ctx, "position");
                 var be = ctx.getSource().getWorld().getBlockEntity(pos);
@@ -98,12 +99,12 @@ public class DataCommand {
       LiteralArgumentBuilder<ServerCommandSource> base,
       String name,
       BiFunction<
-              Target,
+              DataTarget,
               RequiredArgumentBuilder<ServerCommandSource, ?>,
               RequiredArgumentBuilder<ServerCommandSource, ?>>
           keyAttachment) {
     var command = CommandManager.literal(name);
-    for (Target value : Target.values()) {
+    for (DataTarget value : DataTarget.values()) {
       var start = CommandManager.literal(value.name().toLowerCase(Locale.ROOT));
       var keyArg =
           keyAttachment.apply(value, CommandManager.argument("key", StringArgumentType.string()));

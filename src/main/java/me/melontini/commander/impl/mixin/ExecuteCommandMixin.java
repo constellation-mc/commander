@@ -1,13 +1,17 @@
 package me.melontini.commander.impl.mixin;
 
+import static me.melontini.commander.impl.expression.library.ExpressionLibraryLoader.NO_EXPRESSION_EXCEPTION;
+
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.CommandNode;
-import java.util.Optional;
 import me.melontini.commander.api.expression.Expression;
+import me.melontini.commander.api.expression.ExpressionLibrary;
 import me.melontini.commander.impl.Commander;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
@@ -47,28 +51,48 @@ public abstract class ExecuteCommandMixin {
       boolean positive,
       CommandRegistryAccess commandRegistryAccess,
       CallbackInfoReturnable<ArgumentBuilder<ServerCommandSource, ?>> cir) {
-    argumentBuilder.then(CommandManager.literal("cmd:expression")
-        .then(addConditionLogic(
-            root,
-            CommandManager.argument("expression", StringArgumentType.string()),
-            positive,
-            context -> {
-              var r = Expression.parse(StringArgumentType.getString(context, "expression"));
-              if (r.error().isPresent())
-                throw Commander.EXPRESSION_EXCEPTION.create(r.error().get().message());
+    argumentBuilder
+        .then(CommandManager.literal("cmd:expression")
+            .then(addConditionLogic(
+                root,
+                CommandManager.argument("expression", StringArgumentType.string()),
+                positive,
+                context -> {
+                  var r = Expression.parse(StringArgumentType.getString(context, "expression"));
+                  if (r.error().isPresent())
+                    throw Commander.EXPRESSION_EXCEPTION.create(r.error().get().message());
+                  return evaluateExpression(r.result().orElseThrow(), context);
+                })))
+        .then(CommandManager.literal("cmd:library")
+            .then(addConditionLogic(
+                root,
+                CommandManager.argument("expression", IdentifierArgumentType.identifier())
+                    .suggests((context, builder) -> {
+                      ExpressionLibrary.get(context.getSource().getServer())
+                          .allExpressions()
+                          .keySet()
+                          .forEach(identifier -> builder.suggest(identifier.toString()));
+                      return builder.buildFuture();
+                    }),
+                positive,
+                context -> {
+                  var identifier = IdentifierArgumentType.getIdentifier(context, "expression");
+                  var expression = ExpressionLibrary.get(context.getSource().getServer())
+                      .getExpression(identifier);
+                  if (expression == null) throw NO_EXPRESSION_EXCEPTION.create(identifier);
+                  return evaluateExpression(expression, context);
+                })));
+  }
 
-              LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(
-                          context.getSource().getWorld())
-                      .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
-                      .addOptional(
-                          LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
-                      .build(LootContextTypes.COMMAND))
-                  .build(null);
+  private static boolean evaluateExpression(
+      Expression expression, CommandContext<ServerCommandSource> context) {
+    LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(
+                context.getSource().getWorld())
+            .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
+            .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
+            .build(LootContextTypes.COMMAND))
+        .build(null);
 
-              return r.result()
-                  .flatMap(expression -> Optional.ofNullable(expression.eval(context1)))
-                  .map(Expression.Result::getAsBoolean)
-                  .orElse(false);
-            })));
+    return expression.eval(context1).getAsBoolean();
   }
 }
