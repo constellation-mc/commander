@@ -9,6 +9,7 @@ import java.util.function.ToDoubleFunction;
 import me.melontini.commander.impl.expression.intermediaries.ConstantArithmetica;
 import me.melontini.commander.impl.expression.intermediaries.DynamicArithmetica;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @see Expression
  */
+@ApiStatus.NonExtendable
 public interface Arithmetica
     extends ToDoubleFunction<LootContext>,
         ToDoubleBiFunction<LootContext, @Nullable Map<String, ?>> {
@@ -63,13 +65,11 @@ public interface Arithmetica
 
   @Contract("_ -> new")
   static @NotNull Arithmetica constant(double d) {
-    Either<Double, String> either = Either.left(d);
-    return new ConstantArithmetica(either, d);
+    return new ConstantArithmetica(Either.left(d), d);
   }
 
   static @NotNull Arithmetica of(Expression expression) {
-    Either<Double, String> either = Either.right(expression.original());
-    return new DynamicArithmetica(either, expression);
+    return new DynamicArithmetica(Either.right(expression.original()), expression);
   }
 
   @Override

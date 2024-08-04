@@ -18,6 +18,10 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A utility to execute generic event types.
+ * Cannot be used if the {@link EventType} specifies parameters.
+ */
 @UtilityClass
 public class EventExecutors {
   public static void runVoid(EventType type, @NonNull World world, Supplier<LootContext> supplier) {

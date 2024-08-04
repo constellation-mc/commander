@@ -10,6 +10,7 @@ import me.melontini.commander.impl.expression.intermediaries.ConstantBooleanExpr
 import me.melontini.commander.impl.expression.intermediaries.DynamicBooleanExpression;
 import me.melontini.commander.impl.expression.intermediaries.NegatedBooleanExpression;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @see Expression
  */
+@ApiStatus.NonExtendable
 public interface BooleanExpression
     extends Predicate<LootContext>, BiPredicate<LootContext, @Nullable Map<String, ?>> {
 
@@ -39,14 +41,12 @@ public interface BooleanExpression
 
   @Contract("_ -> new")
   static @NotNull BooleanExpression constant(boolean b) {
-    Either<Boolean, String> either = Either.left(b);
-    return new ConstantBooleanExpression(either, b);
+    return b ? ConstantBooleanExpression.TRUE : ConstantBooleanExpression.FALSE;
   }
 
   @Contract("_ -> new")
   static @NotNull BooleanExpression of(Expression expression) {
-    Either<Boolean, String> either = Either.right(expression.original());
-    return new DynamicBooleanExpression(either, expression);
+    return new DynamicBooleanExpression(Either.right(expression.original()), expression);
   }
 
   @Override

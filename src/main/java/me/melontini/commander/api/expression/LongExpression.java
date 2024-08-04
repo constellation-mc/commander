@@ -9,10 +9,18 @@ import java.util.function.ToLongFunction;
 import me.melontini.commander.impl.expression.intermediaries.ConstantLongExpression;
 import me.melontini.commander.impl.expression.intermediaries.DynamicLongExpression;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A simple {@code context -> long} functions, which is encoded as either a long or an expression.
+ * <p>Can be used as a substitute for {@link Codec#LONG} if {@link LootContext} is available</p>
+ *
+ * @see Expression
+ */
+@ApiStatus.NonExtendable
 public interface LongExpression
     extends ToLongFunction<LootContext>, ToLongBiFunction<LootContext, @Nullable Map<String, ?>> {
 
@@ -40,13 +48,11 @@ public interface LongExpression
 
   @Contract("_ -> new")
   static @NotNull LongExpression constant(long j) {
-    Either<Long, String> either = Either.left(j);
-    return new ConstantLongExpression(either, j);
+    return new ConstantLongExpression(Either.left(j), j);
   }
 
   static @NotNull LongExpression of(Expression expression) {
-    Either<Long, String> either = Either.right(expression.original());
-    return new DynamicLongExpression(either, expression);
+    return new DynamicLongExpression(Either.right(expression.original()), expression);
   }
 
   @Override

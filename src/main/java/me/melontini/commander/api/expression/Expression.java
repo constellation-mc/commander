@@ -11,9 +11,11 @@ import java.util.function.Function;
 import me.melontini.commander.impl.expression.EvalUtils;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@ApiStatus.NonExtendable
 public interface Expression extends Function<LootContext, Expression.Result> {
 
   Codec<Expression> CODEC = Codec.STRING.comapFlatMap(Expression::parse, Expression::original);
@@ -36,8 +38,12 @@ public interface Expression extends Function<LootContext, Expression.Result> {
    */
   Result eval(LootContext context, @Nullable Map<String, ?> parameters);
 
+  /**
+   * @return The original expression string.
+   */
   String original();
 
+  @ApiStatus.NonExtendable
   interface Result {
 
     Result NULL = (Result) (Object) NullValue.of();
