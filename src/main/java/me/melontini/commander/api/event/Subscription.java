@@ -1,9 +1,8 @@
 package me.melontini.commander.api.event;
 
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.function.Function;
-
-import com.mojang.serialization.Codec;
 import me.melontini.commander.api.command.Command;
 import me.melontini.commander.impl.event.data.DynamicEventManager;
 import net.minecraft.server.MinecraftServer;

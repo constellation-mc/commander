@@ -10,8 +10,10 @@ import org.jetbrains.annotations.Nullable;
 @EqualsAndHashCode
 public final class ConstantBooleanExpression implements BooleanExpression {
 
-  public static final ConstantBooleanExpression TRUE = new ConstantBooleanExpression(Either.left(true), true);
-  public static final ConstantBooleanExpression FALSE = new ConstantBooleanExpression(Either.left(false), false);
+  public static final ConstantBooleanExpression TRUE =
+      new ConstantBooleanExpression(Either.left(true), true);
+  public static final ConstantBooleanExpression FALSE =
+      new ConstantBooleanExpression(Either.left(false), false);
 
   @EqualsAndHashCode.Exclude
   private final Either<Boolean, String> either;

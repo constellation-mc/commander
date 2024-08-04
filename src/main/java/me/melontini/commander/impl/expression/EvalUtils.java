@@ -212,6 +212,7 @@ public class EvalUtils {
     return ThrowingOptional.empty();
   }
 
+  // Quickly evaluate a fake "lambda".
   public static EvaluationValue runLambda(
       EvaluationContext context, EvaluationValue value, ASTNode predicate)
       throws EvaluationException {

@@ -61,6 +61,7 @@ public interface BooleanExpression
 
   @Override
   default @NotNull BooleanExpression negate() {
+    if (this instanceof ConstantBooleanExpression cbe) return constant(!cbe.asBoolean(null));
     return new NegatedBooleanExpression(this);
   }
 }

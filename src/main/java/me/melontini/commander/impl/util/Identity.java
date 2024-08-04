@@ -1,5 +1,6 @@
 package me.melontini.commander.impl.util;
 
+// Used by registry caches
 public record Identity<V>(V value) {
 
   @Override

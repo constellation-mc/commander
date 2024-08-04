@@ -28,6 +28,7 @@ public class PatternParser {
           "int", v -> NumberValue.of(v.getNumberValue().setScale(0, RoundingMode.DOWN)),
           "double", v -> NumberValue.of(v.getNumberValue()));
 
+  // Parses brigadier macros from strings
   public static DataResult<BrigadierMacro> parse(String input) {
     StringReader reader = new StringReader(input);
 
@@ -35,7 +36,7 @@ public class PatternParser {
     StringBuilder start = new StringBuilder();
     while (reader.hasNext()) {
       char c = reader.read();
-      if (c == '$') {
+      if (c == '$') { // Possible macro start
         var result = processMacroStart(reader);
         if (result.error().isPresent())
           return DataResult.error(() -> result.error().orElseThrow());
@@ -51,7 +52,7 @@ public class PatternParser {
       }
       start.append(c);
     }
-    if (list.isEmpty()) {
+    if (list.isEmpty()) { // Empty == no macros.
       return DataResult.success(new ConstantMacro(input));
     }
 
@@ -79,6 +80,8 @@ public class PatternParser {
       processMacroStart(StringReader reader) {
     int start = reader.pointer();
 
+    // This might not be a macro start, but we have to pre-read
+    // the cast in case of dangling `(`.
     StringBuilder cast = null;
     if (reader.peek() == '(')
       cast:
@@ -94,6 +97,7 @@ public class PatternParser {
       }
 
     StringBuilder expression = null;
+    // Check if it *is* a macro start.
     if (reader.peek() == '{' && reader.peek(1) == '{')
       expression:
       {
@@ -110,13 +114,14 @@ public class PatternParser {
         return Result.error("Dangling braces '{{' at index %s".formatted(start));
       }
 
+    // Nope, not a macro.
     if (expression == null) return Result.empty();
-    if (cast != null) {
+    if (cast != null) { // Now we can verify the cast.
       String s = cast.toString();
       if (s.isBlank()) return Result.error("Illegal empty cast at index %s".formatted(start));
       for (char c : s.toCharArray()) {
-        if (!Character.isLetter(c))
-          return Result.error(
+        if (!Character.isLetter(c)) // Only letters are allowed.
+        return Result.error(
               "Illegal cast (%s). Must only contain letters and no whitespace!".formatted(s));
       }
       if (!CONVERTERS.containsKey(s)) return Result.error("No such cast (%s)".formatted(s));

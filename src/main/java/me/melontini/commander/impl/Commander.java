@@ -105,6 +105,8 @@ public class Commander {
 
   public void onInitialize() {
     try {
+      // We used to store mappings in the instance folder, but this leads to lots of space
+      // being wasted by something that might as well be a global cache.
       var oldPath = FabricLoader.getInstance().getGameDir().resolve(".commander");
       if (Files.exists(oldPath)) {
         if (!Files.exists(BASE_PATH)) Files.move(oldPath, BASE_PATH);
@@ -133,6 +135,7 @@ public class Commander {
     if (!Files.exists(COMMANDER_PATH)) {
       Exceptions.run(() -> Files.createDirectories(COMMANDER_PATH));
       try {
+        // Some users don't like junk in their home folder and windows is very special.
         if (BASE_PATH.getFileSystem().supportedFileAttributeViews().contains("dos"))
           Files.setAttribute(BASE_PATH, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
       } catch (IOException ignored) {
@@ -155,10 +158,12 @@ public class Commander {
     EvalUtils.init();
     this.loadMappings();
 
+    // Init built-ins
     BuiltInEvents.init();
     BuiltInCommands.init();
     BuiltInSelectors.init();
 
+    // Register vanilla parameter types
     LootContextParameterRegistry.register(
         ORIGIN, TOOL,
         THIS_ENTITY, LAST_DAMAGE_PLAYER,
@@ -192,6 +197,7 @@ public class Commander {
         .orElseThrow();
   }
 
+  // Returns the current MC version parsed from included version.json
   private static String getVersion() {
     return Exceptions.supplyAsResult(() -> {
           try (var stream = new InputStreamReader(

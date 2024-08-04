@@ -36,7 +36,7 @@ public interface Expression extends Function<LootContext, Expression.Result> {
    * @return The evaluation {@link Result}.
    * @see #eval(LootContext)
    */
-  Result eval(LootContext context, @Nullable Map<String, ?> parameters);
+  @NotNull Result eval(LootContext context, @Nullable Map<String, ?> parameters);
 
   /**
    * @return The original expression string.
@@ -72,15 +72,15 @@ public interface Expression extends Function<LootContext, Expression.Result> {
       return (Result) (Object) DurationValue.of(duration);
     }
 
-    @NotNull BigDecimal getAsDecimal();
+    @Nullable BigDecimal getAsDecimal();
 
     boolean getAsBoolean();
 
-    @NotNull String getAsString();
+    @Nullable String getAsString();
 
-    @NotNull Instant getAsInstant();
+    @Nullable Instant getAsInstant();
 
-    @NotNull Duration getAsDuration();
+    @Nullable Duration getAsDuration();
 
     boolean isDecimalValue();
 

@@ -81,6 +81,8 @@ public record MappingKeeper(MemoryMappingTree mojmapTarget) implements Ambiguous
     }
   }
 
+  // We cannot reliably tell if a member has a mapping without a descriptor.
+  // So we have to iterate through all members to see if something matches up.
   @Override
   public @Nullable String getFieldOrMethod(Class<?> cls, String name) {
     var clsData = mojmapTarget()

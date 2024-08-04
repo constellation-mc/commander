@@ -23,6 +23,7 @@ public class LootContextDataAccessor implements DataAccessorIfc {
           new Identifier("luck"), LootContext::getLuck,
           new Identifier("library"),
               context -> ExpressionLibrary.get(context.getWorld().getServer()))));
+  // Cache the way we got the variable.
   // We use the same instance for all expressions, so this can help save some overhead.
   private final Map<String, Function<LootContext, EvaluationValue>> varCache =
       new Object2ReferenceOpenHashMap<>();

@@ -49,6 +49,7 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     this.mappings = getAccessors(object.getClass());
   }
 
+  // API made from an implementation side effect.
   public static <C> void addField(
       Class<C> cls, String name, BiFunction<C, LootContext, Object> accessor) {
     ReflectiveMapStructure.getAccessors(cls)
@@ -62,6 +63,8 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     synchronized (MAPPINGS) {
       Struct struct = new Struct();
 
+      // When we create a new struct, we must guarantee that all changes from
+      // interfaces and superclasses propagate downstream.
       for (Class<?> anInterface : cls.getInterfaces()) {
         getAccessors(anInterface).addListener(struct);
       }
@@ -78,6 +81,8 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     }
   }
 
+  // It is believed that LambdaMetafactory is faster than reflection, so I'll blindly believe that
+  // too.
   private static BiFunction<Object, LootContext, Object> methodAccessor(Method method) {
     try {
       var handle = LOOKUP.unreflect(method);
@@ -98,8 +103,10 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
   @Override
   public @Nullable EvaluationValue getData(String variable, Token token, EvaluationContext context)
       throws EvaluationException {
+    // We cache invalid values to avoid bad look up overhead.
     if (this.mappings.isInvalid(variable)) return null;
 
+    // We lazily look up accessors, as doing so eagerly would be extremely slow.
     var cache = this.mappings.getAccessor(variable);
     if (cache != null)
       return ReflectiveValueConverter.convert(
@@ -118,6 +125,8 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
         accessor.right().apply(this.object, (LootContext) context.context()[0]));
   }
 
+  // This method scans the class, all superclasses and interfaces to _maybe_ find a member.
+  // We cannot skip remapping based on package due to subclasses of vanilla classes.
   private static @Nullable Tuple<Class<?>, BiFunction<Object, LootContext, Object>>
       findFieldOrMethod(Class<?> cls, String name) {
     var keeper = Commander.get().mappingKeeper();
@@ -140,6 +149,8 @@ public class ReflectiveMapStructure implements DataAccessorIfc {
     return findAccessor(cls, name);
   }
 
+  // This method attempts to look up a member based on its name.
+  // Iterating here to avoid generating a throwable.
   @Nullable private static Tuple<Class<?>, BiFunction<Object, LootContext, Object>> findAccessor(
       @NonNull Class<?> cls, String mapped) {
     for (Method method : cls.getMethods()) {

@@ -3,10 +3,9 @@ package me.melontini.commander.api.event;
 import static me.melontini.commander.impl.Commander.id;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.function.Function;
-
-import com.mojang.serialization.MapCodec;
 import me.melontini.commander.impl.event.EventTypeImpl;
 import me.melontini.dark_matter.api.base.util.Context;
 import net.minecraft.util.Identifier;
