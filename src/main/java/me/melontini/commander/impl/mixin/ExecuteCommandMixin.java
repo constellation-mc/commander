@@ -12,6 +12,7 @@ import me.melontini.commander.api.expression.ExpressionLibrary;
 import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.util.loot.LootUtil;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
@@ -67,13 +68,11 @@ public abstract class ExecuteCommandMixin {
             .then(addConditionLogic(
                 root,
                 CommandManager.argument("expression", IdentifierArgumentType.identifier())
-                    .suggests((context, builder) -> {
-                      ExpressionLibrary.get(context.getSource().getServer())
-                          .allExpressions()
-                          .keySet()
-                          .forEach(identifier -> builder.suggest(identifier.toString()));
-                      return builder.buildFuture();
-                    }),
+                    .suggests((context, builder) -> CommandSource.suggestIdentifiers(
+                        ExpressionLibrary.get(context.getSource().getServer())
+                            .allExpressions()
+                            .keySet(),
+                        builder)),
                 positive,
                 context -> {
                   var identifier = IdentifierArgumentType.getIdentifier(context, "expression");

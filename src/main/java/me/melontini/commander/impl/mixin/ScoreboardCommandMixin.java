@@ -15,6 +15,7 @@ import me.melontini.commander.api.expression.Expression;
 import me.melontini.commander.api.expression.ExpressionLibrary;
 import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.util.loot.LootUtil;
+import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.command.argument.ScoreHolderArgumentType;
 import net.minecraft.command.argument.ScoreboardObjectiveArgumentType;
@@ -66,13 +67,11 @@ public class ScoreboardCommandMixin {
                 .then(CommandManager.argument(
                         "objective", ScoreboardObjectiveArgumentType.scoreboardObjective())
                     .then(CommandManager.argument("expression", IdentifierArgumentType.identifier())
-                        .suggests((context, builder) -> {
-                          ExpressionLibrary.get(context.getSource().getServer())
-                              .allExpressions()
-                              .keySet()
-                              .forEach(identifier -> builder.suggest(identifier.toString()));
-                          return builder.buildFuture();
-                        })
+                        .suggests((context, builder) -> CommandSource.suggestIdentifiers(
+                            ExpressionLibrary.get(context.getSource().getServer())
+                                .allExpressions()
+                                .keySet(),
+                            builder))
                         .executes(context -> {
                           var identifier =
                               IdentifierArgumentType.getIdentifier(context, "expression");

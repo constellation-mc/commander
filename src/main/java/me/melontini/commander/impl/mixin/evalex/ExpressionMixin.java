@@ -3,7 +3,6 @@ package me.melontini.commander.impl.mixin.evalex;
 import com.ezylang.evalex.Expression;
 import java.util.Map;
 import java.util.Objects;
-
 import me.melontini.commander.impl.expression.EvalUtils;
 import net.minecraft.loot.context.LootContext;
 import org.jetbrains.annotations.NotNull;
