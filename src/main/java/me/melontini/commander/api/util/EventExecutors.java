@@ -3,6 +3,7 @@ package me.melontini.commander.api.util;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.command.Command;
 import me.melontini.commander.api.event.EventContext;
@@ -17,9 +18,13 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A utility to execute generic event types.
+ * Cannot be used if the {@link EventType} specifies parameters.
+ */
 @UtilityClass
 public class EventExecutors {
-  public static void runVoid(EventType type, World world, Supplier<LootContext> supplier) {
+  public static void runVoid(EventType type, @NonNull World world, Supplier<LootContext> supplier) {
     if (world.isClient()) return;
 
     List<Command.Conditioned> subscribers = Objects.requireNonNull(
@@ -34,7 +39,7 @@ public class EventExecutors {
   }
 
   public static boolean runBoolean(
-      EventType type, boolean def, World world, Supplier<LootContext> supplier) {
+      EventType type, boolean def, @NonNull World world, Supplier<LootContext> supplier) {
     if (world.isClient()) return def;
 
     List<Command.Conditioned> subscribers = Objects.requireNonNull(
@@ -53,12 +58,13 @@ public class EventExecutors {
     return def;
   }
 
-  public static boolean runBoolean(EventType type, World world, Supplier<LootContext> supplier) {
+  public static boolean runBoolean(
+      EventType type, @NonNull World world, Supplier<LootContext> supplier) {
     return runBoolean(type, true, world, supplier);
   }
 
   public static <T extends Enum<T>> T runEnum(
-      EventType type, @Nullable T def, World world, Supplier<LootContext> supplier) {
+      EventType type, @Nullable T def, @NonNull World world, Supplier<LootContext> supplier) {
     if (world.isClient()) return def;
 
     List<Command.Conditioned> subscribers = Objects.requireNonNull(

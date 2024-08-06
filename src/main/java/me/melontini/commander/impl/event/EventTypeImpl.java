@@ -15,6 +15,11 @@ import org.jetbrains.annotations.Nullable;
 
 public record EventTypeImpl(Context context) implements EventType {
 
+  public static final Context.Key<Codec<?>> EXTENSION = Context.key("extension");
+  public static final Context.Key<Function<List<Subscription<?>>, ?>> FINALIZER =
+      Context.key("finalizer");
+  public static final Context.Key<Codec<?>> CANCEL_TERM = Context.key("cancel_term");
+
   @Override
   public <T> Optional<T> get(Key<T> key) {
     return context.get(key);

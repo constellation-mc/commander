@@ -8,6 +8,7 @@
       "me.melontini.commander.test.CustomEventsTest"
     ],
     "handy:server_test": [
+      "me.melontini.commander.test.ExpressionLibraryTest",
       "me.melontini.commander.test.ConvertersTest",
       "me.melontini.commander.test.ExpressionTest",
       "me.melontini.commander.test.VirtualFieldsTest",

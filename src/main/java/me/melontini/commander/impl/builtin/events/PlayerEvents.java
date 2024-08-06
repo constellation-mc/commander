@@ -8,6 +8,7 @@ import java.util.Optional;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.api.util.EventExecutors;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.block.BlockState;
@@ -73,15 +74,14 @@ public class PlayerEvents {
         entityCallback(USE_ENTITY, world, player, hand, entity));
 
     UseItemCallback.EVENT.register((player, world, hand) -> new TypedActionResult<>(
-        EventExecutors.runActionResult(USE_ITEM, world, () -> {
-          LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder(
-                  (ServerWorld) world)
-              .add(THIS_ENTITY, player)
-              .add(ORIGIN, player.getPos())
-              .add(TOOL, player.getStackInHand(hand));
-          return new LootContext.Builder(builder.build(LootContextTypes.FISHING))
-              .build(Optional.empty());
-        }),
+        EventExecutors.runActionResult(
+            USE_ITEM,
+            world,
+            () -> LootUtil.build(new LootContextParameterSet.Builder((ServerWorld) world)
+                .add(THIS_ENTITY, player)
+                .add(ORIGIN, player.getPos())
+                .add(TOOL, player.getStackInHand(hand))
+                .build(LootContextTypes.FISHING))),
         player.getStackInHand(hand)));
 
     PlayerBlockBreakEvents.BEFORE.register(
@@ -101,14 +101,13 @@ public class PlayerEvents {
       BlockPos pos,
       BlockState state,
       @Nullable BlockEntity blockEntity) {
-    LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder(
-            (ServerWorld) world)
+    return LootUtil.build(new LootContextParameterSet.Builder((ServerWorld) world)
         .add(THIS_ENTITY, player)
         .add(ORIGIN, Vec3d.ofCenter(pos))
         .add(BLOCK_STATE, state)
         .add(TOOL, ItemStack.EMPTY)
-        .addOptional(BLOCK_ENTITY, blockEntity);
-    return new LootContext.Builder(builder.build(LootContextTypes.BLOCK)).build(Optional.empty());
+        .addOptional(BLOCK_ENTITY, blockEntity)
+        .build(LootContextTypes.BLOCK));
   }
 
   private static ActionResult entityCallback(
@@ -118,15 +117,13 @@ public class PlayerEvents {
       ItemStack tool = player.getStackInHand(hand);
       DamageSource source = world.getDamageSources().generic();
 
-      LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder(
-              (ServerWorld) world)
+      return LootUtil.build(new LootContextParameterSet.Builder((ServerWorld) world)
           .add(THIS_ENTITY, entity)
           .add(ORIGIN, entity.getPos())
           .add(TOOL, tool)
           .add(LAST_DAMAGE_PLAYER, player)
-          .add(DAMAGE_SOURCE, source);
-      return new LootContext.Builder(builder.build(LootContextTypes.ENTITY))
-          .build(Optional.empty());
+          .add(DAMAGE_SOURCE, source)
+          .build(LootContextTypes.ENTITY));
     });
   }
 
@@ -142,14 +139,13 @@ public class PlayerEvents {
       BlockState state = world.getBlockState(pos);
       BlockEntity blockEntity = world.getBlockEntity(pos);
 
-      LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder(
-              (ServerWorld) world)
+      return LootUtil.build(new LootContextParameterSet.Builder((ServerWorld) world)
           .add(THIS_ENTITY, player)
           .add(ORIGIN, origin)
           .add(BLOCK_STATE, state)
           .add(TOOL, tool)
-          .addOptional(BLOCK_ENTITY, blockEntity);
-      return new LootContext.Builder(builder.build(LootContextTypes.BLOCK)).build(Optional.empty());
+          .addOptional(BLOCK_ENTITY, blockEntity)
+          .build(LootContextTypes.BLOCK));
     });
   }
 }

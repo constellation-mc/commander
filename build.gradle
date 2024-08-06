@@ -95,7 +95,8 @@ dependencies {
     }
 
     [libs.evalx, libs.mapping.io].each {
-        implementation it
+        compileOnly it
+        localRuntime it
         shade it
     }
 

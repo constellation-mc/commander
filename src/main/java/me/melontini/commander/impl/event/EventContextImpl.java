@@ -3,6 +3,7 @@ package me.melontini.commander.impl.event;
 import java.util.IdentityHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.experimental.Accessors;
 import me.melontini.commander.api.event.EventContext;
 import me.melontini.commander.api.event.EventKey;
@@ -24,14 +25,14 @@ public final class EventContextImpl implements EventContext {
   }
 
   @Override
-  public EventContextImpl with(IdentityHashMap<EventKey<?>, Object> parameters) {
+  public @NotNull EventContextImpl with(@NonNull IdentityHashMap<EventKey<?>, Object> parameters) {
     IdentityHashMap<EventKey<?>, Object> map = new IdentityHashMap<>(this.parameters);
     map.putAll(parameters);
     return new EventContextImpl(type, map);
   }
 
   @Override
-  public <T> @NotNull T getParameter(EventKey<T> key) {
+  public <T> @NotNull T getParameter(@NonNull EventKey<T> key) {
     var r = parameters.get(key);
     if (r == null)
       throw new IllegalStateException("Missing required parameter key %s".formatted(key.id()));
@@ -55,10 +56,6 @@ public final class EventContextImpl implements EventContext {
     return (T) r;
   }
 
-  public static Builder builder(EventTypeImpl type) {
-    return new Builder(type);
-  }
-
   public static final class Builder implements EventContext.Builder {
     private final IdentityHashMap<EventKey<?>, Object> map = new IdentityHashMap<>();
     private final EventType type;
@@ -66,7 +63,7 @@ public final class EventContextImpl implements EventContext {
     public Builder(EventType type) {
       this.type = type;
 
-      if (this.type.get(EventType.CANCEL_TERM).isPresent()) {
+      if (this.type.get(EventTypeImpl.CANCEL_TERM).isPresent()) {
         map.put(EventKey.RETURN_VALUE, new AtomicReference<>());
       }
     }

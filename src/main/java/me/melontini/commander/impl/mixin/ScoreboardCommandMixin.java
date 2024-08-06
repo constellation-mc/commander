@@ -1,14 +1,22 @@
 package me.melontini.commander.impl.mixin;
 
+import static me.melontini.commander.impl.expression.library.ExpressionLibraryLoader.NO_EXPRESSION_EXCEPTION;
+
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import me.melontini.commander.api.expression.Expression;
+import me.melontini.commander.api.expression.ExpressionLibrary;
 import me.melontini.commander.impl.Commander;
+import me.melontini.commander.impl.util.loot.LootUtil;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.command.argument.ScoreHolderArgumentType;
 import net.minecraft.command.argument.ScoreboardObjectiveArgumentType;
 import net.minecraft.loot.context.LootContext;
@@ -23,6 +31,7 @@ import net.minecraft.server.command.ScoreboardCommand;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ScoreboardCommand.class)
@@ -38,67 +47,88 @@ public class ScoreboardCommandMixin {
               ordinal = 10))
   private static LiteralArgumentBuilder<ServerCommandSource> addCommanderOperator(
       LiteralArgumentBuilder<ServerCommandSource> original) {
-    return original.then(CommandManager.literal("cmd:operate")
-        .then(CommandManager.argument("targets", ScoreHolderArgumentType.scoreHolders())
-            .suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
-            .then(CommandManager.argument(
-                    "objective", ScoreboardObjectiveArgumentType.scoreboardObjective())
-                .then(CommandManager.argument("expression", StringArgumentType.string())
-                    .executes(context -> {
-                      var targets = new ArrayList<>(
-                          ScoreHolderArgumentType.getScoreboardScoreHolders(context, "targets"));
-                      var objective = ScoreboardObjectiveArgumentType.getWritableObjective(
-                          context, "objective");
+    return original
+        .then(CommandManager.literal("cmd:operate")
+            .then(CommandManager.argument("targets", ScoreHolderArgumentType.scoreHolders())
+                .suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
+                .then(CommandManager.argument(
+                        "objective", ScoreboardObjectiveArgumentType.scoreboardObjective())
+                    .then(CommandManager.argument("expression", StringArgumentType.string())
+                        .executes(context -> {
+                          var r =
+                              Expression.parse(StringArgumentType.getString(context, "expression"));
+                          if (r.error().isPresent())
+                            throw Commander.EXPRESSION_EXCEPTION.create(
+                                r.error().get().message());
+                          return evaluateExpression(r.result().orElseThrow(), context);
+                        })))))
+        .then(CommandManager.literal("cmd:library")
+            .then(CommandManager.argument("targets", ScoreHolderArgumentType.scoreHolders())
+                .suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
+                .then(CommandManager.argument(
+                        "objective", ScoreboardObjectiveArgumentType.scoreboardObjective())
+                    .then(CommandManager.argument("expression", IdentifierArgumentType.identifier())
+                        .suggests((context, builder) -> CommandSource.suggestIdentifiers(
+                            ExpressionLibrary.get(context.getSource().getServer())
+                                .allExpressions()
+                                .keySet(),
+                            builder))
+                        .executes(context -> {
+                          var identifier =
+                              IdentifierArgumentType.getIdentifier(context, "expression");
+                          var expression = ExpressionLibrary.get(
+                                  context.getSource().getServer())
+                              .getExpression(identifier);
+                          if (expression == null) throw NO_EXPRESSION_EXCEPTION.create(identifier);
+                          return evaluateExpression(expression, context);
+                        })))));
+  }
 
-                      var r = Expression.parse(StringArgumentType.getString(context, "expression"));
-                      if (r.error().isPresent())
-                        throw Commander.EXPRESSION_EXCEPTION.create(
-                            r.error().get().message());
-                      var expression = r.result().orElseThrow();
+  @Unique private static int evaluateExpression(
+      Expression expression, CommandContext<ServerCommandSource> context)
+      throws CommandSyntaxException {
+    var targets =
+        new ArrayList<>(ScoreHolderArgumentType.getScoreboardScoreHolders(context, "targets"));
+    var objective = ScoreboardObjectiveArgumentType.getWritableObjective(context, "objective");
 
-                      Scoreboard scoreboard = context.getSource().getServer().getScoreboard();
+    Scoreboard scoreboard = context.getSource().getServer().getScoreboard();
 
-                      LootContext context1 = new LootContext.Builder(
-                              new LootContextParameterSet.Builder(
-                                      context.getSource().getWorld())
-                                  .add(
-                                      LootContextParameters.ORIGIN,
-                                      context.getSource().getPosition())
-                                  .build(LootContextTypes.COMMAND))
-                          .build(Optional.empty());
+    LootContext context1 =
+        LootUtil.build(new LootContextParameterSet.Builder(context.getSource().getWorld())
+            .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
+            .build(LootContextTypes.COMMAND));
 
-                      for (ScoreHolder target : targets) {
-                        ScoreAccess score = scoreboard.getOrCreateScore(target, objective);
-                        Optional.ofNullable(expression
-                                .eval(context1, Collections.singletonMap("score", score.getScore()))
-                                .getAsDecimal())
-                            .map(BigDecimal::intValue)
-                            .ifPresent(score::setScore);
-                      }
+    for (ScoreHolder target : targets) {
+      ScoreAccess score = scoreboard.getOrCreateScore(target, objective);
+      Optional.ofNullable(expression
+              .eval(context1, Collections.singletonMap("score", score.getScore()))
+              .getAsDecimal())
+          .map(BigDecimal::intValue)
+          .ifPresent(score::setScore);
+    }
 
-                      if (targets.size() == 1) {
-                        context
-                            .getSource()
-                            .sendFeedback(
-                                () -> Text.translatable(
-                                    "commands.scoreboard.players.set.success.single",
-                                    objective.toHoverableText(),
-                                    targets.get(0).getStyledDisplayName(),
-                                    expression.original()),
-                                true);
-                      } else {
-                        context
-                            .getSource()
-                            .sendFeedback(
-                                () -> Text.translatable(
-                                    "commands.scoreboard.players.set.success.multiple",
-                                    objective.toHoverableText(),
-                                    targets.size(),
-                                    expression.original()),
-                                true);
-                      }
+    if (targets.size() == 1) {
+      context
+          .getSource()
+          .sendFeedback(
+              () -> Text.translatable(
+                  "commands.scoreboard.players.set.success.single",
+                  objective.toHoverableText(),
+                  targets.get(0).getStyledDisplayName(),
+                  expression.original()),
+              true);
+    } else {
+      context
+          .getSource()
+          .sendFeedback(
+              () -> Text.translatable(
+                  "commands.scoreboard.players.set.success.multiple",
+                  objective.toHoverableText(),
+                  targets.size(),
+                  expression.original()),
+              true);
+    }
 
-                      return targets.size();
-                    })))));
+    return targets.size();
   }
 }

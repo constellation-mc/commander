@@ -3,10 +3,17 @@ package me.melontini.commander.api.expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
+import me.melontini.commander.impl.expression.intermediaries.ConstantBooleanExpression;
+import me.melontini.commander.impl.expression.intermediaries.DynamicBooleanExpression;
+import me.melontini.commander.impl.expression.intermediaries.NegatedBooleanExpression;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A simple {@code context -> boolean} functions, which is encoded as either a boolean or an expression.
@@ -14,57 +21,47 @@ import org.jetbrains.annotations.NotNull;
  *
  * @see Expression
  */
-public interface BooleanExpression {
+@ApiStatus.NonExtendable
+public interface BooleanExpression
+    extends Predicate<LootContext>, BiPredicate<LootContext, @Nullable Map<String, ?>> {
 
-  Codec<BooleanExpression> CODEC = ExtraCodecs.either(Codec.BOOL, Codec.STRING)
+  Codec<BooleanExpression> CODEC = Codec.either(Codec.BOOL, Codec.STRING)
       .comapFlatMap(
           (either) -> either.map(b -> DataResult.success(constant(b)), s -> Expression.parse(s)
               .map(BooleanExpression::of)),
           BooleanExpression::toSource);
 
-  boolean asBoolean(LootContext context);
+  default boolean asBoolean(LootContext context) {
+    return this.asBoolean(context, null);
+  }
+
+  boolean asBoolean(LootContext context, @Nullable Map<String, ?> parameters);
 
   Either<Boolean, String> toSource();
 
   @Contract("_ -> new")
   static @NotNull BooleanExpression constant(boolean b) {
-    Either<Boolean, String> either = Either.left(b);
-    return new BooleanExpression() {
-      @Override
-      public Either<Boolean, String> toSource() {
-        return either;
-      }
-
-      @Override
-      public boolean asBoolean(LootContext context) {
-        return b;
-      }
-
-      @Override
-      public String toString() {
-        return "BooleanExpression{boolean=" + b + "}";
-      }
-    };
+    return b ? ConstantBooleanExpression.TRUE : ConstantBooleanExpression.FALSE;
   }
 
   @Contract("_ -> new")
   static @NotNull BooleanExpression of(Expression expression) {
-    Either<Boolean, String> either = Either.right(expression.original());
-    return new BooleanExpression() {
-      @Override
-      public Either<Boolean, String> toSource() {
-        return either;
-      }
+    return new DynamicBooleanExpression(Either.right(expression.original()), expression);
+  }
 
-      @Override
-      public boolean asBoolean(LootContext context) {
-        return expression.eval(context).getAsBoolean();
-      }
+  @Override
+  default boolean test(LootContext context, @Nullable Map<String, ?> parameters) {
+    return this.asBoolean(context, parameters);
+  }
 
-      @Override
-      public String toString() {
-        return "BooleanExpression{expression=" + expression.original() + "}";
-      }
-    };
+  @Override
+  default boolean test(LootContext context) {
+    return this.asBoolean(context);
+  }
+
+  @Override
+  default @NotNull BooleanExpression negate() {
+    if (this instanceof ConstantBooleanExpression cbe) return constant(!cbe.asBoolean(null));
+    return new NegatedBooleanExpression(this);
   }
 }

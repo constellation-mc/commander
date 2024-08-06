@@ -34,6 +34,7 @@ public class LengthFunction extends AbstractFunction {
     return NumberValue.of(BigDecimal.ZERO);
   }
 
+  // We can safely inline constant string and duration values.
   @Override
   public @Nullable EvaluationValue inlineFunction(
       Expression expression, Token token, List<ASTNode> parameters) throws EvaluationException {

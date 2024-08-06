@@ -3,6 +3,7 @@ package me.melontini.commander.impl.event.data.types;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
+import lombok.NonNull;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.util.Identifier;
@@ -19,7 +20,7 @@ public class ExtractionTypes {
     return KNOWN_PARAMETERS.get(identifier);
   }
 
-  public static void register(LootContextParameter<?> parameter) {
+  public static void register(@NonNull LootContextParameter<?> parameter) {
     var old = KNOWN_PARAMETERS.put(parameter.getId(), parameter);
     if (old != null)
       throw new IllegalStateException("Already registered context %s".formatted(parameter.getId()));

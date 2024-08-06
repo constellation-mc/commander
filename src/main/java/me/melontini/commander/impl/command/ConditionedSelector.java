@@ -8,9 +8,9 @@ import java.util.function.Function;
 import me.melontini.commander.api.command.Selector;
 import me.melontini.commander.api.event.EventContext;
 import me.melontini.commander.impl.event.data.types.SelectorTypes;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
@@ -35,15 +35,13 @@ public record ConditionedSelector(Optional<LootCondition> condition, Selector ot
   public Optional<ServerCommandSource> select(EventContext context) {
     var source = other.select(context.lootContext());
     if (source == null) return Optional.empty();
-    if (condition.isEmpty()) return Optional.of(source);
-
-    LootContextParameterSet.Builder builder =
-        new LootContextParameterSet.Builder(context.lootContext().getWorld());
-    builder.add(LootContextParameters.ORIGIN, source.getPosition());
-    builder.addOptional(LootContextParameters.THIS_ENTITY, source.getEntity());
-    LootContext sourceContext =
-        new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(Optional.empty());
-
-    return condition.get().test(sourceContext) ? Optional.of(source) : Optional.empty();
+    return condition
+        .filter(lootCondition -> !lootCondition.test(LootUtil.build(
+            new LootContextParameterSet.Builder(context.lootContext().getWorld())
+                .add(LootContextParameters.ORIGIN, source.getPosition())
+                .addOptional(LootContextParameters.THIS_ENTITY, source.getEntity())
+                .build(LootContextTypes.COMMAND))))
+        .<Optional<ServerCommandSource>>map(lootCondition -> Optional.empty())
+        .orElseGet(() -> Optional.of(source));
   }
 }

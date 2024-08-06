@@ -3,11 +3,16 @@ package me.melontini.commander.api.expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import java.util.Map;
+import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
-import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
+import me.melontini.commander.impl.expression.intermediaries.ConstantArithmetica;
+import me.melontini.commander.impl.expression.intermediaries.DynamicArithmetica;
 import net.minecraft.loot.context.LootContext;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A simple {@code context -> double} functions, which is encoded as either a double or an expression.
@@ -15,70 +20,65 @@ import org.jetbrains.annotations.NotNull;
  *
  * @see Expression
  */
-public interface Arithmetica extends ToDoubleFunction<LootContext> {
+@ApiStatus.NonExtendable
+public interface Arithmetica
+    extends ToDoubleFunction<LootContext>,
+        ToDoubleBiFunction<LootContext, @Nullable Map<String, ?>> {
 
-  Codec<Arithmetica> CODEC = ExtraCodecs.either(Codec.DOUBLE, Codec.STRING)
+  Codec<Arithmetica> CODEC = Codec.either(Codec.DOUBLE, Codec.STRING)
       .comapFlatMap(
           (either) -> either.map(
               b -> DataResult.success(constant(b)), s -> Expression.parse(s).map(Arithmetica::of)),
           Arithmetica::toSource);
 
   default long asLong(LootContext context) {
-    return (long) this.applyAsDouble(context);
+    return (long) this.asDouble(context);
   }
 
   default int asInt(LootContext context) {
-    return (int) this.applyAsDouble(context);
+    return (int) this.asDouble(context);
   }
 
   default float asFloat(LootContext context) {
-    return (float) this.applyAsDouble(context);
+    return (float) this.asDouble(context);
   }
 
   default double asDouble(LootContext context) {
-    return this.applyAsDouble(context);
+    return this.asDouble(context, null);
   }
+
+  default long asLong(LootContext context, @Nullable Map<String, ?> parameters) {
+    return (long) this.asDouble(context, parameters);
+  }
+
+  default int asInt(LootContext context, @Nullable Map<String, ?> parameters) {
+    return (int) this.asDouble(context, parameters);
+  }
+
+  default float asFloat(LootContext context, @Nullable Map<String, ?> parameters) {
+    return (float) this.asDouble(context, parameters);
+  }
+
+  double asDouble(LootContext context, @Nullable Map<String, ?> parameters);
 
   Either<Double, String> toSource();
 
   @Contract("_ -> new")
   static @NotNull Arithmetica constant(double d) {
-    Either<Double, String> either = Either.left(d);
-    return new Arithmetica() {
-      @Override
-      public Either<Double, String> toSource() {
-        return either;
-      }
-
-      @Override
-      public double applyAsDouble(LootContext context) {
-        return d;
-      }
-
-      @Override
-      public String toString() {
-        return "Arithmetica{double=" + d + "}";
-      }
-    };
+    return new ConstantArithmetica(Either.left(d), d);
   }
 
   static @NotNull Arithmetica of(Expression expression) {
-    Either<Double, String> either = Either.right(expression.original());
-    return new Arithmetica() {
-      @Override
-      public Either<Double, String> toSource() {
-        return either;
-      }
+    return new DynamicArithmetica(Either.right(expression.original()), expression);
+  }
 
-      @Override
-      public double applyAsDouble(LootContext context) {
-        return expression.apply(context).getAsDecimal().doubleValue();
-      }
+  @Override
+  default double applyAsDouble(LootContext context, @Nullable Map<String, ?> parameters) {
+    return this.asDouble(context, parameters);
+  }
 
-      @Override
-      public String toString() {
-        return "Arithmetica{expression=" + expression + "}";
-      }
-    };
+  @Override
+  default double applyAsDouble(LootContext context) {
+    return this.asDouble(context);
   }
 }

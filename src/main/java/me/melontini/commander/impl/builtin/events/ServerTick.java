@@ -6,6 +6,7 @@ import static me.melontini.commander.impl.Commander.id;
 import java.util.Optional;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
@@ -36,8 +37,8 @@ public class ServerTick {
   }
 
   private static LootContext forWorld(ServerWorld world) {
-    LootContextParameterSet.Builder builder =
-        new LootContextParameterSet.Builder(world).add(LootContextParameters.ORIGIN, Vec3d.ZERO);
-    return new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(Optional.empty());
+    return LootUtil.build(new LootContextParameterSet.Builder(world)
+        .add(LootContextParameters.ORIGIN, Vec3d.ZERO)
+        .build(LootContextTypes.COMMAND));
   }
 }

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import lombok.experimental.Accessors;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.api.event.Subscription;
+import me.melontini.commander.impl.event.EventTypeImpl;
 import me.melontini.commander.impl.event.data.types.EventTypes;
 import me.melontini.dark_matter.api.data.codecs.JsonCodecDataLoader;
 import me.melontini.dark_matter.api.data.loading.ReloaderType;
@@ -43,7 +44,7 @@ public class DynamicEventManager extends JsonCodecDataLoader<List<? extends Subs
         .flatMap(Collection::stream)
         .collect(Collectors.groupingBy(Subscription::type))
         .forEach((eventType, subscriptions) -> {
-          var finalizer = eventType.get(EventType.FINALIZER);
+          var finalizer = eventType.get(EventTypeImpl.FINALIZER);
           if (finalizer.isPresent()) {
             this.customData.put(
                 eventType, finalizer.get().apply(Collections.unmodifiableList(subscriptions)));
@@ -54,7 +55,7 @@ public class DynamicEventManager extends JsonCodecDataLoader<List<? extends Subs
         });
 
     Sets.difference(EventTypes.types(), customData.keySet()).forEach(type -> {
-      var finalizer = type.get(EventType.FINALIZER);
+      var finalizer = type.get(EventTypeImpl.FINALIZER);
       if (finalizer.isPresent()) {
         this.customData.put(type, finalizer.get().apply(Collections.emptyList()));
         return;

@@ -28,11 +28,6 @@ public class ChainFunction extends AbstractFunction {
   }
 
   @Override
-  public boolean forceInline() {
-    return true;
-  }
-
-  @Override
   public @Nullable EvaluationValue inlineFunction(
       Expression expression, Token token, List<ASTNode> parameters) throws EvaluationException {
     return null;

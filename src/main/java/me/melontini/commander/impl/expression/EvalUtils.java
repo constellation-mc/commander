@@ -5,7 +5,6 @@ import com.ezylang.evalex.EvaluationContext;
 import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.config.ExpressionConfiguration;
-import com.ezylang.evalex.data.DataAccessorIfc;
 import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.data.types.BooleanValue;
 import com.ezylang.evalex.data.types.NullValue;
@@ -14,7 +13,6 @@ import com.ezylang.evalex.data.types.StringValue;
 import com.ezylang.evalex.parser.ASTNode;
 import com.ezylang.evalex.parser.ExpressionParser;
 import com.ezylang.evalex.parser.InlinedASTNode;
-import com.ezylang.evalex.parser.Token;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -27,7 +25,6 @@ import java.math.MathContext;
 import java.util.*;
 import java.util.function.Function;
 import lombok.extern.log4j.Log4j2;
-import me.melontini.commander.impl.event.data.types.ExtractionTypes;
 import me.melontini.commander.impl.expression.extensions.ReflectiveValueConverter;
 import me.melontini.commander.impl.expression.functions.*;
 import me.melontini.commander.impl.expression.functions.arrays.*;
@@ -46,7 +43,6 @@ import net.minecraft.loot.context.LootContext;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 @Log4j2
@@ -71,8 +67,9 @@ public class EvalUtils {
           "DT_FORMAT_LOCAL_DATE", StringValue.of("yyyy-MM-dd"))));
 
   static {
+    LootContextDataAccessor dataAccessor = new LootContextDataAccessor();
     var builder = ExpressionConfiguration.builder()
-        .dataAccessorSupplier(LootContextDataAccessor::new)
+        .dataAccessorSupplier(() -> dataAccessor)
         .parameterMapSupplier(Object2ReferenceOpenHashMap::new)
         .evaluationValueConverter(new ReflectiveValueConverter())
         .allowOverwriteConstants(false)
@@ -215,6 +212,7 @@ public class EvalUtils {
     return ThrowingOptional.empty();
   }
 
+  // Quickly evaluate a fake "lambda".
   public static EvaluationValue runLambda(
       EvaluationContext context, EvaluationValue value, ASTNode predicate)
       throws EvaluationException {
@@ -257,54 +255,6 @@ public class EvalUtils {
       return DataResult.success(result.copy());
     } catch (Throwable throwable) {
       return DataResult.error(Exceptions.unwrap(throwable)::getMessage);
-    }
-  }
-
-  public static class LootContextDataAccessor implements DataAccessorIfc {
-
-    private static final Map<Identifier, Function<LootContext, Object>> overrides =
-        Collections.unmodifiableMap(new Object2ReferenceOpenHashMap<>(Map.of(
-            Identifier.of("level"), LootContext::getWorld,
-            Identifier.of("luck"), LootContext::getLuck)));
-    // In most cases the expression is reused, so caching this helps us avoid some big overhead.
-    private final Map<String, Function<LootContext, EvaluationValue>> varCache =
-        new Object2ReferenceOpenHashMap<>();
-
-    @Override
-    public EvaluationValue getData(String variable, Token token, EvaluationContext context)
-        throws EvaluationException {
-      var supplier = varCache.get(variable);
-      if (supplier != null)
-        return supplier.apply((LootContext)
-            context.context()[0]); // Parameters are cached by setData, so this is fine.
-
-      var r = Identifier.validate(variable);
-      if (r.error().isPresent()) {
-        throw new EvaluationException(token, r.error().orElseThrow().message());
-      }
-
-      var id = r.result().orElseThrow();
-      var func = overrides.get(id);
-      if (func != null) {
-        varCache.put(
-            variable,
-            supplier = (lootContext) -> ReflectiveValueConverter.convert(func.apply(lootContext)));
-        return supplier.apply((LootContext) context.context()[0]);
-      }
-
-      var param = ExtractionTypes.getParameter(id);
-      if (param == null) {
-        throw new EvaluationException(
-            token, "%s is not a registered loot context parameter!".formatted(id));
-      }
-      varCache.put(
-          variable,
-          supplier = (lootContext) -> {
-            var object = lootContext.get(param);
-            if (object == null) return null;
-            return ReflectiveValueConverter.convert(object);
-          });
-      return supplier.apply((LootContext) context.context()[0]);
     }
   }
 

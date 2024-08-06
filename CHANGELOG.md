@@ -2,27 +2,42 @@
 
 User Changes:
 
-* Added `?.` and `?` null safe operators.
-  - `?.` Used on structures. Same as `.`, but returns null if there's no such field in structure.
-  - `?` Used with anything that can be null. Returns the right operand if left is null or left if not.
+* Added the (data pack) expression library!
 
-These operators allow you to quickly check for nulls in your expressions. Let's image a situation like this:
+This feature allows adding common expressions to a library where each is identified using an Identifier.
 
-You have a variable `struct.x` which might not exist and maybe null. Before, you'd have to write something like this:
+```json5
+{
+  "replace": false, // Can be omitted.
+  "expressions": {
+    "test:cool_expression": "score * 2.5",
+    "test:boolean_expression": "level.isDay && !level.isRaining"
+  }
+}
+```
 
-`if(structContainsKey(struct, 'x') && struct.x != null, struct.x, valueElse())'`
+Later on, these expressions can be evaluated inside other expressions using the library container, like so:
 
-Now this can be shortened to: `struct?.x ? valueElse()`. Do note that `?` has a very low precedence, so in ambiguous cases you'll have to wrap it in parentheses. e.g. `23 + struct?.x ? 23` -> `23 + (struct?.x ? 23)`.
+```
+sqrt(library.my_id:some_value) * library.my_id:other_value
+```
 
-* Java `Optional`s are now unwrapped in expressions.
-* Minecraft `Identifier`s are now converted to strings in expressions.
-* Gson elements can now be used in expressions.
+Or in `execute`/`scoreboard` brigadier commands using `cmd:library`. 
+Prefer using the library in Brigadier commands! 
+It does not require parsing the expression in-place!
+
+* Brigadier macros in JSON commands should now correctly fail on dangling braces.
 
 Dev Changes:
 
-* Fixed `equals` on CustomDataAccessors.
-* Added `LootContext` as an argument for the `CustomFields#addVirtualField` function.
+* Added more javadoc to the `api` package.
+* Removed `evalex` and `mapping-io` from pom.xml
+* Added `LongExpression`. Similar to `Arithmetica` and `BooleanExpression`, but for longs!
+* Tried to fix expression equality.
+* Added missing 'parameter' methods to `Arithmetica`, `BooleanExpression` and `BrigadierMacro`.
+* Added `Expression.Result#NULL`.
   
 Other Changes:
 
-* Updated mEvalEx to fix expression inlining.
+* The mod should now fail with slightly better error messages.
+* Inlined constant `BooleanExpression` instances.

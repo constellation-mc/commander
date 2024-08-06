@@ -19,6 +19,12 @@ public interface Selector extends Function<LootContext, ServerCommandSource> {
 
   Codec<Conditioned> CODEC = (Codec<Conditioned>) ConditionedSelector.CODEC;
 
+  /**
+   * Registers a selector to be used with {@link Command}.
+   * @param identifier The selector identifier.
+   * @param selector Selector to be registered.
+   * @return the provided selector instance.
+   */
   static Selector register(Identifier identifier, Selector selector) {
     return SelectorTypes.register(identifier, selector);
   }
@@ -28,12 +34,19 @@ public interface Selector extends Function<LootContext, ServerCommandSource> {
     return this.select(context);
   }
 
+  /**
+   * Selects a {@link ServerCommandSource} based on the provided {@link LootContext}.
+   * @return {@link ServerCommandSource} extracted from the context or null.
+   */
   @Nullable ServerCommandSource select(LootContext context);
 
   /**
    * Executable selector proxy.
    */
   interface Conditioned {
+    /**
+     * @see Selector#select(LootContext)
+     */
     Optional<ServerCommandSource> select(EventContext context);
   }
 }

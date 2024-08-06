@@ -5,8 +5,7 @@ import me.melontini.commander.api.expression.Expression;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * These maps must implement 3 methods: {@link #containsKey(Object)}, {@link #get(Object)} and {@link #entrySet()}.
- * It's recommended to lazily convert map entries, especially if the map is large.
+ * @see ProxyMap
  */
 @ApiStatus.Experimental
 public abstract class AbstractProxyMap extends AbstractMap<String, Expression.Result>

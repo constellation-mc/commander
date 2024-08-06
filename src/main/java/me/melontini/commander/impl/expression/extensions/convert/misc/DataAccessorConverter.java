@@ -17,8 +17,7 @@ public class DataAccessorConverter implements ConverterIfc {
 
   @Override
   public EvaluationValue convert(Object object, ExpressionConfiguration configuration) {
-    if (object instanceof DataAccessorIfc accessor)
-      return DataAccessorValue.of(accessor); // Proxy maps convert all of their outputs.
+    if (object instanceof DataAccessorIfc accessor) return DataAccessorValue.of(accessor);
 
     if (object instanceof CustomDataAccessor accessor)
       return DataAccessorValue.of(new AccessorWrapper(accessor));

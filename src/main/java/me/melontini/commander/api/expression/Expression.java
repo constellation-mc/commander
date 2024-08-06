@@ -15,6 +15,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@ApiStatus.NonExtendable
 public interface Expression extends Function<LootContext, Expression.Result> {
 
   Codec<Expression> CODEC = Codec.STRING.comapFlatMap(Expression::parse, Expression::original);
@@ -23,21 +24,29 @@ public interface Expression extends Function<LootContext, Expression.Result> {
     return (DataResult<Expression>) (Object) EvalUtils.parseExpression(expression);
   }
 
-  @Override
-  default Result apply(LootContext context) {
-    return this.eval(context);
-  }
-
   default Result eval(LootContext context) {
     return this.eval(context, null);
   }
 
-  @ApiStatus.Experimental
-  Result eval(LootContext context, @Nullable Map<String, ?> parameters);
+  /**
+   * Evaluates expressions with additional parameters.
+   * Parameters must be consistent, if something is unavailable - use {@link Result#NULL}.
+   * Otherwise, expressions could start failing and using the {@code ?} operator will be impossible.
+   *
+   * @return The evaluation {@link Result}.
+   * @see #eval(LootContext)
+   */
+  @NotNull Result eval(LootContext context, @Nullable Map<String, ?> parameters);
 
+  /**
+   * @return The original expression string.
+   */
   String original();
 
+  @ApiStatus.NonExtendable
   interface Result {
+
+    Result NULL = (Result) (Object) NullValue.of();
 
     static Result convert(Object o) {
       return (Result) (Object) ReflectiveValueConverter.convert(o);
@@ -47,8 +56,8 @@ public interface Expression extends Function<LootContext, Expression.Result> {
       return (Result) (Object) NumberValue.of(decimal);
     }
 
-    static Result convert(boolean decimal) {
-      return (Result) (Object) BooleanValue.of(decimal);
+    static Result convert(boolean bool) {
+      return (Result) (Object) BooleanValue.of(bool);
     }
 
     static Result convert(String string) {
@@ -63,15 +72,15 @@ public interface Expression extends Function<LootContext, Expression.Result> {
       return (Result) (Object) DurationValue.of(duration);
     }
 
-    @NotNull BigDecimal getAsDecimal();
+    @Nullable BigDecimal getAsDecimal();
 
     boolean getAsBoolean();
 
-    @NotNull String getAsString();
+    @Nullable String getAsString();
 
-    @NotNull Instant getAsInstant();
+    @Nullable Instant getAsInstant();
 
-    @NotNull Duration getAsDuration();
+    @Nullable Duration getAsDuration();
 
     boolean isDecimalValue();
 
@@ -86,5 +95,10 @@ public interface Expression extends Function<LootContext, Expression.Result> {
     boolean isNullValue();
 
     @Nullable Object getValue();
+  }
+
+  @Override
+  default Result apply(LootContext context) {
+    return this.eval(context);
   }
 }

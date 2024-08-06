@@ -12,6 +12,7 @@ import me.melontini.commander.api.command.Command;
 import me.melontini.commander.api.event.EventContext;
 import me.melontini.commander.api.event.EventKey;
 import me.melontini.commander.api.event.EventType;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.minecraft.advancement.AdvancementRewards;
 import net.minecraft.loot.context.LootContext;
@@ -65,12 +66,11 @@ public class AdvancementRewardsMixin {
   @Inject(at = @At("TAIL"), method = "apply")
   private void commander$applyCommands(ServerPlayerEntity player, CallbackInfo ci) {
     if (this.commands == null) return;
-    LootContextParameterSet parameterSet = new LootContextParameterSet.Builder(
-            player.getServerWorld())
-        .add(LootContextParameters.THIS_ENTITY, player)
-        .add(LootContextParameters.ORIGIN, player.getPos())
-        .build(LootContextTypes.ADVANCEMENT_REWARD);
-    LootContext context = new LootContext.Builder(parameterSet).build(Optional.empty());
+    LootContext context =
+        LootUtil.build(new LootContextParameterSet.Builder(player.getServerWorld())
+            .add(LootContextParameters.THIS_ENTITY, player)
+            .add(LootContextParameters.ORIGIN, player.getPos())
+            .build(LootContextTypes.ADVANCEMENT_REWARD));
 
     EventContext context1 = EventContext.builder(EventType.NULL)
         .addParameter(EventKey.LOOT_CONTEXT, context)

@@ -62,6 +62,7 @@ public class ReflectiveValueConverter implements EvaluationValueConverterIfc {
     if (object == null) return NullValue.of();
     if (object instanceof EvaluationValue value) return value;
 
+    // Proxy maps convert all of their outputs.
     if (object instanceof ProxyMap map)
       return StructureValue.of((Map<String, EvaluationValue>) (Object) map);
 
