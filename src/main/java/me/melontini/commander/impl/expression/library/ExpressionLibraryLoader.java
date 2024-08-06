@@ -66,7 +66,7 @@ public class ExpressionLibraryLoader extends JsonCodecDataLoader<ExpressionLibra
   @Override
   public @Nullable EvaluationValue getData(String variable, Token token, EvaluationContext context)
       throws EvaluationException {
-    var expression = ((com.ezylang.evalex.Expression) library.get(new Identifier(variable)));
+    var expression = ((com.ezylang.evalex.Expression) library.get(Identifier.of(variable)));
     if (expression == null) return null;
     return expression.evaluate(context);
   }

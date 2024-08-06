@@ -6,7 +6,6 @@ import com.ezylang.evalex.data.types.StringValue;
 import com.ezylang.evalex.data.types.StructureValue;
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.Optional;
 import me.melontini.commander.api.expression.Expression;
 import me.melontini.commander.impl.util.loot.LootUtil;
 import me.melontini.handytests.server.ServerTestContext;

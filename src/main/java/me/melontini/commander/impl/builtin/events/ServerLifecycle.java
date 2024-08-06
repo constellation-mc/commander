@@ -3,7 +3,6 @@ package me.melontini.commander.impl.builtin.events;
 import static me.melontini.commander.api.util.EventExecutors.runVoid;
 import static me.melontini.commander.impl.Commander.id;
 
-import java.util.Optional;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.impl.util.loot.LootUtil;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;

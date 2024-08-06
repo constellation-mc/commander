@@ -6,7 +6,6 @@ import static net.minecraft.loot.context.LootContextParameters.*;
 
 import com.mojang.serialization.Codec;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.impl.util.loot.LootUtil;

@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.Optional;
 import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.expression.CmdEvalException;
 import me.melontini.commander.impl.expression.EvalUtils;

@@ -19,9 +19,9 @@ public class LootContextDataAccessor implements DataAccessorIfc {
 
   private static final Map<Identifier, Function<LootContext, Object>> overrides =
       Collections.unmodifiableMap(new Object2ReferenceOpenHashMap<>(Map.of(
-          new Identifier("level"), LootContext::getWorld,
-          new Identifier("luck"), LootContext::getLuck,
-          new Identifier("library"),
+          Identifier.of("level"), LootContext::getWorld,
+          Identifier.of("luck"), LootContext::getLuck,
+          Identifier.of("library"),
               context -> ExpressionLibrary.get(context.getWorld().getServer()))));
   // Cache the way we got the variable.
   // We use the same instance for all expressions, so this can help save some overhead.

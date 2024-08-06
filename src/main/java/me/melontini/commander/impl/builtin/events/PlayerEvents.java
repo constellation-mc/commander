@@ -4,7 +4,6 @@ import static me.melontini.commander.impl.Commander.id;
 import static net.minecraft.loot.context.LootContextParameters.*;
 
 import com.mojang.serialization.Codec;
-import java.util.Optional;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.api.util.EventExecutors;
