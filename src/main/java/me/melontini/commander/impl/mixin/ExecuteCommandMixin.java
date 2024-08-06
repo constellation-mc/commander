@@ -10,9 +10,9 @@ import com.mojang.brigadier.tree.CommandNode;
 import me.melontini.commander.api.expression.Expression;
 import me.melontini.commander.api.expression.ExpressionLibrary;
 import me.melontini.commander.impl.Commander;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
@@ -86,13 +86,12 @@ public abstract class ExecuteCommandMixin {
 
   private static boolean evaluateExpression(
       Expression expression, CommandContext<ServerCommandSource> context) {
-    LootContext context1 = new LootContext.Builder(new LootContextParameterSet.Builder(
+    return expression
+        .eval(LootUtil.build(new LootContextParameterSet.Builder(
                 context.getSource().getWorld())
             .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
             .addOptional(LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
-            .build(LootContextTypes.COMMAND))
-        .build(null);
-
-    return expression.eval(context1).getAsBoolean();
+            .build(LootContextTypes.COMMAND)))
+        .getAsBoolean();
   }
 }

@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import java.util.Objects;
 import lombok.experimental.UtilityClass;
 import me.melontini.commander.api.event.EventType;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
@@ -99,13 +100,16 @@ public class EntityEvents {
         ALLOW_ELYTRA, entity.getWorld(), () -> makeContext(entity, entity.getPos(), null)));
 
     ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY.register(
-        (world, entity, killedEntity) -> runVoid(AFTER_KILLED_BY_OTHER, world, () -> {
-          LootContextParameterSet.Builder builder =
-              new LootContextParameterSet.Builder((ServerWorld) entity.getWorld());
-          builder.add(THIS_ENTITY, killedEntity).add(ORIGIN, killedEntity.getPos());
-          builder.add(DAMAGE_SOURCE, world.getDamageSources().generic()).add(KILLER_ENTITY, entity);
-          return new LootContext.Builder(builder.build(LootContextTypes.ENTITY)).build(null);
-        }));
+        (world, entity, killedEntity) -> runVoid(
+            AFTER_KILLED_BY_OTHER,
+            world,
+            () ->
+                LootUtil.build(new LootContextParameterSet.Builder((ServerWorld) entity.getWorld())
+                    .add(THIS_ENTITY, killedEntity)
+                    .add(ORIGIN, killedEntity.getPos())
+                    .add(DAMAGE_SOURCE, world.getDamageSources().generic())
+                    .add(KILLER_ENTITY, entity)
+                    .build(LootContextTypes.ENTITY))));
   }
 
   private static LootContext makeContext(
@@ -114,12 +118,12 @@ public class EntityEvents {
         new LootContextParameterSet.Builder((ServerWorld) entity.getWorld());
     builder.add(THIS_ENTITY, entity).add(ORIGIN, origin);
     if (source != null) {
-      builder.add(DAMAGE_SOURCE, source);
-      builder.addOptional(DIRECT_KILLER_ENTITY, source.getAttacker());
-      builder.addOptional(KILLER_ENTITY, source.getSource());
+      builder
+          .add(DAMAGE_SOURCE, source)
+          .addOptional(DIRECT_KILLER_ENTITY, source.getAttacker())
+          .addOptional(KILLER_ENTITY, source.getSource());
     }
-    return new LootContext.Builder(
-            builder.build(source == null ? LootContextTypes.COMMAND : LootContextTypes.ENTITY))
-        .build(null);
+    return LootUtil.build(
+        builder.build(source == null ? LootContextTypes.COMMAND : LootContextTypes.ENTITY));
   }
 }

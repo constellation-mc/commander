@@ -95,7 +95,8 @@ dependencies {
     }
 
     [libs.evalx, libs.mapping.io].each {
-        implementation it
+        compileOnly it
+        localRuntime it
         shade it
     }
 
@@ -229,20 +230,6 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-
-            pom.withXml {
-                Node pomNode = asNode()
-                pomNode.dependencies.dependency.each() { node ->
-                    logger.warn("${node.groupId.text()}")
-
-                    [libs.evalx, libs.mapping.io].each {
-                        if(node.groupId.text()?.startsWith(it.get().group) &&
-                                node.artifactId.text()?.startsWith(it.get().name)) {
-                            node.parent().remove(node)
-                        }
-                    }
-                }
-            }
         }
     }
 

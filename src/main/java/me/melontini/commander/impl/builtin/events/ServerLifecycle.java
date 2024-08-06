@@ -4,6 +4,7 @@ import static me.melontini.commander.api.util.EventExecutors.runVoid;
 import static me.melontini.commander.impl.Commander.id;
 
 import me.melontini.commander.api.event.EventType;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -57,21 +58,21 @@ public class ServerLifecycle {
   }
 
   private static LootContext forEntity(ServerWorld world, Entity entity) {
-    LootContextParameterSet.Builder builder = new LootContextParameterSet.Builder(world)
+    return LootUtil.build(new LootContextParameterSet.Builder(world)
         .add(LootContextParameters.ORIGIN, entity.getPos())
-        .add(LootContextParameters.THIS_ENTITY, entity);
-    return new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(null);
+        .add(LootContextParameters.THIS_ENTITY, entity)
+        .build(LootContextTypes.COMMAND));
   }
 
   private static LootContext forWorld(ServerWorld world, Vec3d origin) {
-    LootContextParameterSet.Builder builder =
-        new LootContextParameterSet.Builder(world).add(LootContextParameters.ORIGIN, origin);
-    return new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(null);
+    return LootUtil.build(new LootContextParameterSet.Builder(world)
+        .add(LootContextParameters.ORIGIN, origin)
+        .build(LootContextTypes.COMMAND));
   }
 
   private static LootContext forWorld(ServerWorld world) {
-    LootContextParameterSet.Builder builder =
-        new LootContextParameterSet.Builder(world).add(LootContextParameters.ORIGIN, Vec3d.ZERO);
-    return new LootContext.Builder(builder.build(LootContextTypes.COMMAND)).build(null);
+    return LootUtil.build(new LootContextParameterSet.Builder(world)
+        .add(LootContextParameters.ORIGIN, Vec3d.ZERO)
+        .build(LootContextTypes.COMMAND));
   }
 }

@@ -7,6 +7,7 @@ import com.ezylang.evalex.data.types.StructureValue;
 import java.math.BigDecimal;
 import java.util.Map;
 import me.melontini.commander.api.expression.Expression;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import me.melontini.handytests.server.ServerTestContext;
 import me.melontini.handytests.server.ServerTestEntrypoint;
 import me.melontini.handytests.util.runner.HandyTest;
@@ -50,10 +51,8 @@ public class ExpressionTest implements ServerTestEntrypoint {
   }
 
   public static LootContext emptyContext(ServerTestContext context) {
-    return new LootContext.Builder(
-            new LootContextParameterSet.Builder(context.server().getOverworld())
-                .build(LootContextTypes.EMPTY))
-        .build(null);
+    return LootUtil.build(new LootContextParameterSet.Builder(context.server().getOverworld())
+        .build(LootContextTypes.EMPTY));
   }
 
   public static Expression parse(String expression) {

@@ -8,7 +8,7 @@ import me.melontini.commander.impl.Commander;
 import me.melontini.commander.impl.expression.CmdEvalException;
 import me.melontini.commander.impl.expression.EvalUtils;
 import me.melontini.commander.impl.expression.macro.PatternParser;
-import net.minecraft.loot.context.LootContext;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
@@ -43,18 +43,18 @@ public class ArithmeticaCommand {
       if (r.error().isPresent())
         throw Commander.EXPRESSION_EXCEPTION.create(r.error().get().message());
 
-      LootContext context1 = new LootContext.Builder(
-              new LootContextParameterSet.Builder(context.getSource().getWorld())
-                  .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
-                  .addOptional(
-                      LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
-                  .build(LootContextTypes.COMMAND))
-          .build(null);
-
       context
           .getSource()
-          .sendMessage(Text.literal(
-              EvalUtils.prettyToString(r.result().orElseThrow().apply(context1, null))));
+          .sendMessage(Text.literal(EvalUtils.prettyToString(r.result()
+              .orElseThrow()
+              .apply(
+                  LootUtil.build(new LootContextParameterSet.Builder(
+                          context.getSource().getWorld())
+                      .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
+                      .addOptional(
+                          LootContextParameters.THIS_ENTITY, context.getSource().getEntity())
+                      .build(LootContextTypes.COMMAND)),
+                  null))));
       return 1;
     } catch (CmdEvalException e) {
       throw Commander.EXPRESSION_EXCEPTION.create(e.getMessage());

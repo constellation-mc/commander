@@ -14,6 +14,7 @@ import java.util.Optional;
 import me.melontini.commander.api.expression.Expression;
 import me.melontini.commander.api.expression.ExpressionLibrary;
 import me.melontini.commander.impl.Commander;
+import me.melontini.commander.impl.util.loot.LootUtil;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.command.argument.ScoreHolderArgumentType;
 import net.minecraft.command.argument.ScoreboardObjectiveArgumentType;
@@ -92,11 +93,10 @@ public class ScoreboardCommandMixin {
 
     Scoreboard scoreboard = context.getSource().getServer().getScoreboard();
 
-    LootContext context1 = new LootContext.Builder(
-            new LootContextParameterSet.Builder(context.getSource().getWorld())
-                .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
-                .build(LootContextTypes.COMMAND))
-        .build(null);
+    LootContext context1 =
+        LootUtil.build(new LootContextParameterSet.Builder(context.getSource().getWorld())
+            .add(LootContextParameters.ORIGIN, context.getSource().getPosition())
+            .build(LootContextTypes.COMMAND));
 
     for (String target : targets) {
       ScoreboardPlayerScore score = scoreboard.getPlayerScore(target, objective);

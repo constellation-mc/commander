@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import me.melontini.commander.api.command.Command;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.api.event.Subscription;
+import me.melontini.commander.impl.event.EventTypeImpl;
 import me.melontini.commander.impl.event.data.types.EventTypes;
 import me.melontini.dark_matter.api.base.util.Utilities;
 import me.melontini.dark_matter.api.data.codecs.ExtraCodecs;
@@ -32,7 +33,7 @@ public record SubscriptionImpl<E>(
           if (!input.list().isEmpty())
             map.add("commands", LIST_CODEC.encodeStart(ops, input.list()));
           if (input.parameters() != null) {
-            var opt = input.type().get(EventType.EXTENSION);
+            var opt = input.type().get(EventTypeImpl.EXTENSION);
             opt.ifPresent(codec ->
                 map.add("parameters", codec.encodeStart(ops, Utilities.cast(input.parameters()))));
           }
@@ -49,7 +50,7 @@ public record SubscriptionImpl<E>(
           T parameters = input.get("parameters");
           return event
               .flatMap(eventType -> {
-                var opt = eventType.get(EventType.EXTENSION);
+                var opt = eventType.get(EventTypeImpl.EXTENSION);
                 if (opt.isPresent()) {
                   if (parameters == null)
                     return DataResult.error(

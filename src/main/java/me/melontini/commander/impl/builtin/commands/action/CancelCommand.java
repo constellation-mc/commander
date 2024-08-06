@@ -12,6 +12,7 @@ import me.melontini.commander.api.command.CommandType;
 import me.melontini.commander.api.event.EventContext;
 import me.melontini.commander.api.event.EventType;
 import me.melontini.commander.impl.builtin.BuiltInCommands;
+import me.melontini.commander.impl.event.EventTypeImpl;
 import net.minecraft.util.dynamic.Codecs;
 
 @Getter
@@ -38,10 +39,10 @@ public final class CancelCommand implements Command {
 
   @Override
   public DataResult<Void> validate(EventType type) {
-    if (type.get(EventType.CANCEL_TERM).isEmpty())
+    if (type.get(EventTypeImpl.CANCEL_TERM).isEmpty())
       return DataResult.error(() -> "Event '%s' does not support cancellation");
 
-    var val = type.get(EventType.CANCEL_TERM).orElseThrow().parse(JsonOps.INSTANCE, element);
+    var val = type.get(EventTypeImpl.CANCEL_TERM).orElseThrow().parse(JsonOps.INSTANCE, element);
     if (val.error().isPresent()) return val.map(object -> null);
     this.value = val.result().orElseThrow();
 

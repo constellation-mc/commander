@@ -10,10 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.Supplier;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 import me.melontini.commander.api.expression.LootContextParameterRegistry;
@@ -38,17 +36,14 @@ import me.melontini.dark_matter.api.minecraft.util.TextUtil;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.loot.condition.LootConditionType;
 import net.minecraft.loot.provider.number.LootNumberProviderType;
 import net.minecraft.loot.provider.number.LootNumberProviderTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 @Accessors(fluent = true)
@@ -81,10 +76,6 @@ public class Commander {
   @Getter
   private AmbiguousRemapper mappingKeeper;
 
-  @Getter
-  @Setter
-  private @Nullable MinecraftServer currentServer;
-
   public static Identifier id(String path) {
     return new Identifier("commander", path);
   }
@@ -104,34 +95,6 @@ public class Commander {
   }
 
   public void onInitialize() {
-    try {
-      // We used to store mappings in the instance folder, but this leads to lots of space
-      // being wasted by something that might as well be a global cache.
-      var oldPath = FabricLoader.getInstance().getGameDir().resolve(".commander");
-      if (Files.exists(oldPath)) {
-        if (!Files.exists(BASE_PATH)) Files.move(oldPath, BASE_PATH);
-        else {
-          Files.walkFileTree(oldPath, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                throws IOException {
-              Files.delete(file);
-              return super.visitFile(file, attrs);
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-                throws IOException {
-              Files.delete(dir);
-              return super.postVisitDirectory(dir, exc);
-            }
-          });
-        }
-      }
-    } catch (IOException e) {
-      log.error("Failed to move old .commander folder!", e);
-    }
-
     if (!Files.exists(COMMANDER_PATH)) {
       Exceptions.run(() -> Files.createDirectories(COMMANDER_PATH));
       try {
@@ -149,11 +112,7 @@ public class Commander {
       context.register(new DynamicEventManager());
     });
 
-    ServerLifecycleEvents.SERVER_STARTING.register(server -> this.currentServer = server);
-    ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-      this.currentServer = null;
-      this.resetCaches();
-    });
+    ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.resetCaches());
 
     EvalUtils.init();
     this.loadMappings();
