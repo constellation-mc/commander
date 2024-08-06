@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Event types define basic information about events, like the return type, additional parameters and the finalizer.
  *
- * <p>- {@link EventType.Builder#extension(Codec, Function)} allows you to pass additional parameters to the subscription and {@link EventType#FINALIZER} allows you to process those parameters.</p>
+ * <p>- {@link EventType.Builder#extension(Codec, Function)} allows you to pass additional parameters to the subscription and process those parameters.</p>
  * <p>- {@link EventType.Builder#cancelTerm(Codec)} defines if the {@code commander:cancel} command is supported by this event.</p>
  */
 @ApiStatus.NonExtendable

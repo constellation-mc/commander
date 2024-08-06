@@ -63,7 +63,7 @@ public final class EventContextImpl implements EventContext {
     public Builder(EventType type) {
       this.type = type;
 
-      if (this.type.get(EventType.CANCEL_TERM).isPresent()) {
+      if (this.type.get(EventTypeImpl.CANCEL_TERM).isPresent()) {
         map.put(EventKey.RETURN_VALUE, new AtomicReference<>());
       }
     }
