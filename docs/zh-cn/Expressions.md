@@ -68,7 +68,7 @@
 
 | 函数  |  描述 |  实参 | 示例 |
 |---|---|---|---|
-| `?.` | Attempts to get a field from a structure or returns `null` | `struct`, `key` | `struct?.field` |
+| `?.` | 尝试从结构中获取字段，或返回 `null`。 | `struct`, `key` | `struct?.field` |
 | `?` | 如果 `a` 为 `null`，返回 `b`。  | `a`, `b` | `struct?.y ? 5` |
 
 :::
