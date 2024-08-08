@@ -66,9 +66,21 @@ cmd:data
             \- position （坐标位置）
                 \- key （键值）
                     \- data （数据）
+    \- remove （移除）
+        \- level （世界）
+            \- key （键值）
+        \- chunk （区块）
+            \- position （位置）
+                \- key （键值）
+        \- entity （实体）
+            \- entity （实体）
+                \- key （键值）
+        \- block_entity （方块实体）
+            \- position （位置）
+                \- key （键值）
 ```
 :::
 
-读写示例：`cmd:data read entity @s "my_test_data"` 或 `cmd:data write entity @s "my_test_data" "Hello "`
+读写示例：`cmd:data write entity @s "my_test_data" "Hello "`，`cmd:data read entity @s "my_test_data"`，`cmd:data remove entity @s "my_test_data"`
 
 使用示例：`this_entity.storage.my_test_data + 'World!'`
