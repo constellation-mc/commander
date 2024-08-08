@@ -4,7 +4,7 @@
 
 算术使用 [EvalEx](https://ezylang.github.io/EvalEx/) 来实现运算功能。掌握它并非必要，但多有好处。这里的区别是，所有函数、变量、常量都对大小写有严格的准确度要求，并且所有函数名都是驼峰式大小写（除第一个词语，其它首字母大写，不加标点），而不是蛇式（全大写，且用_划分）。
 
-## 额外功能
+## 额外功能与运算符
 
 本模组在 EvalEx 的基础上，添加了一些额外功能。
 
@@ -34,6 +34,20 @@
 | `arrayAnyMatch` | 检查是否数组中存在符合条件的对象。 | `array`, `predicate(λ)` | `arrayAnyMatch(arrayOf(0,1,2), it == 1)` |
 | `arrayNoneMatch` | 检查是否数组中完全没有符合条件的对象。 | `array`, `predicate(λ)` | `arrayNoneMatch(arrayOf(0,1,2), it == 1)` |
 | `arrayAllMatch` | 检查是否数组中的全部对象符合条件。 | `array`, `predicate(λ)` | `arrayAllMatch(arrayOf(0,1,2), it == 1)` |
+| `arrayFindFirst` | 返回数组中的第一个对象，若为空数组，返回 `null`。 | `array` | `arrayFindFirst(arrayOf(0, 23))` |
+
+:::
+
+::: details 注册表
+
+| 函数  |  描述 |  实参 | 示例 |
+|---|---|---|---|
+| `Registry` | 返回一个静态内容注册表。 | `identifier` | `Registry('entity_type')` |
+| `Item` | 返回注册表中的一个物品。 | `identifier` | `Item('diamond')` |
+| `Block` | 返回注册表中的一个方块。 | `identifier` | `Block('chest')` |
+| `DynamicRegistry` | 返回一个动态内容注册表。 | `identifier` | `DynamicRegistry('worldgen/biome')` |
+| `Biome` | 返回注册表中的一个群系。 | `identifier` | `Biome('the_void')` |
+| `DimensionType` | 返回注册表中的一个维度。 | `identifier` | `DimensionType('overworld')` |
 
 :::
 
@@ -42,10 +56,20 @@
 | 函数  |  描述 |  实参 | 示例 |
 |---|---|---|---|
 | `structContainsKey` | 检查是否结构中包含指定键值。 | `struct`, `key...` | `structContainsKey(block_state.properties, 'candles')` |
-| `hasContext` | 检查是否表达式的形式参数可用。  | `key...` | `hasContext('tool')` |
-| `length` | 返回指定对象的长度或 0。  | `value` | `length('Hello World!')` |
-| `strFormat` | 将字符串转化为指定格式。  | `pattern`, `args...` | `strFormat('Hello %s World!', 23)` |
-| `ifMatches` | 类似于内置的 `if`，但介入匿名函数。  | `value`, `predicate(λ)`, `ifTrue(λ)`, `ifFalse(λ)` | `ifMatches(arrayFind(arrayOf(0,1,2), it == 1), length(it) > 0, it[0], 0)` |
+| `hasContext` | 检查是否表达式的形式参数可用。 | `key...` | `hasContext('tool')` |
+| `length` | 返回指定对象的长度或 0。 | `value` | `length('Hello World!')` |
+| `strFormat` | 将字符串转化为指定格式。 | `pattern`, `args...` | `strFormat('Hello %s World!', 23)` |
+| `ifMatches` | 类似于内置的 `if`，但介入匿名函数。 | `value`, `predicate(λ)`, `ifTrue(λ)`, `ifFalse(λ)` | `ifMatches(arrayFind(arrayOf(0,1,2), it == 1), length(it) > 0, it[0], 0)` |
+| `chain` | 用匿名函数串连多个函数，`it` 是最终结果。 | `value`, `actions(λ)...` | `chain(23, it + 3, sqrt(it))` |
+
+:::
+
+::: details 运算符
+
+| 函数  |  描述 |  实参 | 示例 |
+|---|---|---|---|
+| `?.` | Attempts to get a field from a structure or returns `null` | `struct`, `key` | `struct?.field` |
+| `?` | 如果 `a` 为 `null`，返回 `b`。  | `a`, `b` | `struct?.y ? 5` |
 
 :::
 
@@ -177,6 +201,18 @@ minecraft:level.getDayTime
 
 ```
 /execute if cmd:expression "level.isDay" run say 现在是白天！
+```
+
+:::
+
+::: details `scoreboard players` 命令
+
+你能够以表达式为修饰，作为玩家谓词。你可以通过 `score` 变量获取当前分数。
+
+当前版本还没有提供实体上下文。
+
+```
+/scoreboard players cmd:operate @s test_objective "(score * 1.5) + level.storage.my_score_modifier"
 ```
 
 :::
