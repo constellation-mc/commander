@@ -16,7 +16,7 @@ assertj-core = { module = "org.assertj:assertj-core", version = "3.26.3" }
 mockito-core = { module = "org.mockito:mockito-core", version = "5.14.2" }
 
 [plugins]
-fabric-loom = { id = "fabric-loom", version = "1.7.3" }
+fabric-loom = { id = "fabric-loom", version = "1.9.2" }
 lombok = { id = "io.freefair.lombok", version = "8.11"}
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 spotbugs-base = { id = "com.github.spotbugs-base", version = "6.0.27" }
