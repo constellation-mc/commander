@@ -12,7 +12,7 @@ dark-matter-minecraft = { group = "me.melontini", name = "dark-matter-minecraft"
 dark-matter-data = { group = "me.melontini", name = "dark-matter-data", version.ref = "dark-matter" }
 
 handy-tests = { group = "me.melontini", name = "handy-tests", version = "0.3.0-1.20.1-build.16" }
-assertj-core = { module = "org.assertj:assertj-core", version = "3.26.3" }
+assertj-core = { module = "org.assertj:assertj-core", version = "3.27.0" }
 mockito-core = { module = "org.mockito:mockito-core", version = "5.14.2" }
 
 [plugins]
