@@ -1,8 +1,8 @@
 ## Commander
 
-[![Available on Modrinth](https://raw.githubusercontent.com/melontini/mini-badges/main/minecraft/modrinth.svg)](https://modrinth.com/mod/cmd)
-[![Available on CurseForge](https://raw.githubusercontent.com/melontini/mini-badges/main/minecraft/curseforge.svg)](https://www.curseforge.com/minecraft/mc-mods/cmd-project)
-![License MIT](https://raw.githubusercontent.com/melontini/mini-badges/main/licenses/MIT.svg)
+[![Available on Modrinth](https://raw.githubusercontent.com/zenfyrdev/mini-badges/v1/minecraft/modrinth/available.svg)](https://modrinth.com/mod/cmd)
+[![Available on CurseForge](https://raw.githubusercontent.com/zenfyrdev/mini-badges/v1/minecraft/curseforge/available.svg)](https://www.curseforge.com/minecraft/mc-mods/cmd-project)
+![License MIT](https://raw.githubusercontent.com/zenfyrdev/mini-badges/v1/licenses/mit/mit.svg)
 
 Checkout the wiki to learn more! https://constellation-mc.github.io/commander/
 

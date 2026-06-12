@@ -1,12 +1,11 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "me.melontini.commander.impl.mixin",
+  "package": "dev.zenfyr.commander.impl.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AdvancementRewardsMixin",
     "ExecuteCommandMixin",
-    "NbtCompoundAccessor",
+    "CompoundTagAccessor",
     "ScoreboardCommandMixin",
     "evalex.EvaluationValueMixin",
     "evalex.ExpressionMixin"

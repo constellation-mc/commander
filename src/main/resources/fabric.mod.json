@@ -5,7 +5,7 @@
   "name": "Commander",
   "description": "A data pack event system",
   "authors": [
-    "melontini"
+    "zenfyr"
   ],
   "contact": {
     "repo": "https://github.com/constellation-mc/commander",
@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.melontini.commander.impl.Commander::init"
+      "dev.zenfyr.commander.impl.Commander"
     ]
   },
   "mixins": [

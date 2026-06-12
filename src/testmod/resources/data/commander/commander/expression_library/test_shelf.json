@@ -1,7 +1,7 @@
 {
   "replace": false,
   "expressions": {
-    "cmd:is_day": "level.isDay",
-    "cmd:day_time": "strFormat('%02.0f:%02.0f', floor((level.getDayTime / 1000 + 8) % 24), floor(60 * (level.getDayTime % 1000) / 1000))"
+    "cmd:is_day": "level.isDay()",
+    "cmd:day_time": "\"%02.0f:%02.0f\".format(math.floor((level.time / 1000 + 8) % 24), math.floor(60 * (level.time % 1000) / 1000))"
   }
 }
