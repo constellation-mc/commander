@@ -7,7 +7,7 @@ import com.ezylang.evalex.data.number.NumberValue;
 import com.ezylang.evalex.functions.AbstractFunction;
 import com.ezylang.evalex.functions.FunctionParameter;
 import com.ezylang.evalex.parser.Token;
-import dev.zenfyr.pulsar.util.MathUtil;
+import dev.zenfyr.pulsar.api.util.MathUtil;
 
 @FunctionParameter(name = "min")
 @FunctionParameter(name = "max")

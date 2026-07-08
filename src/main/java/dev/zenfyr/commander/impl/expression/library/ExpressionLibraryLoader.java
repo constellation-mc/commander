@@ -11,9 +11,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.zenfyr.commander.api.expression.Expression;
 import dev.zenfyr.commander.api.expression.ExpressionLibrary;
 import dev.zenfyr.commander.impl.Commander;
-import dev.zenfyr.pulsar.codec.JsonCodecDataLoader;
-import dev.zenfyr.pulsar.resources.ReloaderType;
-import dev.zenfyr.pulsar.util.TextUtil;
+import dev.zenfyr.pulsar.api.codec.JsonCodecDataLoader;
+import dev.zenfyr.pulsar.api.resources.ReloadListenerType;
+import dev.zenfyr.pulsar.api.util.TextUtil;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.util.Collections;
 import java.util.Map;
@@ -30,8 +30,8 @@ public class ExpressionLibraryLoader extends JsonCodecDataLoader<ExpressionLibra
       new DynamicCommandExceptionType(
           object -> TextUtil.literal("No such expression in library %s!".formatted(object)));
 
-  public static final ReloaderType<ExpressionLibraryLoader> RELOADER =
-      ReloaderType.create(Commander.id("expression_library"));
+  public static final ReloadListenerType<ExpressionLibraryLoader> RELOADER =
+      ReloadListenerType.create(Commander.id("expression_library"));
 
   private Map<ResourceLocation, Expression> library = new Object2ReferenceOpenHashMap<>();
   private Map<String, Supplier<Expression>> cache = new Object2ReferenceOpenHashMap<>();

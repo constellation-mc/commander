@@ -10,7 +10,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.zenfyr.commander.api.expression.Expression;
 import dev.zenfyr.commander.api.expression.ExpressionLibrary;
 import dev.zenfyr.commander.impl.Commander;
-import dev.zenfyr.pulsar.loot.LootContextBuilder;
+import dev.zenfyr.pulsar.api.loot.LootContextBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
 import net.minecraft.commands.CommandSourceStack;

@@ -14,7 +14,7 @@ import dev.zenfyr.commander.api.expression.ExpressionLibrary;
 import dev.zenfyr.commander.impl.Commander;
 import dev.zenfyr.commander.impl.expression.CmdEvalException;
 import dev.zenfyr.commander.impl.expression.library.ExpressionLibraryLoader;
-import dev.zenfyr.pulsar.loot.LootContextBuilder;
+import dev.zenfyr.pulsar.api.loot.LootContextBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.StringJoiner;

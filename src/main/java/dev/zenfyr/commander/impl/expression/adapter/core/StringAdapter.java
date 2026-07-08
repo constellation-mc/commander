@@ -9,7 +9,7 @@ import com.ezylang.evalex.data.adapter.context.IndexAdapterContext;
 import com.ezylang.evalex.data.adapter.context.MethodAdapterContext;
 import com.ezylang.evalex.functions.string.StringFormatFunction;
 import dev.zenfyr.commander.impl.Commander;
-import dev.zenfyr.pulsar.util.Utilities;
+import dev.zenfyr.pulsar.api.util.Utilities;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.util.ArrayList;
 import java.util.IllegalFormatException;

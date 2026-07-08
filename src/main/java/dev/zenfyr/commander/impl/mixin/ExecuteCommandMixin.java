@@ -9,7 +9,7 @@ import dev.zenfyr.commander.api.expression.Expression;
 import dev.zenfyr.commander.api.expression.ExpressionLibrary;
 import dev.zenfyr.commander.impl.Commander;
 import dev.zenfyr.commander.impl.expression.library.ExpressionLibraryLoader;
-import dev.zenfyr.pulsar.loot.LootContextBuilder;
+import dev.zenfyr.pulsar.api.loot.LootContextBuilder;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

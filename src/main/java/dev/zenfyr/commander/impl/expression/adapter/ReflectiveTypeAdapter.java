@@ -6,7 +6,7 @@ import com.ezylang.evalex.data.EvaluationValue;
 import com.ezylang.evalex.data.adapter.TypeAdapter;
 import com.ezylang.evalex.data.adapter.context.MethodAdapterContext;
 import com.ezylang.evalex.data.adapter.context.PropertyAdapterContext;
-import dev.zenfyr.pulsar.util.functions.ThrowingSupplier;
+import dev.zenfyr.pulsar.api.util.functions.ThrowingSupplier;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.lang.invoke.*;
 import java.lang.reflect.Method;

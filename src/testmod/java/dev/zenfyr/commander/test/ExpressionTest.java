@@ -2,7 +2,7 @@ package dev.zenfyr.commander.test;
 
 import com.ezylang.evalex.data.EvaluationValue;
 import dev.zenfyr.commander.api.expression.Expression;
-import dev.zenfyr.pulsar.loot.LootContextBuilder;
+import dev.zenfyr.pulsar.api.loot.LootContextBuilder;
 import java.util.Map;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.gametest.framework.GameTest;

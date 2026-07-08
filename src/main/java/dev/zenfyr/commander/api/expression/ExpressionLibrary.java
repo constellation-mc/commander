@@ -15,7 +15,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 public interface ExpressionLibrary {
 
   static ExpressionLibrary get(MinecraftServer server) {
-    return server.pulsar$getReloader(ExpressionLibraryLoader.RELOADER);
+    return server.pulsar$getReloadListener(ExpressionLibraryLoader.RELOADER);
   }
 
   /**

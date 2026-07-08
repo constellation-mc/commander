@@ -8,9 +8,9 @@ import dev.zenfyr.commander.impl.expression.extension.ExpressionLootCondition;
 import dev.zenfyr.commander.impl.expression.extension.ExpressionLootNumberProvider;
 import dev.zenfyr.commander.impl.expression.library.ExpressionLibraryLoader;
 import dev.zenfyr.commander.impl.util.NbtCodecs;
-import dev.zenfyr.pulsar.codec.ExtraCodecs;
-import dev.zenfyr.pulsar.resources.ServerReloadersEvent;
-import dev.zenfyr.pulsar.util.TextUtil;
+import dev.zenfyr.pulsar.api.codec.ExtraCodecs;
+import dev.zenfyr.pulsar.api.resources.ServerReloadListenersEvent;
+import dev.zenfyr.pulsar.api.util.TextUtil;
 import java.util.List;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.ModInitializer;
@@ -60,9 +60,9 @@ public class Commander implements ModInitializer {
   }
 
   public void onInitialize() {
-    ServerReloadersEvent.EVENT.register(context -> {
+    ServerReloadListenersEvent.EVENT.listen(context -> {
       this.resetCaches();
-      context.register(new ExpressionLibraryLoader());
+      context.register(ExpressionLibraryLoader.RELOADER.location(), new ExpressionLibraryLoader());
     });
 
     ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.resetCaches());
