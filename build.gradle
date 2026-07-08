@@ -110,7 +110,7 @@ spotless {
 def cleanMcVersion = project.minecraft_version.replace('.', '_')
 
 loom {
-    accessWidenerPath = file("src/main/resources/commander.accesswidener")
+    accessWidenerPath = file("src/main/resources/commander.classtweaker")
 
     runs {
         testmod {

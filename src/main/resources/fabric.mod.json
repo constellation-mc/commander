@@ -22,7 +22,7 @@
   "mixins": [
     "commander.mixins.json"
   ],
-  "accessWidener": "commander.accesswidener",
+  "accessWidener": "commander.classtweaker",
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
