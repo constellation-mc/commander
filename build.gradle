@@ -11,13 +11,14 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import me.modmuss50.mpp.ReleaseType
 import net.fabricmc.loom.api.RemapConfigurationSettings
 
-def local = !System.getenv().containsKey("GITHUB_RUN_NUMBER");
+def targetJavaVersion = Integer.parseInt(java_version)
+def local = !System.getenv().containsKey("GITHUB_RUN_NUMBER")
 
-version = "${project.mod_version}-${project.minecraft_version}-${local ? 'SNAPSHOT' : "build.${System.getenv("GITHUB_RUN_NUMBER")}"}"
+version = "${mod_version}+mc${minecraft_version}"
 group = project.maven_group
 
 base {
-    archivesName = project.archives_base_name
+    archivesName = "${project.mod_id}-${loader_id}"
 }
 
 repositories {
@@ -107,50 +108,51 @@ spotless {
     }
 }
 
-def cleanMcVersion = project.minecraft_version.replace('.', '_')
-
 loom {
     accessWidenerPath = file("src/main/resources/commander.classtweaker")
 
     runs {
+        client {
+            runDirectory = file("run/client")
+        }
+        server {
+            runDirectory = file("run/server")
+        }
         testmod {
             server()
-            name = "Testmod"
-            source sourceSets.testmod
-            runDir "run/%s/testmod_server".formatted(cleanMcVersion)
+            displayName = "Testmod"
+            sourceSet = 'testmod'
+            runDirectory = file("run/testmod_server")
         }
         testmodClient {
             client()
-            name = "Testmod Client"
-            source sourceSets.testmod
-            runDir "run/%s/testmod_client".formatted(cleanMcVersion)
+            displayName = "Testmod Client"
+            sourceSet = 'testmod'
+            runDirectory = file("run/testmod_client")
         }
         gametest {
             inherit testmod
-
-            name "Game Test"
-
-            // Enable the gametest runner
-            vmArg "-Dfabric-api.gametest"
-            runDir "build/gametest/%s".formatted(cleanMcVersion)
+            displayName = "Game Test"
+            jvmArguments.add("-Dfabric-api.gametest")
+            runDirectory = file("run/gametest")
         }
     }
 
     //https://gist.github.com/maityyy/3dbcd558d58a6412c3a2a38c72706e8e
     afterEvaluate {
         loom.runs.configureEach {
-            vmArgs("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+            jvmArguments.addAll(["-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition"])
+            jvmArguments.add("-javaagent:${ configurations.compileClasspath.find { it.name.contains("sponge-mixin") } }")
 
-            vmArg "-javaagent:${configurations.compileClasspath.find { it.name.contains("sponge-mixin") }}"
-            property("mixin.debug.export", "true")
+            systemProperties.put("mixin.debug.export", "true")
         }
     }
 
-    mods.register(project.archives_base_name) {
+    mods.register(mod_id) {
         sourceSet project.sourceSets.main
     }
 
-    mods.register(project.archives_base_name + "-testmod") {
+    mods.register(mod_id + "-testmod") {
         sourceSet project.sourceSets.testmod
     }
 }
@@ -158,7 +160,7 @@ loom {
 processResources {
     def map = [
             "version"          : project.version,
-            "minecraft_version": project.minecraft_version,
+            "minecraft_version": minecraft_version,
             "loader_version"   : libs.fabric.loader.get().version,
             "fabric_version"   : libs.fabric.api.get().version,
             "pulsar_version"   : libs.pulsar.get().version
@@ -171,7 +173,6 @@ processResources {
     }
 }
 
-def targetJavaVersion = 17
 tasks.withType(JavaCompile).configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
     // this fixes some edge cases with special characters not displaying correctly
