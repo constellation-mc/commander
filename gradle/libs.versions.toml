@@ -11,7 +11,7 @@ assertj-core = { module = "org.assertj:assertj-core", version = "3.26.3" }
 mockito-core = { module = "org.mockito:mockito-core", version = "5.14.2" }
 
 [plugins]
-fabric-loom = { id = "net.fabricmc.fabric-loom-remap", version = "1.17.12" }
+fabric-loom = { id = "net.fabricmc.fabric-loom-remap", version = "1.17.13" }
 lombok = { id = "io.freefair.lombok", version = "9.4.0"}
 spotless = { id = "com.diffplug.spotless", version = "8.6.0" }
 modmuss50-publish = { id = "me.modmuss50.mod-publish-plugin", version = "2.1.1" }
